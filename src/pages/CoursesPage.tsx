@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Course } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +21,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Link } from 'react-router-dom';
 
 // Mock courses data
 const mockCourses: Course[] = [
@@ -106,6 +106,7 @@ const mockCourses: Course[] = [
 
 export default function CoursesPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
@@ -170,7 +171,11 @@ export default function CoursesPage() {
       {/* Courses Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredCourses.map((course) => (
-          <Card key={course.id} className="hover-lift group">
+          <Card 
+            key={course.id} 
+            className="hover-lift group cursor-pointer"
+            onClick={() => navigate(`/courses/${course.id}`)}
+          >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -186,13 +191,20 @@ export default function CoursesPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Xem chi tiết</DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>
+                      Xem chi tiết
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/chat')}>
                       <MessageSquare className="mr-2 h-4 w-4" />
                       Chat về môn này
                     </DropdownMenuItem>

@@ -8,9 +8,12 @@ import MainLayout from "@/components/layout/MainLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import CoursesPage from "@/pages/CoursesPage";
+import CourseDetailPage from "@/pages/CourseDetailPage";
 import ChatPage from "@/pages/ChatPage";
 import DocumentsPage from "@/pages/DocumentsPage";
 import QuizzesPage from "@/pages/QuizzesPage";
+import UsersPage from "@/pages/UsersPage";
+import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +64,30 @@ const App = () => (
               element={
                 <MainLayout>
                   <QuizzesPage />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/courses/:id"
+              element={
+                <MainLayout>
+                  <CourseDetailPage />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <MainLayout>
+                  <UsersPage />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <MainLayout>
+                  <SettingsPage />
                 </MainLayout>
               }
             />
