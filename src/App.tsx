@@ -14,6 +14,7 @@ import DocumentsPage from "@/pages/DocumentsPage";
 import QuizzesPage from "@/pages/QuizzesPage";
 import UsersPage from "@/pages/UsersPage";
 import SettingsPage from "@/pages/SettingsPage";
+import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,70 +28,15 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/dashboard"
-              element={
-                <MainLayout>
-                  <DashboardPage />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/courses"
-              element={
-                <MainLayout>
-                  <CoursesPage />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/chat"
-              element={
-                <MainLayout>
-                  <ChatPage />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/documents"
-              element={
-                <MainLayout>
-                  <DocumentsPage />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/quizzes"
-              element={
-                <MainLayout>
-                  <QuizzesPage />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/courses/:id"
-              element={
-                <MainLayout>
-                  <CourseDetailPage />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/users"
-              element={
-                <MainLayout>
-                  <UsersPage />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <MainLayout>
-                  <SettingsPage />
-                </MainLayout>
-              }
-            />
+            <Route path="/dashboard" element={<MainLayout><DashboardPage /></MainLayout>} />
+            <Route path="/courses" element={<MainLayout><CoursesPage /></MainLayout>} />
+            <Route path="/courses/:id" element={<MainLayout><CourseDetailPage /></MainLayout>} />
+            <Route path="/chat" element={<MainLayout><ChatPage /></MainLayout>} />
+            <Route path="/documents" element={<MainLayout><DocumentsPage /></MainLayout>} />
+            <Route path="/quizzes" element={<MainLayout><QuizzesPage /></MainLayout>} />
+            <Route path="/users" element={<MainLayout><UsersPage /></MainLayout>} />
+            <Route path="/settings" element={<MainLayout><SettingsPage /></MainLayout>} />
+            <Route path="/profile" element={<MainLayout><ProfilePage /></MainLayout>} />
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
