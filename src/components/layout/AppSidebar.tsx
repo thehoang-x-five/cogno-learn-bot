@@ -104,8 +104,8 @@ export default function AppSidebar() {
               <ChevronDown className="h-4 w-4 text-sidebar-foreground/60" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>
+           <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
               <Settings className="mr-2 h-4 w-4" />
               Cài đặt tài khoản
             </DropdownMenuItem>
