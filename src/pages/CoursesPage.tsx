@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
-  BookOpen, Search, Plus, Users, FileText, MoreVertical, MessageSquare,
+  BookOpen, Search, Plus, Users, FileText, MoreVertical, MessageSquare, Grid3X3, List,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -23,12 +23,16 @@ const mockCourses: Course[] = [
   { id: '6', code: 'CS601', name: 'Phát triển Web', description: 'Full-stack web development với React, Node.js, và các công nghệ hiện đại.', semester: 'HK1-2025', isActive: false, createdAt: new Date().toISOString(), enrollmentRole: 'student', teacherCount: 2, studentCount: 130, documentCount: 25 },
 ];
 
+const courseColors = ['bg-primary/10', 'bg-accent/10', 'bg-warning/10', 'bg-info/10', 'bg-destructive/10', 'bg-secondary'];
+const courseTextColors = ['text-primary', 'text-accent', 'text-warning', 'text-info', 'text-destructive', 'text-muted-foreground'];
+
 export default function CoursesPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const filteredCourses = mockCourses.filter((course) => {
     const matchesSearch = course.name.toLowerCase().includes(searchQuery.toLowerCase()) || course.code.toLowerCase().includes(searchQuery.toLowerCase());
@@ -39,7 +43,7 @@ export default function CoursesPage() {
   const canManageCourses = user?.role === 'admin' || user?.role === 'teacher';
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-6 lg:p-8 space-y-6 page-enter">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Môn học</h1>
@@ -60,65 +64,102 @@ export default function CoursesPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Tìm kiếm môn học..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1 bg-secondary rounded-lg p-1">
           {(['all', 'active', 'inactive'] as const).map((f) => (
-            <Button key={f} variant={filter === f ? 'default' : 'outline'} size="sm" onClick={() => setFilter(f)}>
+            <Button key={f} variant={filter === f ? 'default' : 'ghost'} size="sm" onClick={() => setFilter(f)} className="text-xs h-7">
               {f === 'all' ? 'Tất cả' : f === 'active' ? 'Đang mở' : 'Đã đóng'}
             </Button>
           ))}
         </div>
+        <div className="flex gap-1 bg-secondary rounded-lg p-1 ml-auto">
+          <Button variant={viewMode === 'grid' ? 'default' : 'ghost'} size="icon" className="h-7 w-7" onClick={() => setViewMode('grid')}>
+            <Grid3X3 className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant={viewMode === 'list' ? 'default' : 'ghost'} size="icon" className="h-7 w-7" onClick={() => setViewMode('list')}>
+            <List className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredCourses.map((course) => (
-          <Card key={course.id} className="hover-lift group cursor-pointer" onClick={() => navigate(`/courses/${course.id}`)}>
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <BookOpen className="h-6 w-6 text-primary" />
+      <div className={cn(
+        viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3 stagger-children' : 'space-y-3 stagger-children'
+      )}>
+        {filteredCourses.map((course, index) => (
+          <Card key={course.id} className={cn(
+            'hover-lift group cursor-pointer transition-all',
+            viewMode === 'list' && 'flex flex-row items-center'
+          )} onClick={() => navigate(`/courses/${course.id}`)}>
+            {viewMode === 'grid' ? (
+              <>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-12 w-12 rounded-xl ${courseColors[index % 6]} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <BookOpen className={`h-6 w-6 ${courseTextColors[index % 6]}`} />
+                      </div>
+                      <div>
+                        <Badge variant={course.isActive ? 'default' : 'secondary'} className="mb-1 text-[10px]">{course.code}</Badge>
+                        <CardTitle className="text-base leading-tight">{course.name}</CardTitle>
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>Xem chi tiết</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/chat')}><MessageSquare className="mr-2 h-4 w-4" />Chat về môn này</DropdownMenuItem>
+                        {canManageCourses && (<><DropdownMenuItem>Chỉnh sửa</DropdownMenuItem><DropdownMenuItem className="text-destructive">Xóa</DropdownMenuItem></>)}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <div>
-                    <Badge variant={course.isActive ? 'default' : 'secondary'} className="mb-1">{course.code}</Badge>
-                    <CardTitle className="text-lg leading-tight">{course.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="line-clamp-2 mb-4 text-xs">{course.description}</CardDescription>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{course.studentCount} SV</div>
+                    <div className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{course.documentCount} tài liệu</div>
                   </div>
+                  <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                    <Badge variant="outline" className="text-[10px]">{course.semester}</Badge>
+                    {course.enrollmentRole && (
+                      <Badge variant={course.enrollmentRole === 'teacher' ? 'default' : 'secondary'} className="text-[10px]">
+                        {course.enrollmentRole === 'teacher' ? 'Giảng viên' : 'Sinh viên'}
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </>
+            ) : (
+              <div className="flex items-center gap-4 p-4 w-full">
+                <div className={`h-10 w-10 rounded-lg ${courseColors[index % 6]} flex items-center justify-center shrink-0`}>
+                  <BookOpen className={`h-5 w-5 ${courseTextColors[index % 6]}`} />
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>Xem chi tiết</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/chat')}><MessageSquare className="mr-2 h-4 w-4" />Chat về môn này</DropdownMenuItem>
-                    {canManageCourses && (<><DropdownMenuItem>Chỉnh sửa</DropdownMenuItem><DropdownMenuItem className="text-destructive">Xóa</DropdownMenuItem></>)}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px]">{course.code}</Badge>
+                    <span className="font-medium text-sm">{course.name}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{course.description}</p>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+                  <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{course.studentCount}</span>
+                  <span className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{course.documentCount}</span>
+                  <Badge variant="outline" className="text-[10px]">{course.semester}</Badge>
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="line-clamp-2 mb-4">{course.description}</CardDescription>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1"><Users className="h-4 w-4" />{course.studentCount} SV</div>
-                <div className="flex items-center gap-1"><FileText className="h-4 w-4" />{course.documentCount} tài liệu</div>
-              </div>
-              <div className="flex items-center gap-2 mt-4 pt-4 border-t">
-                <Badge variant="outline" className="text-xs">{course.semester}</Badge>
-                {course.enrollmentRole && (
-                  <Badge variant={course.enrollmentRole === 'teacher' ? 'default' : 'secondary'} className="text-xs">
-                    {course.enrollmentRole === 'teacher' ? 'Giảng viên' : 'Sinh viên'}
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
+            )}
           </Card>
         ))}
       </div>
 
       {filteredCourses.length === 0 && (
-        <div className="text-center py-12">
-          <BookOpen className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+        <div className="text-center py-16 animate-fade-in">
+          <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="h-8 w-8 text-muted-foreground/50" />
+          </div>
           <h3 className="text-lg font-medium">Không tìm thấy môn học</h3>
           <p className="text-muted-foreground text-sm mt-1">Thử tìm kiếm với từ khóa khác</p>
         </div>
@@ -127,4 +168,8 @@ export default function CoursesPage() {
       <CreateCourseDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </div>
   );
+}
+
+function cn(...classes: (string | false | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
 }
