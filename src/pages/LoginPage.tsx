@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { GraduationCap, BookOpen, Brain, Users, Sparkles } from 'lucide-react';
+import { GraduationCap, BookOpen, Brain, Users, Sparkles, Shield, Zap, Globe } from 'lucide-react';
 import { useEffect } from 'react';
 
 export default function LoginPage() {
@@ -20,73 +20,80 @@ export default function LoginPage() {
   };
 
   const features = [
-    {
-      icon: Brain,
-      title: 'Trợ lý AI thông minh',
-      description: 'Hỏi đáp dựa trên tài liệu môn học thực tế',
-    },
-    {
-      icon: BookOpen,
-      title: 'Quản lý tài liệu',
-      description: 'Upload và tổ chức slide, giáo trình dễ dàng',
-    },
-    {
-      icon: Sparkles,
-      title: 'Tạo Quiz tự động',
-      description: 'AI tự động tạo câu hỏi ôn tập từ nội dung',
-    },
-    {
-      icon: Users,
-      title: 'Theo dõi tiến độ',
-      description: 'Giáo viên theo dõi học tập của sinh viên',
-    },
+    { icon: Brain, title: 'Trợ lý AI thông minh', description: 'Hỏi đáp dựa trên tài liệu môn học thực tế với RAG' },
+    { icon: BookOpen, title: 'Quản lý tài liệu', description: 'Upload và tổ chức slide, giáo trình dễ dàng' },
+    { icon: Sparkles, title: 'Tạo Quiz tự động', description: 'AI tự động tạo câu hỏi ôn tập từ nội dung' },
+    { icon: Users, title: 'Theo dõi tiến độ', description: 'Giáo viên theo dõi học tập của sinh viên' },
+  ];
+
+  const stats = [
+    { value: '1,200+', label: 'Sinh viên', icon: Users },
+    { value: '50+', label: 'Môn học', icon: BookOpen },
+    { value: '99.9%', label: 'Uptime', icon: Zap },
   ];
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Hero section */}
-      <div className="hidden lg:flex lg:w-1/2 bg-sidebar relative overflow-hidden">
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20" />
+      {/* Left side - Hero */}
+      <div className="hidden lg:flex lg:w-[55%] bg-sidebar relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/10" />
         
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center p-12 text-sidebar-foreground">
-          <div className="flex items-center gap-3 mb-8">
+        {/* Animated background orbs */}
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-subtle" />
+        <div className="absolute -top-32 -left-32 w-72 h-72 bg-accent/10 rounded-full blur-3xl animate-pulse-subtle" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-info/5 rounded-full blur-3xl animate-pulse-subtle" style={{ animationDelay: '0.5s' }} />
+        
+        <div className="relative z-10 flex flex-col justify-between p-12 text-sidebar-foreground w-full">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl bg-primary/20 backdrop-blur-sm">
               <GraduationCap className="h-8 w-8 text-primary" />
             </div>
             <span className="text-2xl font-bold">EduAssist</span>
           </div>
           
-          <h1 className="text-4xl font-bold mb-4 leading-tight">
-            Hệ thống Trợ lý<br />
-            <span className="gradient-text">Học tập AI</span>
-          </h1>
-          
-          <p className="text-lg text-sidebar-foreground/70 mb-12 max-w-md">
-            Ứng dụng RAG hỗ trợ sinh viên và giáo viên trong việc học tập và giảng dạy hiệu quả hơn.
-          </p>
+          {/* Hero text */}
+          <div>
+            <h1 className="text-5xl font-bold mb-4 leading-tight">
+              Hệ thống Trợ lý<br />
+              <span className="gradient-text">Học tập AI</span>
+            </h1>
+            <p className="text-lg text-sidebar-foreground/70 mb-10 max-w-md leading-relaxed">
+              Nền tảng AI-powered hỗ trợ sinh viên và giáo viên trong việc học tập, giảng dạy hiệu quả hơn với công nghệ RAG.
+            </p>
 
-          <div className="grid grid-cols-2 gap-4">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="p-4 rounded-xl bg-sidebar-accent/50 backdrop-blur-sm border border-sidebar-border hover:bg-sidebar-accent/70 transition-colors"
-              >
-                <feature.icon className="h-6 w-6 text-primary mb-2" />
-                <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
-                <p className="text-xs text-sidebar-foreground/60">{feature.description}</p>
+            <div className="grid grid-cols-2 gap-4 mb-10">
+              {features.map((feature) => (
+                <div
+                  key={feature.title}
+                  className="p-4 rounded-xl bg-sidebar-accent/50 backdrop-blur-sm border border-sidebar-border/50 hover:bg-sidebar-accent/70 transition-all duration-300 hover:-translate-y-0.5"
+                >
+                  <feature.icon className="h-6 w-6 text-primary mb-2" />
+                  <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
+                  <p className="text-xs text-sidebar-foreground/60 leading-relaxed">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex items-center gap-8">
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-sidebar-accent/50 flex items-center justify-center">
+                  <stat.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold">{stat.value}</p>
+                  <p className="text-xs text-sidebar-foreground/60">{stat.label}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Decorative elements */}
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute -top-20 -left-20 w-60 h-60 bg-accent/10 rounded-full blur-3xl" />
       </div>
 
-      {/* Right side - Login form */}
+      {/* Right side - Login */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
@@ -99,9 +106,9 @@ export default function LoginPage() {
 
           <Card className="border-0 shadow-2xl shadow-primary/5">
             <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl">Đăng nhập</CardTitle>
+              <CardTitle className="text-2xl">Chào mừng trở lại</CardTitle>
               <CardDescription>
-                Sử dụng tài khoản Google để đăng nhập vào hệ thống
+                Đăng nhập để tiếp tục hành trình học tập
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 pt-4">
@@ -120,22 +127,10 @@ export default function LoginPage() {
                 ) : (
                   <>
                     <svg className="h-5 w-5" viewBox="0 0 24 24">
-                      <path
-                        fill="currentColor"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      />
+                      <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                      <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
                     Đăng nhập với Google
                   </>
@@ -147,45 +142,33 @@ export default function LoginPage() {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    Hoặc demo với vai trò
-                  </span>
+                  <span className="bg-card px-2 text-muted-foreground">Demo nhanh</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMockUser('admin')}
-                >
-                  Admin
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMockUser('teacher')}
-                >
-                  Giáo viên
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMockUser('student')}
-                >
-                  Sinh viên
-                </Button>
+                {[
+                  { role: 'admin' as const, label: 'Admin', icon: Shield, desc: 'Quản trị' },
+                  { role: 'teacher' as const, label: 'Giáo viên', icon: BookOpen, desc: 'Giảng dạy' },
+                  { role: 'student' as const, label: 'Sinh viên', icon: GraduationCap, desc: 'Học tập' },
+                ].map((item) => (
+                  <Button
+                    key={item.role}
+                    variant="outline"
+                    className="h-auto py-3 flex-col gap-1 hover:border-primary/50 hover:bg-primary/5 transition-all"
+                    onClick={() => setMockUser(item.role)}
+                  >
+                    <item.icon className="h-5 w-5 text-primary" />
+                    <span className="text-xs font-medium">{item.label}</span>
+                    <span className="text-[10px] text-muted-foreground">{item.desc}</span>
+                  </Button>
+                ))}
               </div>
 
               <p className="text-center text-xs text-muted-foreground">
                 Bằng việc đăng nhập, bạn đồng ý với{' '}
-                <a href="#" className="text-primary hover:underline">
-                  Điều khoản sử dụng
-                </a>{' '}
-                và{' '}
-                <a href="#" className="text-primary hover:underline">
-                  Chính sách bảo mật
-                </a>
+                <a href="#" className="text-primary hover:underline">Điều khoản</a> và{' '}
+                <a href="#" className="text-primary hover:underline">Chính sách bảo mật</a>
               </p>
             </CardContent>
           </Card>

@@ -10,20 +10,34 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  User, Mail, Shield, Bell, Key, Clock, BookOpen,
-  MessageSquare, ClipboardList, Save, Camera, Globe,
+  User, Bell, Key, Clock, BookOpen,
+  MessageSquare, ClipboardList, Save, Camera, Globe, Shield, Award,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const roleLabels = { admin: 'Quản trị viên', teacher: 'Giáo viên', student: 'Sinh viên' };
 
 const activityLog = [
-  { action: 'Đăng nhập hệ thống', time: '5 phút trước' },
-  { action: 'Chat AI - Hỏi về OOP', time: '1 giờ trước' },
-  { action: 'Hoàn thành Quiz Chương 2', time: '3 giờ trước' },
-  { action: 'Xem tài liệu slide_chuong3.pdf', time: '5 giờ trước' },
-  { action: 'Đăng nhập hệ thống', time: '1 ngày trước' },
+  { action: 'Đăng nhập hệ thống', time: '5 phút trước', type: 'auth' },
+  { action: 'Chat AI - Hỏi về OOP', time: '1 giờ trước', type: 'chat' },
+  { action: 'Hoàn thành Quiz Chương 2', time: '3 giờ trước', type: 'quiz' },
+  { action: 'Xem tài liệu slide_chuong3.pdf', time: '5 giờ trước', type: 'doc' },
+  { action: 'Đăng nhập hệ thống', time: '1 ngày trước', type: 'auth' },
 ];
+
+const activityIcons: Record<string, React.ElementType> = {
+  auth: Shield,
+  chat: MessageSquare,
+  quiz: ClipboardList,
+  doc: BookOpen,
+};
+
+const activityColors: Record<string, string> = {
+  auth: 'bg-info/10 text-info',
+  chat: 'bg-primary/10 text-primary',
+  quiz: 'bg-warning/10 text-warning',
+  doc: 'bg-accent/10 text-accent',
+};
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -39,7 +53,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="p-8 space-y-6 max-w-4xl mx-auto">
+    <div className="p-6 lg:p-8 space-y-6 max-w-4xl mx-auto page-enter">
       <div>
         <h1 className="text-3xl font-bold">Tài khoản</h1>
         <p className="text-muted-foreground mt-1">Quản lý thông tin cá nhân và cài đặt</p>
@@ -53,35 +67,41 @@ export default function ProfilePage() {
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Thông tin cá nhân</CardTitle>
-              <CardDescription>Cập nhật ảnh đại diện và thông tin cơ bản</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center gap-6">
+          {/* Profile Card */}
+          <Card className="overflow-hidden">
+            <div className="h-24 bg-gradient-primary" />
+            <CardContent className="relative pt-0">
+              <div className="flex items-end gap-6 -mt-12">
                 <div className="relative">
-                  <Avatar className="h-24 w-24">
+                  <Avatar className="h-24 w-24 border-4 border-card">
                     <AvatarImage src={user?.avatarUrl} alt={user?.fullName} />
                     <AvatarFallback className="text-2xl bg-primary/10 text-primary">
                       {user?.fullName?.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <Button size="icon" variant="outline" className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full">
+                  <Button size="icon" variant="outline" className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-card">
                     <Camera className="h-4 w-4" />
                   </Button>
                 </div>
-                <div>
+                <div className="pb-2">
                   <h3 className="text-xl font-semibold">{user?.fullName}</h3>
-                  <Badge variant="outline" className="mt-1">
-                    {roleLabels[user?.role || 'student']}
-                  </Badge>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Tham gia từ {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : '—'}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="outline">{roleLabels[user?.role || 'student']}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      Tham gia từ {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : '—'}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <Separator />
+            </CardContent>
+          </Card>
+
+          {/* Edit Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Thông tin cá nhân</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Họ và tên</Label>
@@ -102,9 +122,10 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
+          {/* Appearance */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <Globe className="h-5 w-5" />
                 Giao diện
               </CardTitle>
@@ -120,33 +141,28 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Stats summary */}
+          {/* Stats */}
           <Card>
             <CardHeader>
-              <CardTitle>Thống kê hoạt động</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Award className="h-5 w-5" />
+                Thống kê hoạt động
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-4">
-                <div className="text-center p-4 rounded-lg bg-primary/5">
-                  <BookOpen className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-bold">6</p>
-                  <p className="text-xs text-muted-foreground">Môn học</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-accent/5">
-                  <MessageSquare className="h-6 w-6 text-accent mx-auto mb-2" />
-                  <p className="text-2xl font-bold">89</p>
-                  <p className="text-xs text-muted-foreground">Câu hỏi AI</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-warning/5">
-                  <ClipboardList className="h-6 w-6 text-warning mx-auto mb-2" />
-                  <p className="text-2xl font-bold">23</p>
-                  <p className="text-xs text-muted-foreground">Quiz hoàn thành</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-info/5">
-                  <Clock className="h-6 w-6 text-info mx-auto mb-2" />
-                  <p className="text-2xl font-bold">48h</p>
-                  <p className="text-xs text-muted-foreground">Thời gian học</p>
-                </div>
+              <div className="grid gap-4 md:grid-cols-4 stagger-children">
+                {[
+                  { icon: BookOpen, value: '6', label: 'Môn học', color: 'bg-primary/5 text-primary' },
+                  { icon: MessageSquare, value: '89', label: 'Câu hỏi AI', color: 'bg-accent/5 text-accent' },
+                  { icon: ClipboardList, value: '23', label: 'Quiz hoàn thành', color: 'bg-warning/5 text-warning' },
+                  { icon: Clock, value: '48h', label: 'Thời gian học', color: 'bg-info/5 text-info' },
+                ].map((stat) => (
+                  <div key={stat.label} className={`text-center p-4 rounded-xl ${stat.color.split(' ')[0]}`}>
+                    <stat.icon className={`h-6 w-6 ${stat.color.split(' ')[1]} mx-auto mb-2`} />
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -155,7 +171,7 @@ export default function ProfilePage() {
         <TabsContent value="notifications" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Cài đặt thông báo</CardTitle>
+              <CardTitle className="text-base">Cài đặt thông báo</CardTitle>
               <CardDescription>Chọn loại thông báo bạn muốn nhận</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -181,19 +197,25 @@ export default function ProfilePage() {
         <TabsContent value="activity" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Nhật ký hoạt động</CardTitle>
+              <CardTitle className="text-base">Nhật ký hoạt động</CardTitle>
               <CardDescription>Lịch sử hoạt động gần đây</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {activityLog.map((log, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span className="text-sm">{log.action}</span>
+              {activityLog.map((log, i) => {
+                const Icon = activityIcons[log.type] || Clock;
+                const colorClass = activityColors[log.type] || 'bg-muted text-muted-foreground';
+                return (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-8 w-8 rounded-lg ${colorClass} flex items-center justify-center`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium">{log.action}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{log.time}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">{log.time}</span>
-                </div>
-              ))}
+                );
+              })}
             </CardContent>
           </Card>
         </TabsContent>

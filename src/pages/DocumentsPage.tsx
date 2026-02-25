@@ -6,43 +6,20 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  FileText,
-  Upload,
-  Search,
-  MoreVertical,
-  Download,
-  Trash2,
-  Eye,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  Loader2,
-  File,
-  FileType,
+  FileText, Upload, Search, MoreVertical, Download, Trash2, Eye,
+  CheckCircle2, Clock, AlertCircle, Loader2, File, FileType,
+  HardDrive, Layers, Database,
 } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-// Mock documents
 const mockDocuments: Document[] = [
   { id: '1', courseId: '3', uploadedBy: '2', filename: 'slide_chuong1_gioi_thieu_oop.pdf', filePath: '/docs/1', fileType: 'pdf', fileSize: 2048000, status: 'ready', totalChunks: 45, createdAt: new Date(Date.now() - 86400000).toISOString() },
   { id: '2', courseId: '3', uploadedBy: '2', filename: 'slide_chuong2_tinh_chat_oop.pdf', filePath: '/docs/2', fileType: 'pdf', fileSize: 3145728, status: 'ready', totalChunks: 62, createdAt: new Date(Date.now() - 172800000).toISOString() },
@@ -74,12 +51,9 @@ const formatFileSize = (bytes: number) => {
 
 const getFileIcon = (fileType: string) => {
   switch (fileType) {
-    case 'pdf':
-      return <FileText className="h-5 w-5 text-destructive" />;
-    case 'docx':
-      return <FileType className="h-5 w-5 text-primary" />;
-    default:
-      return <File className="h-5 w-5 text-muted-foreground" />;
+    case 'pdf': return <FileText className="h-5 w-5 text-destructive" />;
+    case 'docx': return <FileType className="h-5 w-5 text-primary" />;
+    default: return <File className="h-5 w-5 text-muted-foreground" />;
   }
 };
 
@@ -102,76 +76,54 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      {/* Header */}
+    <div className="p-6 lg:p-8 space-y-6 page-enter">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Tài liệu</h1>
-          <p className="text-muted-foreground mt-1">
-            Quản lý tài liệu môn học cho hệ thống RAG
-          </p>
+          <p className="text-muted-foreground mt-1">Quản lý tài liệu môn học cho hệ thống RAG</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Tổng tài liệu</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Đã xử lý</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{stats.ready}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Đang xử lý</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{stats.processing}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Tổng chunks</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">{stats.totalChunks}</div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-4 stagger-children">
+        {[
+          { label: 'Tổng tài liệu', value: stats.total, icon: FileText, color: 'text-primary', bg: 'bg-primary/10' },
+          { label: 'Đã xử lý', value: stats.ready, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
+          { label: 'Đang xử lý', value: stats.processing, icon: Loader2, color: 'text-warning', bg: 'bg-warning/10' },
+          { label: 'Tổng chunks', value: stats.totalChunks, icon: Database, color: 'text-info', bg: 'bg-info/10' },
+        ].map((stat) => (
+          <Card key={stat.label}>
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-2">
+                <div className={`h-7 w-7 rounded-md ${stat.bg} flex items-center justify-center`}>
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                </div>
+                {stat.label}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stat.value}</div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Upload Area */}
       <Card
-        className={`border-2 border-dashed transition-colors ${
-          isDragging ? 'border-primary bg-primary/5' : 'border-border'
+        className={`border-2 border-dashed transition-all duration-300 ${
+          isDragging ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-border hover:border-primary/30'
         }`}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setIsDragging(false);
-          // Handle file drop
-        }}
+        onDrop={(e) => { e.preventDefault(); setIsDragging(false); }}
       >
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <Upload className="h-8 w-8 text-primary" />
+        <CardContent className="flex flex-col items-center justify-center py-10">
+          <div className={`h-14 w-14 rounded-2xl ${isDragging ? 'bg-primary/20 scale-110' : 'bg-primary/10'} flex items-center justify-center mb-4 transition-all`}>
+            <Upload className={`h-7 w-7 ${isDragging ? 'text-primary animate-bounce' : 'text-primary'}`} />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Tải lên tài liệu</h3>
+          <h3 className="text-base font-semibold mb-1">Tải lên tài liệu</h3>
           <p className="text-muted-foreground text-sm mb-4">
-            Kéo thả file hoặc click để chọn (PDF, DOCX, TXT)
+            Kéo thả file hoặc click để chọn • PDF, DOCX, TXT
           </p>
           <Button variant="outline" className="gap-2">
             <Upload className="h-4 w-4" />
@@ -184,12 +136,7 @@ export default function DocumentsPage() {
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm tài liệu..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+          <Input placeholder="Tìm kiếm tài liệu..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
         <Select value={selectedCourse} onValueChange={setSelectedCourse}>
           <SelectTrigger className="w-64">
@@ -197,9 +144,7 @@ export default function DocumentsPage() {
           </SelectTrigger>
           <SelectContent>
             {courses.map((course) => (
-              <SelectItem key={course.id} value={course.id}>
-                {course.name}
-              </SelectItem>
+              <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -226,38 +171,36 @@ export default function DocumentsPage() {
               const course = courses.find((c) => c.id === doc.courseId);
 
               return (
-                <TableRow key={doc.id}>
+                <TableRow key={doc.id} className="hover:bg-secondary/30 transition-colors">
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {getFileIcon(doc.fileType)}
-                      <span className="font-medium">{doc.filename}</span>
+                      <span className="font-medium text-sm">{doc.filename}</span>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{course?.name.split(' - ')[0]}</Badge>
+                    <Badge variant="outline" className="text-[10px]">{course?.name.split(' - ')[0]}</Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {formatFileSize(doc.fileSize)}
-                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{formatFileSize(doc.fileSize)}</TableCell>
                   <TableCell>
                     {doc.status === 'processing' ? (
                       <div className="flex items-center gap-2">
-                        <Progress value={45} className="w-16 h-2" />
+                        <Progress value={45} className="w-16 h-1.5" />
                         <span className="text-xs text-muted-foreground">45%</span>
                       </div>
                     ) : (
-                      <span className={doc.totalChunks > 0 ? 'text-foreground' : 'text-muted-foreground'}>
+                      <span className={`text-sm ${doc.totalChunks > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
                         {doc.totalChunks || '-'}
                       </span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={`gap-1 ${status.className}`}>
+                    <Badge variant="outline" className={`gap-1 text-[10px] ${status.className}`}>
                       <StatusIcon className={`h-3 w-3 ${doc.status === 'processing' ? 'animate-spin' : ''}`} />
                       {status.label}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-sm">
                     {new Date(doc.createdAt).toLocaleDateString('vi-VN')}
                   </TableCell>
                   <TableCell>
@@ -268,18 +211,9 @@ export default function DocumentsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Xem trước
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Download className="mr-2 h-4 w-4" />
-                          Tải xuống
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Xóa
-                        </DropdownMenuItem>
+                        <DropdownMenuItem><Eye className="mr-2 h-4 w-4" />Xem trước</DropdownMenuItem>
+                        <DropdownMenuItem><Download className="mr-2 h-4 w-4" />Tải xuống</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -291,12 +225,12 @@ export default function DocumentsPage() {
       </Card>
 
       {filteredDocuments.length === 0 && (
-        <div className="text-center py-12">
-          <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+        <div className="text-center py-16 animate-fade-in">
+          <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <FileText className="h-8 w-8 text-muted-foreground/50" />
+          </div>
           <h3 className="text-lg font-medium">Không tìm thấy tài liệu</h3>
-          <p className="text-muted-foreground text-sm mt-1">
-            Thử tìm kiếm với từ khóa khác hoặc chọn môn học khác
-          </p>
+          <p className="text-muted-foreground text-sm mt-1">Thử tìm kiếm với từ khóa khác hoặc chọn môn học khác</p>
         </div>
       )}
     </div>

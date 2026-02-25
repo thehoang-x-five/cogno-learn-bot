@@ -1,0 +1,142 @@
+import { useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Search, Bell, Sun, Moon, ChevronRight, Settings, LogOut, User,
+} from 'lucide-react';
+import { useState } from 'react';
+
+const breadcrumbMap: Record<string, string> = {
+  '/dashboard': 'Dashboard',
+  '/courses': 'Môn học',
+  '/chat': 'Chat AI',
+  '/documents': 'Tài liệu',
+  '/quizzes': 'Quiz',
+  '/users': 'Người dùng',
+  '/settings': 'Cài đặt',
+  '/profile': 'Tài khoản',
+};
+
+export default function TopHeader() {
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const breadcrumbs = pathSegments.map((_, i) => {
+    const path = '/' + pathSegments.slice(0, i + 1).join('/');
+    return { label: breadcrumbMap[path] || pathSegments[i], path };
+  });
+
+  return (
+    <header className="h-14 border-b bg-card/80 backdrop-blur-sm flex items-center justify-between px-6 shrink-0">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-1.5 text-sm">
+        {breadcrumbs.map((crumb, i) => (
+          <span key={crumb.path} className="flex items-center gap-1.5">
+            {i > 0 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />}
+            <span className={i === breadcrumbs.length - 1 ? 'font-medium text-foreground' : 'text-muted-foreground'}>
+              {crumb.label}
+            </span>
+          </span>
+        ))}
+      </nav>
+
+      {/* Right section */}
+      <div className="flex items-center gap-2">
+        {/* Search */}
+        <div className={`transition-all duration-300 overflow-hidden ${searchOpen ? 'w-64' : 'w-0'}`}>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Tìm kiếm..."
+              className="h-8 pl-9 text-sm"
+              onBlur={() => setSearchOpen(false)}
+              autoFocus={searchOpen}
+            />
+          </div>
+        </div>
+        {!searchOpen && (
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)}>
+            <Search className="h-4 w-4" />
+          </Button>
+        )}
+
+        {/* Notifications */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 relative">
+              <Bell className="h-4 w-4" />
+              <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                3
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80">
+            <div className="px-3 py-2 border-b">
+              <p className="font-semibold text-sm">Thông báo</p>
+            </div>
+            {[
+              { title: 'Quiz mới: Ôn tập Chương 3', desc: 'CS301 - Lập trình OOP', time: '5 phút trước', unread: true },
+              { title: 'Tài liệu đã xử lý xong', desc: 'slide_chuong3.pdf - Sẵn sàng', time: '1 giờ trước', unread: true },
+              { title: 'Điểm Quiz Chương 2', desc: 'Bạn đạt 8/10 - Tốt!', time: '3 giờ trước', unread: true },
+            ].map((notif, i) => (
+              <DropdownMenuItem key={i} className="flex-col items-start gap-0.5 py-3 cursor-pointer">
+                <div className="flex items-center gap-2 w-full">
+                  <span className="font-medium text-sm flex-1">{notif.title}</span>
+                  {notif.unread && <span className="h-2 w-2 rounded-full bg-primary" />}
+                </div>
+                <span className="text-xs text-muted-foreground">{notif.desc}</span>
+                <span className="text-[10px] text-muted-foreground/70">{notif.time}</span>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="justify-center text-primary text-xs font-medium">
+              Xem tất cả thông báo
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* User menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 gap-2 pl-2 pr-3">
+              <Avatar className="h-6 w-6">
+                <AvatarImage src={user?.avatarUrl} />
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                  {user?.fullName?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium hidden md:inline">{user?.fullName?.split(' ').pop()}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
+              <User className="mr-2 h-4 w-4" />
+              Tài khoản
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => window.location.href = '/settings'}>
+              <Settings className="mr-2 h-4 w-4" />
+              Cài đặt
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
+              Đăng xuất
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </header>
+  );
+}
