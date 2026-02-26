@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   GraduationCap,
@@ -43,6 +43,7 @@ export default function AppSidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
 
   const filteredNavigation = navigation.filter(
     (item) => user && item.roles.includes(user.role)
@@ -161,7 +162,7 @@ export default function AppSidebar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
+              <DropdownMenuItem onClick={() => navigate('/profile')}>
                 <Settings className="mr-2 h-4 w-4" />
                 Cài đặt tài khoản
               </DropdownMenuItem>
