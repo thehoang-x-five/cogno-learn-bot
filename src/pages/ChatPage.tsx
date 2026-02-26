@@ -55,7 +55,7 @@ public class Animal {
     }
 }
 \`\`\``,
-    tokensUsed: 250, modelUsed: 'gpt-4',
+    tokensUsed: 250, modelUsed: 'gpt-4-turbo',
     createdAt: new Date(Date.now() - 55000).toISOString(),
     citations: [
       { id: '1', messageId: '2', chunkId: 'c1', relevanceScore: 0.89, quote: 'OOP có 4 tính chất chính...', documentName: 'slide_chuong2.pdf', pageNumber: 15 },
@@ -104,7 +104,7 @@ public class Main {
 \`\`\`
 
 Trong ví dụ trên, cùng phương thức \`makeSound()\` nhưng mỗi đối tượng lại có hành vi khác nhau. Đây chính là **đa hình runtime** (method overriding).`,
-    tokensUsed: 180, modelUsed: 'gpt-4',
+    tokensUsed: 180, modelUsed: 'gpt-4-turbo',
     createdAt: new Date(Date.now() - 25000).toISOString(),
     citations: [
       { id: '3', messageId: '4', chunkId: 'c3', relevanceScore: 0.92, quote: 'Polymorphism cho phép override method...', documentName: 'slide_chuong2.pdf', pageNumber: 28 },
@@ -124,7 +124,7 @@ export default function ChatPage() {
   const [activeConversation, setActiveConversation] = useState<string | null>('1');
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [inputValue, setInputValue] = useState('');
-  const [selectedModel, setSelectedModel] = useState<string>('gpt-4');
+  const [selectedModel, setSelectedModel] = useState<string>('gpt-4-turbo');
   const [selectedCourse, setSelectedCourse] = useState<string>('3');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);

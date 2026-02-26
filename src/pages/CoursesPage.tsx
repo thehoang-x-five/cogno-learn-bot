@@ -13,6 +13,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import CreateCourseDialog from '@/components/course/CreateCourseDialog';
+import { cn } from '@/lib/utils';
 
 const mockCourses: Course[] = [
   { id: '1', code: 'CS101', name: 'Nhập môn lập trình', description: 'Môn học cơ sở về lập trình với Python, bao gồm các khái niệm cơ bản như biến, vòng lặp, hàm...', semester: 'HK1-2025', isActive: true, createdAt: new Date().toISOString(), enrollmentRole: 'student', teacherCount: 2, studentCount: 120, documentCount: 15 },
@@ -168,8 +169,4 @@ export default function CoursesPage() {
       <CreateCourseDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </div>
   );
-}
-
-function cn(...classes: (string | false | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
 }
