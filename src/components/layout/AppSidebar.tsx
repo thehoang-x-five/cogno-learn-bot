@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -35,6 +36,7 @@ const navigation = [
   { name: 'Quiz', href: '/quizzes', icon: ClipboardList, roles: ['teacher', 'student'] },
   { name: 'Người dùng', href: '/users', icon: Users, roles: ['admin'] },
   { name: 'Cài đặt', href: '/settings', icon: Settings, roles: ['admin'] },
+  { name: 'Tài khoản', href: '/profile', icon: User, roles: ['teacher', 'student'] },
 ];
 
 export default function AppSidebar() {
