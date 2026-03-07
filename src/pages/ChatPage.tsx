@@ -17,6 +17,7 @@ import {
   Send, Plus, MessageSquare, Bot, Paperclip, Settings,
   BookOpen, Sparkles, FileText, Trash2, GraduationCap,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const mockConversations: Conversation[] = [
@@ -129,6 +130,7 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -223,7 +225,10 @@ export default function ChatPage() {
                     <p className="text-sm font-medium truncate">{conv.title}</p>
                     <p className="text-xs text-muted-foreground truncate mt-0.5">{conv.lastMessage}</p>
                   </div>
-                  <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded transition-all">
+                  <button
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded transition-all"
+                    onClick={(e) => { e.stopPropagation(); toast({ title: 'Xóa cuộc trò chuyện', description: `Xác nhận xóa "${conv.title}"? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' }); }}
+                  >
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </button>
                 </div>

@@ -16,6 +16,7 @@ import {
   CheckCircle2, Clock, AlertCircle, Loader2, File, FileType,
   HardDrive, Layers, Database,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -61,6 +62,7 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [isDragging, setIsDragging] = useState(false);
+  const { toast } = useToast();
 
   const filteredDocuments = mockDocuments.filter((doc) => {
     const matchesSearch = doc.filename.toLowerCase().includes(searchQuery.toLowerCase());
@@ -211,9 +213,9 @@ export default function DocumentsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem><Eye className="mr-2 h-4 w-4" />Xem trước</DropdownMenuItem>
-                        <DropdownMenuItem><Download className="mr-2 h-4 w-4" />Tải xuống</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast({ title: 'Xem trước', description: `Đang mở ${doc.filename}...` })}><Eye className="mr-2 h-4 w-4" />Xem trước</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast({ title: 'Tải xuống', description: `Đang tải ${doc.filename}...` })}><Download className="mr-2 h-4 w-4" />Tải xuống</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa tài liệu', description: `Xác nhận xóa ${doc.filename}? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
