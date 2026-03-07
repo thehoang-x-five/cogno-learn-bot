@@ -10,7 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ClipboardList, Search, Plus, Play, Trophy, Clock, Sparkles,
   BookOpen, CheckCircle2, XCircle, ArrowRight, History, BarChart3,
+  MoreVertical, Edit, Trash2, Eye, Copy, Share2,
 } from 'lucide-react';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import CreateQuizDialog from '@/components/quiz/CreateQuizDialog';
