@@ -65,7 +65,12 @@ import {
   TrendingUp,
   MessageSquare,
   Settings,
+  Edit,
+  Copy,
+  Share2,
+  BarChart3,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock course data
 const mockCourse = {
@@ -131,10 +136,12 @@ export default function CourseDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
 
@@ -162,10 +169,36 @@ export default function CourseDetailPage() {
           </p>
         </div>
         {isTeacher && (
-          <Button variant="outline" className="gap-2">
-            <Settings className="h-4 w-4" />
-            Cài đặt
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Settings className="h-4 w-4" />
+                Cài đặt
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa môn học', description: 'Chức năng sẽ sớm được cập nhật.' })}>
+                <Edit className="mr-2 h-4 w-4" />
+                Chỉnh sửa thông tin
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast({ title: 'Sao chép mã môn', description: `Mã môn: ${mockCourse.code}` })}>
+                <Copy className="mr-2 h-4 w-4" />
+                Sao chép mã môn
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast({ title: 'Chia sẻ', description: 'Link đã được sao chép.' })}>
+                <Share2 className="mr-2 h-4 w-4" />
+                Chia sẻ liên kết
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Thống kê chi tiết
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa môn học', description: 'Chức năng sẽ sớm được cập nhật.', variant: 'destructive' })}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Xóa môn học
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 
@@ -452,12 +485,32 @@ export default function CourseDetailPage() {
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {mockQuizzes.map((quiz) => (
-              <Card key={quiz.id} className="hover:shadow-md transition-shadow">
+              <Card key={quiz.id} className="hover:shadow-md transition-shadow group">
                 <CardHeader>
-                  <CardTitle className="text-lg">{quiz.title}</CardTitle>
-                  <CardDescription>
-                    {quiz.questionsCount} câu hỏi • Tạo ngày {quiz.createdAt}
-                  </CardDescription>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg">{quiz.title}</CardTitle>
+                      <CardDescription>
+                        {quiz.questionsCount} câu hỏi • Tạo ngày {quiz.createdAt}
+                      </CardDescription>
+                    </div>
+                    {isTeacher && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem><Eye className="mr-2 h-4 w-4" />Xem trước</DropdownMenuItem>
+                          <DropdownMenuItem><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
+                          <DropdownMenuItem><Copy className="mr-2 h-4 w-4" />Nhân bản</DropdownMenuItem>
+                          <DropdownMenuItem><BarChart3 className="mr-2 h-4 w-4" />Thống kê</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between mb-4">
