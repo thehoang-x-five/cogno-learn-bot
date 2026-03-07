@@ -169,10 +169,36 @@ export default function CourseDetailPage() {
           </p>
         </div>
         {isTeacher && (
-          <Button variant="outline" className="gap-2">
-            <Settings className="h-4 w-4" />
-            Cài đặt
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Settings className="h-4 w-4" />
+                Cài đặt
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa môn học', description: 'Chức năng sẽ sớm được cập nhật.' })}>
+                <Edit className="mr-2 h-4 w-4" />
+                Chỉnh sửa thông tin
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast({ title: 'Sao chép mã môn', description: `Mã môn: ${mockCourse.code}` })}>
+                <Copy className="mr-2 h-4 w-4" />
+                Sao chép mã môn
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast({ title: 'Chia sẻ', description: 'Link đã được sao chép.' })}>
+                <Share2 className="mr-2 h-4 w-4" />
+                Chia sẻ liên kết
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Thống kê chi tiết
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa môn học', description: 'Chức năng sẽ sớm được cập nhật.', variant: 'destructive' })}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Xóa môn học
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 
