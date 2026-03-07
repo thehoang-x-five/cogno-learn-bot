@@ -253,16 +253,52 @@ export default function QuizzesPage() {
               return (
                 <Card key={quiz.id} className="hover-lift group">
                   <CardHeader className="pb-3">
-                    <div className="flex items-start gap-3">
-                      <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center group-hover:bg-warning/20 transition-colors">
-                        <ClipboardList className="h-6 w-6 text-warning" />
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center group-hover:bg-warning/20 transition-colors">
+                          <ClipboardList className="h-6 w-6 text-warning" />
+                        </div>
+                        <div>
+                          {quiz.isAiGenerated && (
+                            <Badge variant="secondary" className="gap-1 mb-1"><Sparkles className="h-3 w-3" />AI</Badge>
+                          )}
+                          <CardTitle className="text-base leading-tight">{quiz.title}</CardTitle>
+                        </div>
                       </div>
-                      <div>
-                        {quiz.isAiGenerated && (
-                          <Badge variant="secondary" className="gap-1 mb-1"><Sparkles className="h-3 w-3" />AI</Badge>
-                        )}
-                        <CardTitle className="text-base leading-tight">{quiz.title}</CardTitle>
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleStartQuiz(quiz.id)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Xem trước
+                          </DropdownMenuItem>
+                          {isTeacher && (
+                            <>
+                              <DropdownMenuItem>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Chỉnh sửa
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Copy className="mr-2 h-4 w-4" />
+                                Nhân bản
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Share2 className="mr-2 h-4 w-4" />
+                                Chia sẻ
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Xóa
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </CardHeader>
                   <CardContent>

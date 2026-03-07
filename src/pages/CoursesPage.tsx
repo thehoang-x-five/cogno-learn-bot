@@ -150,6 +150,18 @@ export default function CoursesPage() {
                   <span className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{course.documentCount}</span>
                   <Badge variant="outline" className="text-[10px]">{course.semester}</Badge>
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>Xem chi tiết</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/chat')}><MessageSquare className="mr-2 h-4 w-4" />Chat về môn này</DropdownMenuItem>
+                    {canManageCourses && (<><DropdownMenuItem>Chỉnh sửa</DropdownMenuItem><DropdownMenuItem className="text-destructive">Xóa</DropdownMenuItem></>)}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
           </Card>

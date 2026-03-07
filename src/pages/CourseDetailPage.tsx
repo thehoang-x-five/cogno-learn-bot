@@ -65,7 +65,12 @@ import {
   TrendingUp,
   MessageSquare,
   Settings,
+  Edit,
+  Copy,
+  Share2,
+  BarChart3,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock course data
 const mockCourse = {
