@@ -21,6 +21,7 @@ import {
 import {
   Users, UserPlus, Search, MoreVertical, Edit, Trash2, Shield, GraduationCap, BookOpen, CheckCircle2, XCircle, Mail,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const mockUsers: User[] = [
   { id: '1', email: 'admin@edu.vn', fullName: 'Nguyễn Văn Admin', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin', role: 'admin', isActive: true, createdAt: new Date(Date.now() - 365 * 86400000).toISOString() },
@@ -43,6 +44,7 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newUser, setNewUser] = useState({ email: '', fullName: '', role: 'student' as UserRole });
+  const { toast } = useToast();
 
   const filteredUsers = mockUsers.filter((user) => {
     const matchesSearch = user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -221,10 +223,10 @@ export default function UsersPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
-                        <DropdownMenuItem><Shield className="mr-2 h-4 w-4" />Đổi vai trò</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa người dùng', description: `Đang mở form chỉnh sửa ${user.fullName}.` })}><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast({ title: 'Đổi vai trò', description: `Chức năng đổi vai trò cho ${user.fullName} sẽ sớm được cập nhật.` })}><Shield className="mr-2 h-4 w-4" />Đổi vai trò</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa người dùng', description: `Xác nhận xóa ${user.fullName}? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

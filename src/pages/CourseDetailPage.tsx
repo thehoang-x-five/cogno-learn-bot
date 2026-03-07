@@ -189,7 +189,7 @@ export default function CourseDetailPage() {
                 <Share2 className="mr-2 h-4 w-4" />
                 Chia sẻ liên kết
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast({ title: 'Thống kê chi tiết', description: 'Đang mở trang thống kê...' })}>
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Thống kê chi tiết
               </DropdownMenuItem>
@@ -438,16 +438,16 @@ export default function CourseDetailPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast({ title: 'Xem trước', description: `Đang mở ${doc.filename}...` })}>
                               <Eye className="mr-2 h-4 w-4" />
                               Xem trước
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast({ title: 'Tải xuống', description: `Đang tải ${doc.filename}...` })}>
                               <Download className="mr-2 h-4 w-4" />
                               Tải xuống
                             </DropdownMenuItem>
                             {isTeacher && (
-                              <DropdownMenuItem className="text-destructive">
+                              <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa tài liệu', description: `Xác nhận xóa ${doc.filename}? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}>
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Xóa
                               </DropdownMenuItem>
@@ -502,11 +502,11 @@ export default function CourseDetailPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem><Eye className="mr-2 h-4 w-4" />Xem trước</DropdownMenuItem>
-                          <DropdownMenuItem><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
-                          <DropdownMenuItem><Copy className="mr-2 h-4 w-4" />Nhân bản</DropdownMenuItem>
-                          <DropdownMenuItem><BarChart3 className="mr-2 h-4 w-4" />Thống kê</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast({ title: 'Xem trước', description: `Đang mở "${quiz.title}"...` })}><Eye className="mr-2 h-4 w-4" />Xem trước</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa quiz', description: `Đang mở form chỉnh sửa "${quiz.title}".` })}><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast({ title: 'Nhân bản', description: `Đã nhân bản "${quiz.title}" thành công.` })}><Copy className="mr-2 h-4 w-4" />Nhân bản</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast({ title: 'Thống kê', description: `Đang mở thống kê "${quiz.title}"...` })}><BarChart3 className="mr-2 h-4 w-4" />Thống kê</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa quiz', description: `Xác nhận xóa "${quiz.title}"? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     )}
@@ -626,15 +626,15 @@ export default function CourseDetailPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast({ title: 'Xem chi tiết', description: `Đang mở hồ sơ ${student.fullName}...` })}>
                               <Eye className="mr-2 h-4 w-4" />
                               Xem chi tiết
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast({ title: 'Gửi tin nhắn', description: `Đang mở hội thoại với ${student.fullName}...` })}>
                               <MessageSquare className="mr-2 h-4 w-4" />
                               Gửi tin nhắn
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa khỏi môn', description: `Xác nhận xóa ${student.fullName} khỏi môn? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}>
                               <Trash2 className="mr-2 h-4 w-4" />
                               Xóa khỏi môn
                             </DropdownMenuItem>

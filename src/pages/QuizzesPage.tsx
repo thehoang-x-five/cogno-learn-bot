@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import CreateQuizDialog from '@/components/quiz/CreateQuizDialog';
 import QuizResultSummary from '@/components/quiz/QuizResultSummary';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock quizzes
 const mockQuizzes: Quiz[] = [
@@ -58,6 +59,7 @@ export default function QuizzesPage() {
   const [showSummary, setShowSummary] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [startTime] = useState(Date.now());
+  const { toast } = useToast();
 
   const filteredQuizzes = mockQuizzes.filter((quiz) =>
     quiz.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -278,20 +280,20 @@ export default function QuizzesPage() {
                           </DropdownMenuItem>
                           {isTeacher && (
                             <>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa quiz', description: `Đang mở form chỉnh sửa "${quiz.title}".` })}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Chỉnh sửa
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toast({ title: 'Nhân bản quiz', description: `Đã nhân bản "${quiz.title}" thành công.` })}>
                                 <Copy className="mr-2 h-4 w-4" />
                                 Nhân bản
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toast({ title: 'Chia sẻ quiz', description: 'Link quiz đã được sao chép.' })}>
                                 <Share2 className="mr-2 h-4 w-4" />
                                 Chia sẻ
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive">
+                              <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa quiz', description: `Xác nhận xóa "${quiz.title}"? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}>
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Xóa
                               </DropdownMenuItem>

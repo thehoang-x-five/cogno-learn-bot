@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
-  BookOpen, Search, Plus, Users, FileText, MoreVertical, MessageSquare, Grid3X3, List,
+  BookOpen, Search, Plus, Users, FileText, MoreVertical, MessageSquare, Grid3X3, List, Edit, Trash2, Copy, Share2,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -34,6 +35,7 @@ export default function CoursesPage() {
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const { toast } = useToast();
 
   const filteredCourses = mockCourses.filter((course) => {
     const matchesSearch = course.name.toLowerCase().includes(searchQuery.toLowerCase()) || course.code.toLowerCase().includes(searchQuery.toLowerCase());
@@ -112,7 +114,14 @@ export default function CoursesPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>Xem chi tiết</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate('/chat')}><MessageSquare className="mr-2 h-4 w-4" />Chat về môn này</DropdownMenuItem>
-                        {canManageCourses && (<><DropdownMenuItem>Chỉnh sửa</DropdownMenuItem><DropdownMenuItem className="text-destructive">Xóa</DropdownMenuItem></>)}
+                        {canManageCourses && (
+                          <>
+                            <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa môn học', description: `Đang mở form chỉnh sửa ${course.name}.` })}><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: 'Đã sao chép', description: `Mã môn ${course.code} đã được sao chép.` }); }}><Copy className="mr-2 h-4 w-4" />Sao chép mã</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast({ title: 'Chia sẻ', description: 'Link môn học đã được sao chép.' })}><Share2 className="mr-2 h-4 w-4" />Chia sẻ</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa môn học', description: `Xác nhận xóa ${course.name}? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -159,7 +168,13 @@ export default function CoursesPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>Xem chi tiết</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/chat')}><MessageSquare className="mr-2 h-4 w-4" />Chat về môn này</DropdownMenuItem>
-                    {canManageCourses && (<><DropdownMenuItem>Chỉnh sửa</DropdownMenuItem><DropdownMenuItem className="text-destructive">Xóa</DropdownMenuItem></>)}
+                    {canManageCourses && (
+                      <>
+                        <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa môn học', description: `Đang mở form chỉnh sửa ${course.name}.` })}><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: 'Đã sao chép', description: `Mã môn ${course.code} đã được sao chép.` }); }}><Copy className="mr-2 h-4 w-4" />Sao chép mã</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa môn học', description: `Xác nhận xóa ${course.name}? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
