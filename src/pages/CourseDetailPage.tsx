@@ -168,7 +168,7 @@ export default function CourseDetailPage() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="text-base font-mono">{course.code}</Badge>
+            <Badge variant="outline" className="text-sm sm:text-base font-mono">{course.code}</Badge>
             <h1 className="text-3xl font-bold">{course.name}</h1>
             {course.isActive && <Badge className="bg-success/10 text-success border-success/20">{t('courseDetail.operating')}</Badge>}
           </div>
