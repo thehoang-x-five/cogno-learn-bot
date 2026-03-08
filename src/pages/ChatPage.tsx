@@ -178,10 +178,16 @@ export default function ChatPage() {
 
   const currentCourse = courses.find((c) => c.id === selectedCourse);
 
+  const isMobile = useIsMobile();
+  const [showConversations, setShowConversations] = useState(!isMobile);
+
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <div className="w-72 border-r bg-card flex flex-col">
+    <div className="flex h-full">
+      {/* Sidebar - hidden on mobile unless toggled */}
+      <div className={cn(
+        'border-r bg-card flex flex-col transition-all duration-300',
+        isMobile ? (showConversations ? 'w-full absolute inset-0 z-20' : 'w-0 overflow-hidden') : 'w-72'
+      )}>
         <div className="p-4 border-b">
           <Button variant="gradient" className="w-full gap-2" onClick={handleNewConversation}>
             <Plus className="h-4 w-4" />
