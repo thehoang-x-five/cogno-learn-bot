@@ -81,6 +81,24 @@ const translations: Record<string, Record<Language, string>> = {
   'admin.comparedLastMonth': { vi: 'so với tháng trước', en: 'compared to last month' },
   'admin.estimatedCost': { vi: 'Chi phí ước tính', en: 'Estimated Cost' },
 
+  // Admin time labels
+  'admin.time.10m': { vi: '10 phút trước', en: '10 min ago' },
+  'admin.time.30m': { vi: '30 phút trước', en: '30 min ago' },
+  'admin.time.2h': { vi: '2 giờ trước', en: '2 hours ago' },
+  'admin.time.5h': { vi: '5 giờ trước', en: '5 hours ago' },
+  'admin.day.mon': { vi: 'T2', en: 'Mon' },
+  'admin.day.tue': { vi: 'T3', en: 'Tue' },
+  'admin.day.wed': { vi: 'T4', en: 'Wed' },
+  'admin.day.thu': { vi: 'T5', en: 'Thu' },
+  'admin.day.fri': { vi: 'T6', en: 'Fri' },
+  'admin.day.sat': { vi: 'T7', en: 'Sat' },
+  'admin.day.sun': { vi: 'CN', en: 'Sun' },
+
+  // Settings time suffixes
+  'settings.timeAgo': { vi: 'trước', en: 'ago' },
+  'settings.dayAgo': { vi: 'ngày trước', en: 'day ago' },
+  'settings.siteDescDefault': { vi: 'Hệ thống Trợ lý Học tập AI', en: 'AI Learning Assistant System' },
+
   // Teacher Dashboard
   'teacher.coursesTaught': { vi: 'Môn học đang dạy', en: 'Courses Teaching' },
   'teacher.totalStudents': { vi: 'Tổng sinh viên', en: 'Total Students' },

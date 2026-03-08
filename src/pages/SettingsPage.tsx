@@ -61,10 +61,10 @@ export default function SettingsPage() {
   const currentProvider = llmProviders.find((p) => p.id === selectedProvider);
 
   const activityLogs = [
-    { action: t('settings.logLogin'), user: 'admin@edu.vn', time: `5 ${t('settings.minutes')} ${language === 'vi' ? 'trước' : 'ago'}` },
-    { action: t('settings.logUpdateLLM'), user: 'admin@edu.vn', time: `1 ${t('settings.hours')} ${language === 'vi' ? 'trước' : 'ago'}` },
-    { action: t('settings.logAddUser'), user: 'admin@edu.vn', time: `2 ${t('settings.hours')} ${language === 'vi' ? 'trước' : 'ago'}` },
-    { action: t('settings.logDeleteDoc'), user: 'admin@edu.vn', time: `1 ${language === 'vi' ? 'ngày trước' : 'day ago'}` },
+    { action: t('settings.logLogin'), user: 'admin@edu.vn', time: `5 ${t('settings.minutes')} ${t('settings.timeAgo')}` },
+    { action: t('settings.logUpdateLLM'), user: 'admin@edu.vn', time: `1 ${t('settings.hours')} ${t('settings.timeAgo')}` },
+    { action: t('settings.logAddUser'), user: 'admin@edu.vn', time: `2 ${t('settings.hours')} ${t('settings.timeAgo')}` },
+    { action: t('settings.logDeleteDoc'), user: 'admin@edu.vn', time: `1 ${t('settings.dayAgo')}` },
   ];
 
   return (
