@@ -109,7 +109,8 @@ export default function DocumentsPage() {
       }
 
       const tempId = Date.now().toString() + Math.random().toString(36).slice(2);
-      const fileType = ext.replace('.', '') as string;
+      const rawExt = ext.replace('.', '');
+      const fileType: DocFileType = (['pdf', 'docx', 'txt'].includes(rawExt) ? rawExt : 'txt') as DocFileType;
 
       // Add as processing
       const newDoc: Document = {
