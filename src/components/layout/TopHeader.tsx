@@ -2,27 +2,29 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Search, Bell, Sun, Moon, ChevronRight, Settings, LogOut, User, Globe,
+  Search, Bell, Sun, Moon, ChevronRight, Settings, LogOut, User, Globe, Menu, GraduationCap,
 } from 'lucide-react';
 import { useState } from 'react';
 
-export default function TopHeader() {
+interface TopHeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function TopHeader({ onMenuClick }: TopHeaderProps) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [searchOpen, setSearchOpen] = useState(false);
 
   const breadcrumbMap: Record<string, string> = {
@@ -43,37 +45,58 @@ export default function TopHeader() {
   });
 
   return (
-    <header className="h-14 border-b bg-card/80 backdrop-blur-sm flex items-center justify-between px-6 shrink-0">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-sm">
-        {breadcrumbs.map((crumb, i) => (
-          <span key={crumb.path} className="flex items-center gap-1.5">
-            {i > 0 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />}
-            <span className={i === breadcrumbs.length - 1 ? 'font-medium text-foreground' : 'text-muted-foreground'}>
-              {crumb.label}
+    <header className="h-14 border-b bg-card/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-6 shrink-0 gap-2">
+      {/* Left: hamburger + breadcrumbs */}
+      <div className="flex items-center gap-2 min-w-0">
+        {isMobile && (
+          <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={onMenuClick}>
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
+
+        {isMobile ? (
+          <div className="flex items-center gap-2 min-w-0">
+            <GraduationCap className="h-5 w-5 text-primary shrink-0" />
+            <span className="font-semibold text-sm truncate">
+              {breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].label : 'EduAssist'}
             </span>
-          </span>
-        ))}
-      </nav>
+          </div>
+        ) : (
+          <nav className="flex items-center gap-1.5 text-sm">
+            {breadcrumbs.map((crumb, i) => (
+              <span key={crumb.path} className="flex items-center gap-1.5">
+                {i > 0 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />}
+                <span className={i === breadcrumbs.length - 1 ? 'font-medium text-foreground' : 'text-muted-foreground'}>
+                  {crumb.label}
+                </span>
+              </span>
+            ))}
+          </nav>
+        )}
+      </div>
 
       {/* Right section */}
-      <div className="flex items-center gap-1">
-        {/* Search */}
-        <div className={`transition-all duration-300 overflow-hidden ${searchOpen ? 'w-64' : 'w-0'}`}>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input
-              placeholder={t('action.search')}
-              className="h-8 pl-9 text-sm"
-              onBlur={() => setSearchOpen(false)}
-              autoFocus={searchOpen}
-            />
-          </div>
-        </div>
-        {!searchOpen && (
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)}>
-            <Search className="h-4 w-4" />
-          </Button>
+      <div className="flex items-center gap-1 shrink-0">
+        {/* Search - hidden on mobile */}
+        {!isMobile && (
+          <>
+            <div className={`transition-all duration-300 overflow-hidden ${searchOpen ? 'w-64' : 'w-0'}`}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder={t('action.search')}
+                  className="h-8 pl-9 text-sm"
+                  onBlur={() => setSearchOpen(false)}
+                  autoFocus={searchOpen}
+                />
+              </div>
+            </div>
+            {!searchOpen && (
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)}>
+                <Search className="h-4 w-4" />
+              </Button>
+            )}
+          </>
         )}
 
         {/* Language */}
@@ -133,35 +156,37 @@ export default function TopHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* User menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 gap-2 pl-2 pr-3">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={user?.avatarUrl} />
-                <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-                  {user?.fullName?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium hidden md:inline">{user?.fullName?.split(' ').pop()}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => navigate('/profile')}>
-              <User className="mr-2 h-4 w-4" />
-              {t('nav.profile')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/settings')}>
-              <Settings className="mr-2 h-4 w-4" />
-              {t('nav.settings')}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
-              <LogOut className="mr-2 h-4 w-4" />
-              {t('nav.logout')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* User menu - hidden on mobile (accessible via sidebar) */}
+        {!isMobile && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 gap-2 pl-2 pr-3">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={user?.avatarUrl} />
+                  <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                    {user?.fullName?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium hidden md:inline">{user?.fullName?.split(' ').pop()}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <User className="mr-2 h-4 w-4" />
+                {t('nav.profile')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>
+                <Settings className="mr-2 h-4 w-4" />
+                {t('nav.settings')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                {t('nav.logout')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </header>
   );

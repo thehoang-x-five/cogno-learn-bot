@@ -1,10 +1,12 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { GraduationCap } from 'lucide-react';
 import AppSidebar from './AppSidebar';
 import TopHeader from './TopHeader';
+import MobileSidebar from './MobileSidebar';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -14,6 +16,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -42,9 +46,18 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
-      <AppSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {!isChatPage && <TopHeader />}
+      {/* Desktop sidebar */}
+      {!isMobile && <AppSidebar />}
+      
+      {/* Mobile sidebar */}
+      {isMobile && (
+        <MobileSidebar open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen} />
+      )}
+
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {(!isChatPage || isMobile) && (
+          <TopHeader onMenuClick={() => setMobileSidebarOpen(true)} />
+        )}
         <main className="flex-1 overflow-auto bg-background">
           {children}
         </main>
