@@ -35,25 +35,32 @@ export default function LoginPage() {
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-subtle" />
         <div className="absolute -top-32 -left-32 w-72 h-72 bg-accent/10 rounded-full blur-3xl animate-pulse-subtle" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-info/5 rounded-full blur-3xl animate-pulse-subtle" style={{ animationDelay: '0.5s' }} />
+        
+        {/* Decorative grid */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
         <div className="relative z-10 flex flex-col justify-between p-12 text-sidebar-foreground w-full">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-primary/20 backdrop-blur-sm"><GraduationCap className="h-8 w-8 text-primary" /></div>
-            <span className="text-2xl font-bold">EduAssist</span>
+            <div className="p-3 rounded-xl bg-primary/20 backdrop-blur-sm border border-primary/10"><GraduationCap className="h-8 w-8 text-primary" /></div>
+            <span className="text-2xl font-bold tracking-tight">EduAssist</span>
           </div>
 
           <div>
-            <h1 className="text-5xl font-bold mb-4 leading-tight">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-6">
+              <Sparkles className="h-3.5 w-3.5 text-accent" />
+              <span className="text-xs font-medium text-accent">AI-Powered Learning Platform</span>
+            </div>
+            <h1 className="text-5xl font-bold mb-4 leading-[1.1] tracking-tight">
               {t('login.heroTitle1')}<br />
               <span className="gradient-text">{t('login.heroTitle2')}</span>
             </h1>
-            <p className="text-lg text-sidebar-foreground/70 mb-10 max-w-md leading-relaxed">{t('login.heroDesc')}</p>
-            <div className="grid grid-cols-2 gap-4 mb-10">
+            <p className="text-lg text-sidebar-foreground/60 mb-10 max-w-md leading-relaxed">{t('login.heroDesc')}</p>
+            <div className="grid grid-cols-2 gap-3 mb-10">
               {features.map((feature) => (
-                <div key={feature.title} className="p-4 rounded-xl bg-sidebar-accent/50 backdrop-blur-sm border border-sidebar-border/50 hover:bg-sidebar-accent/70 transition-all duration-300 hover:-translate-y-0.5">
-                  <feature.icon className="h-6 w-6 text-primary mb-2" />
+                <div key={feature.title} className="p-4 rounded-xl bg-sidebar-accent/40 backdrop-blur-sm border border-sidebar-border/30 hover:bg-sidebar-accent/60 transition-all duration-300 hover:-translate-y-0.5 group">
+                  <feature.icon className="h-5 w-5 text-primary mb-2.5 group-hover:scale-110 transition-transform" />
                   <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
-                  <p className="text-xs text-sidebar-foreground/60 leading-relaxed">{feature.description}</p>
+                  <p className="text-xs text-sidebar-foreground/50 leading-relaxed">{feature.description}</p>
                 </div>
               ))}
             </div>
@@ -62,28 +69,32 @@ export default function LoginPage() {
           <div className="flex items-center gap-8">
             {stats.map((stat) => (
               <div key={stat.label} className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-sidebar-accent/50 flex items-center justify-center"><stat.icon className="h-5 w-5 text-primary" /></div>
-                <div><p className="text-lg font-bold">{stat.value}</p><p className="text-xs text-sidebar-foreground/60">{stat.label}</p></div>
+                <div className="h-10 w-10 rounded-lg bg-sidebar-accent/40 flex items-center justify-center"><stat.icon className="h-5 w-5 text-primary" /></div>
+                <div><p className="text-lg font-bold">{stat.value}</p><p className="text-xs text-sidebar-foreground/50">{stat.label}</p></div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-8 bg-background">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center p-8 bg-background relative">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+        
+        <div className="w-full max-w-md relative z-10">
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
             <div className="p-3 rounded-xl bg-primary/10"><GraduationCap className="h-8 w-8 text-primary" /></div>
-            <span className="text-2xl font-bold">EduAssist</span>
+            <span className="text-2xl font-bold tracking-tight">EduAssist</span>
           </div>
 
-          <Card className="border-0 shadow-2xl shadow-primary/5">
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl">{t('login.welcome')}</CardTitle>
-              <CardDescription>{t('login.subtitle')}</CardDescription>
+          <Card className="border-0 shadow-2xl shadow-primary/5 overflow-hidden">
+            <div className="h-1 bg-gradient-primary" />
+            <CardHeader className="text-center pb-2 pt-8">
+              <CardTitle className="text-2xl tracking-tight">{t('login.welcome')}</CardTitle>
+              <CardDescription className="mt-1">{t('login.subtitle')}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 pt-4">
-              <Button variant="google" size="lg" className="w-full" onClick={login} disabled={isLoading}>
+            <CardContent className="space-y-6 pt-4 pb-8">
+              <Button variant="google" size="lg" className="w-full h-12" onClick={login} disabled={isLoading}>
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -104,27 +115,27 @@ export default function LoginPage() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">{t('login.demoQuick')}</span></div>
+                <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-3 text-muted-foreground font-medium">{t('login.demoQuick')}</span></div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2.5">
                 {[
-                  { role: 'admin' as const, label: 'Admin', icon: Shield, desc: t('login.admin') },
-                  { role: 'teacher' as const, label: t('role.teacher'), icon: BookOpen, desc: t('login.teaching') },
-                  { role: 'student' as const, label: t('role.student'), icon: GraduationCap, desc: t('login.learning') },
+                  { role: 'admin' as const, label: 'Admin', icon: Shield, desc: t('login.admin'), color: 'hover:border-destructive/40 hover:bg-destructive/5' },
+                  { role: 'teacher' as const, label: t('role.teacher'), icon: BookOpen, desc: t('login.teaching'), color: 'hover:border-primary/40 hover:bg-primary/5' },
+                  { role: 'student' as const, label: t('role.student'), icon: GraduationCap, desc: t('login.learning'), color: 'hover:border-accent/40 hover:bg-accent/5' },
                 ].map((item) => (
-                  <Button key={item.role} variant="outline" className="h-auto py-3 flex-col gap-1 hover:border-primary/50 hover:bg-primary/5 transition-all" onClick={() => setMockUser(item.role)}>
+                  <Button key={item.role} variant="outline" className={`h-auto py-4 flex-col gap-1.5 transition-all duration-200 ${item.color}`} onClick={() => setMockUser(item.role)}>
                     <item.icon className="h-5 w-5 text-primary" />
-                    <span className="text-xs font-medium">{item.label}</span>
-                    <span className="text-[10px] text-muted-foreground">{item.desc}</span>
+                    <span className="text-xs font-semibold">{item.label}</span>
+                    <span className="text-[10px] text-muted-foreground leading-tight">{item.desc}</span>
                   </Button>
                 ))}
               </div>
 
-              <p className="text-center text-xs text-muted-foreground">
+              <p className="text-center text-xs text-muted-foreground leading-relaxed">
                 {t('login.terms')}{' '}
-                <a href="#" className="text-primary hover:underline">{t('login.termsLink')}</a> {t('login.and')}{' '}
-                <a href="#" className="text-primary hover:underline">{t('login.privacyLink')}</a>
+                <a href="#" className="text-primary hover:underline font-medium">{t('login.termsLink')}</a> {t('login.and')}{' '}
+                <a href="#" className="text-primary hover:underline font-medium">{t('login.privacyLink')}</a>
               </p>
             </CardContent>
           </Card>
