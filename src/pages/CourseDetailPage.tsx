@@ -486,8 +486,8 @@ export default function CourseDetailPage() {
 
       {/* All Dialogs */}
       <EditDialog open={editCourseOpen} onOpenChange={setEditCourseOpen}
-        title={language === 'vi' ? 'Chỉnh sửa môn học' : 'Edit Course'}
-        description={language === 'vi' ? 'Cập nhật thông tin môn học' : 'Update course information'}
+        title={t('courseDetail.editCourse')}
+        description={t('courseDetail.updateInfo')}
         fields={courseEditFields}
         onSave={(values) => {
           setCourse(prev => ({ ...prev, code: values.code, name: values.name, description: values.description, semester: values.semester }));
