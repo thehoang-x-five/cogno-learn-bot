@@ -27,6 +27,8 @@ const llmProviders = [
 
 export default function SettingsPage() {
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [activeTab, setActiveTab] = useState('general');
   
   // General settings
