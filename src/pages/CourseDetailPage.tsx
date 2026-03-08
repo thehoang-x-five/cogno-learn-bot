@@ -523,7 +523,7 @@ export default function CourseDetailPage() {
 
       <ConfirmDeleteDialog open={!!deleteStudentTarget} onOpenChange={(open) => !open && setDeleteStudentTarget(null)}
         title={t('confirm.deleteStudent')}
-        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to remove'} "${deleteStudentTarget?.fullName}"?`}
+        description={`${t('courseDetail.confirmRemoveStudent')} "${deleteStudentTarget?.fullName}"?`}
         onConfirm={() => { setStudents(prev => prev.filter(s => s.id !== deleteStudentTarget?.id)); toast({ title: t('toast.deleted') }); setDeleteStudentTarget(null); }}
       />
 
