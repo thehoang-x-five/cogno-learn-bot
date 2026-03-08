@@ -517,7 +517,7 @@ export default function CourseDetailPage() {
       />
 
       <EditDialog open={!!editQuizTarget} onOpenChange={(open) => !open && setEditQuizTarget(null)}
-        title={language === 'vi' ? 'Chỉnh sửa quiz' : 'Edit Quiz'} fields={quizEditFields}
+        title={t('courseDetail.editQuiz')} fields={quizEditFields}
         onSave={(values) => { setQuizzes(prev => prev.map(q => q.id === editQuizTarget?.id ? { ...q, title: values.title } : q)); toast({ title: t('toast.updated') }); setEditQuizTarget(null); }}
       />
 
