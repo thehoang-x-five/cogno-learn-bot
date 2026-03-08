@@ -7,32 +7,17 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import {
-  Settings,
-  Bot,
-  Database,
-  Shield,
-  Bell,
-  Palette,
-  Save,
-  RotateCcw,
-  Zap,
-  Server,
-  Key,
-  Globe,
-  Mail,
-  CheckCircle2,
-  AlertCircle,
+  Settings, Bot, Database, Shield, Bell, Palette, Save, RotateCcw, Zap, Server,
+  Key, Globe, Mail, CheckCircle2, AlertCircle, Sun, Moon,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const llmProviders = [
   { id: 'openai', name: 'OpenAI', models: ['gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo'] },
