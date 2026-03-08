@@ -17,6 +17,7 @@ import QuizzesPage from "@/pages/QuizzesPage";
 import UsersPage from "@/pages/UsersPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ProfilePage from "@/pages/ProfilePage";
+import NotificationsPage from "@/pages/NotificationsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
