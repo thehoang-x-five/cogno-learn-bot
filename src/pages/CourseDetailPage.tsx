@@ -119,7 +119,7 @@ export default function CourseDetailPage() {
       const ext = '.' + file.name.split('.').pop()?.toLowerCase();
       const allowedExts = ['.pdf', '.docx', '.txt'];
       if (!allowedExts.includes(ext)) {
-        toast({ title: language === 'vi' ? 'Định dạng không hỗ trợ' : 'Unsupported format', description: `"${file.name}"`, variant: 'destructive' });
+        toast({ title: t('courseDetail.unsupported'), description: `"${file.name}"`, variant: 'destructive' });
         return;
       }
       const tempId = Date.now().toString() + Math.random().toString(36).slice(2);
