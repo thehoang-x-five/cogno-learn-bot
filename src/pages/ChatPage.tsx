@@ -210,7 +210,7 @@ export default function ChatPage() {
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-1">
             {conversations.map((conv) => (
-              <button key={conv.id} onClick={() => setActiveConversation(conv.id)}
+              <button key={conv.id} onClick={() => { setActiveConversation(conv.id); if (isMobile) setShowConversations(false); }}
                 className={cn('w-full p-3 rounded-lg text-left transition-all duration-200 group',
                   activeConversation === conv.id ? 'bg-primary/10 text-primary border border-primary/20' : 'hover:bg-secondary text-foreground border border-transparent'
                 )}>
