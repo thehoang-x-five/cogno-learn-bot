@@ -11,12 +11,14 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import CreateCourseDialog from '@/components/course/CreateCourseDialog';
+import ConfirmDeleteDialog from '@/components/shared/ConfirmDeleteDialog';
+import EditDialog, { EditField } from '@/components/shared/EditDialog';
 import { cn } from '@/lib/utils';
 
-const mockCourses: Course[] = [
+const initialCourses: Course[] = [
   { id: '1', code: 'CS101', name: 'Nhập môn lập trình', description: 'Môn học cơ sở về lập trình với Python, bao gồm các khái niệm cơ bản như biến, vòng lặp, hàm...', semester: 'HK1-2025', isActive: true, createdAt: new Date().toISOString(), enrollmentRole: 'student', teacherCount: 2, studentCount: 120, documentCount: 15 },
   { id: '2', code: 'CS201', name: 'Cấu trúc dữ liệu và giải thuật', description: 'Học về các cấu trúc dữ liệu như mảng, danh sách liên kết, cây, đồ thị và các giải thuật sắp xếp, tìm kiếm...', semester: 'HK1-2025', isActive: true, createdAt: new Date().toISOString(), enrollmentRole: 'student', teacherCount: 1, studentCount: 95, documentCount: 22 },
   { id: '3', code: 'CS301', name: 'Lập trình hướng đối tượng', description: 'Các nguyên lý OOP: đóng gói, kế thừa, đa hình, trừu tượng. Thực hành với Java.', semester: 'HK1-2025', isActive: true, createdAt: new Date().toISOString(), enrollmentRole: 'teacher', teacherCount: 1, studentCount: 88, documentCount: 18 },
@@ -31,19 +33,83 @@ const courseTextColors = ['text-primary', 'text-accent', 'text-warning', 'text-i
 export default function CoursesPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [courses, setCourses] = useState(initialCourses);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { toast } = useToast();
 
-  const filteredCourses = mockCourses.filter((course) => {
+  // Delete state
+  const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
+  // Edit state
+  const [editTarget, setEditTarget] = useState<Course | null>(null);
+
+  const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.name.toLowerCase().includes(searchQuery.toLowerCase()) || course.code.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filter === 'all' || (filter === 'active' && course.isActive) || (filter === 'inactive' && !course.isActive);
     return matchesSearch && matchesFilter;
   });
 
   const canManageCourses = user?.role === 'admin' || user?.role === 'teacher';
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    setCourses((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+    toast({ title: 'Đã xóa', description: `Môn học "${deleteTarget.name}" đã được xóa thành công.` });
+    setDeleteTarget(null);
+  };
+
+  const handleEdit = (values: Record<string, string>) => {
+    if (!editTarget) return;
+    setCourses((prev) => prev.map((c) =>
+      c.id === editTarget.id ? { ...c, name: values.name, code: values.code, description: values.description, semester: values.semester } : c
+    ));
+    toast({ title: 'Đã cập nhật', description: `Môn học "${values.name}" đã được cập nhật.` });
+    setEditTarget(null);
+  };
+
+  const handleShare = (course: Course) => {
+    const url = `${window.location.origin}/courses/${course.id}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: 'Đã sao chép link', description: `Link môn ${course.name} đã được sao chép vào clipboard.` });
+  };
+
+  const editFields: EditField[] = editTarget ? [
+    { key: 'code', label: 'Mã môn học', value: editTarget.code, placeholder: 'VD: CS101' },
+    { key: 'name', label: 'Tên môn học', value: editTarget.name, placeholder: 'Nhập tên môn học' },
+    { key: 'description', label: 'Mô tả', value: editTarget.description, type: 'textarea', placeholder: 'Mô tả ngắn về môn học' },
+    { key: 'semester', label: 'Học kỳ', value: editTarget.semester, placeholder: 'VD: HK1-2025' },
+  ] : [];
+
+  const renderCourseActions = (course: Course) => (
+    <DropdownMenuContent align="end">
+      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/courses/${course.id}`); }}>
+        <BookOpen className="mr-2 h-4 w-4" />Xem chi tiết
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate('/chat'); }}>
+        <MessageSquare className="mr-2 h-4 w-4" />Chat về môn này
+      </DropdownMenuItem>
+      {canManageCourses && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditTarget(course); }}>
+            <Edit className="mr-2 h-4 w-4" />Chỉnh sửa
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(course.code); toast({ title: 'Đã sao chép', description: `Mã môn ${course.code} đã được sao chép.` }); }}>
+            <Copy className="mr-2 h-4 w-4" />Sao chép mã
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleShare(course); }}>
+            <Share2 className="mr-2 h-4 w-4" />Chia sẻ
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteTarget(course); }}>
+            <Trash2 className="mr-2 h-4 w-4" />Xóa
+          </DropdownMenuItem>
+        </>
+      )}
+    </DropdownMenuContent>
+  );
 
   return (
     <div className="p-6 lg:p-8 space-y-6 page-enter">
@@ -111,18 +177,7 @@ export default function CoursesPage() {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>Xem chi tiết</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/chat')}><MessageSquare className="mr-2 h-4 w-4" />Chat về môn này</DropdownMenuItem>
-                        {canManageCourses && (
-                          <>
-                            <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa môn học', description: `Đang mở form chỉnh sửa ${course.name}.` })}><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: 'Đã sao chép', description: `Mã môn ${course.code} đã được sao chép.` }); }}><Copy className="mr-2 h-4 w-4" />Sao chép mã</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast({ title: 'Chia sẻ', description: 'Link môn học đã được sao chép.' })}><Share2 className="mr-2 h-4 w-4" />Chia sẻ</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa môn học', description: `Xác nhận xóa ${course.name}? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
+                      {renderCourseActions(course)}
                     </DropdownMenu>
                   </div>
                 </CardHeader>
@@ -165,17 +220,7 @@ export default function CoursesPage() {
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}`)}>Xem chi tiết</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/chat')}><MessageSquare className="mr-2 h-4 w-4" />Chat về môn này</DropdownMenuItem>
-                    {canManageCourses && (
-                      <>
-                        <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa môn học', description: `Đang mở form chỉnh sửa ${course.name}.` })}><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: 'Đã sao chép', description: `Mã môn ${course.code} đã được sao chép.` }); }}><Copy className="mr-2 h-4 w-4" />Sao chép mã</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa môn học', description: `Xác nhận xóa ${course.name}? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
+                  {renderCourseActions(course)}
                 </DropdownMenu>
               </div>
             )}
@@ -194,6 +239,23 @@ export default function CoursesPage() {
       )}
 
       <CreateCourseDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+      
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Xóa môn học"
+        description={`Bạn có chắc chắn muốn xóa môn "${deleteTarget?.name}"? Hành động này không thể hoàn tác. Tất cả tài liệu, quiz và dữ liệu liên quan sẽ bị xóa.`}
+        onConfirm={handleDelete}
+      />
+
+      <EditDialog
+        open={!!editTarget}
+        onOpenChange={(open) => !open && setEditTarget(null)}
+        title="Chỉnh sửa môn học"
+        description="Cập nhật thông tin môn học"
+        fields={editFields}
+        onSave={handleEdit}
+      />
     </div>
   );
 }
