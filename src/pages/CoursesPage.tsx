@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Course } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ const courseTextColors = ['text-primary', 'text-accent', 'text-warning', 'text-i
 
 export default function CoursesPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [courses, setCourses] = useState(initialCourses);
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,9 +42,7 @@ export default function CoursesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { toast } = useToast();
 
-  // Delete state
   const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
-  // Edit state
   const [editTarget, setEditTarget] = useState<Course | null>(null);
 
   const filteredCourses = courses.filter((course) => {
@@ -56,7 +56,7 @@ export default function CoursesPage() {
   const handleDelete = () => {
     if (!deleteTarget) return;
     setCourses((prev) => prev.filter((c) => c.id !== deleteTarget.id));
-    toast({ title: 'Đã xóa', description: `Môn học "${deleteTarget.name}" đã được xóa thành công.` });
+    toast({ title: t('toast.deleted'), description: `${t('courses.name')} "${deleteTarget.name}" ${t('toast.deleted').toLowerCase()}.` });
     setDeleteTarget(null);
   };
 
@@ -65,46 +65,50 @@ export default function CoursesPage() {
     setCourses((prev) => prev.map((c) =>
       c.id === editTarget.id ? { ...c, name: values.name, code: values.code, description: values.description, semester: values.semester } : c
     ));
-    toast({ title: 'Đã cập nhật', description: `Môn học "${values.name}" đã được cập nhật.` });
+    toast({ title: t('toast.updated'), description: `${t('courses.name')} "${values.name}" ${t('toast.updated').toLowerCase()}.` });
     setEditTarget(null);
   };
 
   const handleShare = (course: Course) => {
     const url = `${window.location.origin}/courses/${course.id}`;
     navigator.clipboard.writeText(url);
-    toast({ title: 'Đã sao chép link', description: `Link môn ${course.name} đã được sao chép vào clipboard.` });
+    toast({ title: t('toast.linkCopied'), description: `Link ${course.name} ${t('toast.copied').toLowerCase()}.` });
+  };
+
+  const handleCourseCreated = (newCourse: Course) => {
+    setCourses((prev) => [newCourse, ...prev]);
   };
 
   const editFields: EditField[] = editTarget ? [
-    { key: 'code', label: 'Mã môn học', value: editTarget.code, placeholder: 'VD: CS101' },
-    { key: 'name', label: 'Tên môn học', value: editTarget.name, placeholder: 'Nhập tên môn học' },
-    { key: 'description', label: 'Mô tả', value: editTarget.description, type: 'textarea', placeholder: 'Mô tả ngắn về môn học' },
-    { key: 'semester', label: 'Học kỳ', value: editTarget.semester, placeholder: 'VD: HK1-2025' },
+    { key: 'code', label: t('courses.code'), value: editTarget.code, placeholder: 'VD: CS101' },
+    { key: 'name', label: t('courses.name'), value: editTarget.name, placeholder: t('courses.name') },
+    { key: 'description', label: t('courses.description'), value: editTarget.description, type: 'textarea', placeholder: t('courses.description') },
+    { key: 'semester', label: t('courses.semester'), value: editTarget.semester, placeholder: 'VD: HK1-2025' },
   ] : [];
 
   const renderCourseActions = (course: Course) => (
     <DropdownMenuContent align="end">
       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/courses/${course.id}`); }}>
-        <BookOpen className="mr-2 h-4 w-4" />Xem chi tiết
+        <BookOpen className="mr-2 h-4 w-4" />{t('action.viewDetail')}
       </DropdownMenuItem>
       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate('/chat'); }}>
-        <MessageSquare className="mr-2 h-4 w-4" />Chat về môn này
+        <MessageSquare className="mr-2 h-4 w-4" />{t('courses.chatAbout')}
       </DropdownMenuItem>
       {canManageCourses && (
         <>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditTarget(course); }}>
-            <Edit className="mr-2 h-4 w-4" />Chỉnh sửa
+            <Edit className="mr-2 h-4 w-4" />{t('action.edit')}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(course.code); toast({ title: 'Đã sao chép', description: `Mã môn ${course.code} đã được sao chép.` }); }}>
-            <Copy className="mr-2 h-4 w-4" />Sao chép mã
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(course.code); toast({ title: t('toast.codeCopied'), description: `${course.code} ${t('toast.copied').toLowerCase()}.` }); }}>
+            <Copy className="mr-2 h-4 w-4" />{t('action.copyCode')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleShare(course); }}>
-            <Share2 className="mr-2 h-4 w-4" />Chia sẻ
+            <Share2 className="mr-2 h-4 w-4" />{t('action.share')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteTarget(course); }}>
-            <Trash2 className="mr-2 h-4 w-4" />Xóa
+            <Trash2 className="mr-2 h-4 w-4" />{t('action.delete')}
           </DropdownMenuItem>
         </>
       )}
@@ -115,15 +119,15 @@ export default function CoursesPage() {
     <div className="p-6 lg:p-8 space-y-6 page-enter">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Môn học</h1>
+          <h1 className="text-3xl font-bold">{t('courses.title')}</h1>
           <p className="text-muted-foreground mt-1">
-            {user?.role === 'admin' ? 'Quản lý tất cả môn học trong hệ thống' : user?.role === 'teacher' ? 'Môn học bạn đang giảng dạy' : 'Các môn học bạn đang theo học'}
+            {user?.role === 'admin' ? t('courses.admin.subtitle') : user?.role === 'teacher' ? t('courses.teacher.subtitle') : t('courses.student.subtitle')}
           </p>
         </div>
         {canManageCourses && (
           <Button variant="gradient" className="gap-2" onClick={() => setIsCreateOpen(true)}>
             <Plus className="h-4 w-4" />
-            Thêm môn học
+            {t('courses.create')}
           </Button>
         )}
       </div>
@@ -131,12 +135,12 @@ export default function CoursesPage() {
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Tìm kiếm môn học..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+          <Input placeholder={t('courses.search')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
         <div className="flex gap-1 bg-secondary rounded-lg p-1">
           {(['all', 'active', 'inactive'] as const).map((f) => (
             <Button key={f} variant={filter === f ? 'default' : 'ghost'} size="sm" onClick={() => setFilter(f)} className="text-xs h-7">
-              {f === 'all' ? 'Tất cả' : f === 'active' ? 'Đang mở' : 'Đã đóng'}
+              {f === 'all' ? t('courses.all') : f === 'active' ? t('courses.active') : t('courses.inactive')}
             </Button>
           ))}
         </div>
@@ -185,13 +189,13 @@ export default function CoursesPage() {
                   <CardDescription className="line-clamp-2 mb-4 text-xs">{course.description}</CardDescription>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{course.studentCount} SV</div>
-                    <div className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{course.documentCount} tài liệu</div>
+                    <div className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{course.documentCount} {t('courses.docs')}</div>
                   </div>
                   <div className="flex items-center gap-2 mt-4 pt-4 border-t">
                     <Badge variant="outline" className="text-[10px]">{course.semester}</Badge>
                     {course.enrollmentRole && (
                       <Badge variant={course.enrollmentRole === 'teacher' ? 'default' : 'secondary'} className="text-[10px]">
-                        {course.enrollmentRole === 'teacher' ? 'Giảng viên' : 'Sinh viên'}
+                        {course.enrollmentRole === 'teacher' ? t('role.teacher') : t('role.student')}
                       </Badge>
                     )}
                   </div>
@@ -233,26 +237,26 @@ export default function CoursesPage() {
           <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
             <BookOpen className="h-8 w-8 text-muted-foreground/50" />
           </div>
-          <h3 className="text-lg font-medium">Không tìm thấy môn học</h3>
-          <p className="text-muted-foreground text-sm mt-1">Thử tìm kiếm với từ khóa khác</p>
+          <h3 className="text-lg font-medium">{t('courses.notFound')}</h3>
+          <p className="text-muted-foreground text-sm mt-1">{t('courses.notFoundDesc')}</p>
         </div>
       )}
 
-      <CreateCourseDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+      <CreateCourseDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} onCourseCreated={handleCourseCreated} />
       
       <ConfirmDeleteDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Xóa môn học"
-        description={`Bạn có chắc chắn muốn xóa môn "${deleteTarget?.name}"? Hành động này không thể hoàn tác. Tất cả tài liệu, quiz và dữ liệu liên quan sẽ bị xóa.`}
+        title={t('confirm.deleteCourse')}
+        description={`${t('confirm.sure')} "${deleteTarget?.name}"? ${t('confirm.irreversible')}`}
         onConfirm={handleDelete}
       />
 
       <EditDialog
         open={!!editTarget}
         onOpenChange={(open) => !open && setEditTarget(null)}
-        title="Chỉnh sửa môn học"
-        description="Cập nhật thông tin môn học"
+        title={`${t('action.edit')} ${t('courses.title').toLowerCase()}`}
+        description={t('toast.updated')}
         fields={editFields}
         onSave={handleEdit}
       />

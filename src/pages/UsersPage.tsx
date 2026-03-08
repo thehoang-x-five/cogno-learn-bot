@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { User, UserRole } from '@/types';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,13 +35,8 @@ const initialUsers: User[] = [
   { id: '6', email: 'student3@edu.vn', fullName: 'Võ Văn Viên', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=student3', role: 'student', isActive: false, createdAt: new Date(Date.now() - 30 * 86400000).toISOString() },
 ];
 
-const roleConfig: Record<UserRole, { label: string; icon: React.ElementType; className: string }> = {
-  admin: { label: 'Quản trị viên', icon: Shield, className: 'bg-destructive/10 text-destructive border-destructive/20' },
-  teacher: { label: 'Giáo viên', icon: BookOpen, className: 'bg-primary/10 text-primary border-primary/20' },
-  student: { label: 'Sinh viên', icon: GraduationCap, className: 'bg-accent/10 text-accent border-accent/20' },
-};
-
 export default function UsersPage() {
+  const { t, language } = useLanguage();
   const [users, setUsers] = useState(initialUsers);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -52,6 +48,12 @@ export default function UsersPage() {
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [editTarget, setEditTarget] = useState<User | null>(null);
   const [roleChangeTarget, setRoleChangeTarget] = useState<User | null>(null);
+
+  const roleConfig: Record<UserRole, { label: string; icon: React.ElementType; className: string }> = {
+    admin: { label: t('role.admin'), icon: Shield, className: 'bg-destructive/10 text-destructive border-destructive/20' },
+    teacher: { label: t('role.teacher'), icon: BookOpen, className: 'bg-primary/10 text-primary border-primary/20' },
+    student: { label: t('role.student'), icon: GraduationCap, className: 'bg-accent/10 text-accent border-accent/20' },
+  };
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch = user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -70,7 +72,7 @@ export default function UsersPage() {
 
   const handleAddUser = () => {
     if (!newUser.fullName || !newUser.email) {
-      toast({ title: 'Thiếu thông tin', description: 'Vui lòng nhập đầy đủ họ tên và email.', variant: 'destructive' });
+      toast({ title: t('users.missingInfo'), description: t('users.fillRequired'), variant: 'destructive' });
       return;
     }
     const user: User = {
@@ -85,13 +87,13 @@ export default function UsersPage() {
     setUsers((prev) => [...prev, user]);
     setIsAddDialogOpen(false);
     setNewUser({ email: '', fullName: '', role: 'student' });
-    toast({ title: 'Đã thêm người dùng', description: `${user.fullName} đã được thêm vào hệ thống.` });
+    toast({ title: t('toast.added'), description: `${user.fullName} ${t('toast.addedToSystem')}.` });
   };
 
   const handleDelete = () => {
     if (!deleteTarget) return;
     setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-    toast({ title: 'Đã xóa', description: `Người dùng "${deleteTarget.fullName}" đã được xóa.` });
+    toast({ title: t('toast.deleted'), description: `${t('users.user')} "${deleteTarget.fullName}" ${t('toast.deleted').toLowerCase()}.` });
     setDeleteTarget(null);
   };
 
@@ -100,65 +102,65 @@ export default function UsersPage() {
     setUsers((prev) => prev.map((u) =>
       u.id === editTarget.id ? { ...u, fullName: values.fullName, email: values.email } : u
     ));
-    toast({ title: 'Đã cập nhật', description: `Thông tin "${values.fullName}" đã được cập nhật.` });
+    toast({ title: t('toast.updated'), description: `"${values.fullName}" ${t('toast.updated').toLowerCase()}.` });
     setEditTarget(null);
   };
 
   const handleRoleChange = (userId: string, newRole: UserRole) => {
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
     const user = users.find((u) => u.id === userId);
-    toast({ title: 'Đã đổi vai trò', description: `${user?.fullName} đã được chuyển sang ${roleConfig[newRole].label}.` });
+    toast({ title: t('toast.roleChanged'), description: `${user?.fullName} → ${roleConfig[newRole].label}.` });
     setRoleChangeTarget(null);
   };
 
   const editFields: EditField[] = editTarget ? [
-    { key: 'fullName', label: 'Họ và tên', value: editTarget.fullName },
-    { key: 'email', label: 'Email', value: editTarget.email, type: 'email' },
+    { key: 'fullName', label: t('users.fullName'), value: editTarget.fullName },
+    { key: 'email', label: t('users.email'), value: editTarget.email, type: 'email' },
   ] : [];
 
   return (
     <div className="p-6 lg:p-8 space-y-6 page-enter">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Quản lý người dùng</h1>
-          <p className="text-muted-foreground mt-1">Quản lý tài khoản và phân quyền người dùng trong hệ thống</p>
+          <h1 className="text-3xl font-bold">{t('users.title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('users.subtitle')}</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
               <UserPlus className="h-4 w-4" />
-              Thêm người dùng
+              {t('users.addUser')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Thêm người dùng mới</DialogTitle>
-              <DialogDescription>Tạo tài khoản mới cho người dùng. Họ sẽ nhận được email xác nhận.</DialogDescription>
+              <DialogTitle>{t('users.addUserTitle')}</DialogTitle>
+              <DialogDescription>{t('users.addUserDesc')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Họ và tên</Label>
+                <Label htmlFor="fullName">{t('users.fullName')}</Label>
                 <Input id="fullName" placeholder="Nguyễn Văn A" value={newUser.fullName} onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('users.email')}</Label>
                 <Input id="email" type="email" placeholder="email@edu.vn" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="role">Vai trò</Label>
+                <Label htmlFor="role">{t('users.role')}</Label>
                 <Select value={newUser.role} onValueChange={(value: UserRole) => setNewUser({ ...newUser, role: value })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="student">Sinh viên</SelectItem>
-                    <SelectItem value="teacher">Giáo viên</SelectItem>
-                    <SelectItem value="admin">Quản trị viên</SelectItem>
+                    <SelectItem value="student">{t('role.student')}</SelectItem>
+                    <SelectItem value="teacher">{t('role.teacher')}</SelectItem>
+                    <SelectItem value="admin">{t('role.admin')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Hủy</Button>
-              <Button onClick={handleAddUser}>Thêm người dùng</Button>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t('action.cancel')}</Button>
+              <Button onClick={handleAddUser}>{t('users.addUser')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -167,11 +169,11 @@ export default function UsersPage() {
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-5 stagger-children">
         {[
-          { label: 'Tổng người dùng', value: stats.total, icon: Users, color: 'text-muted-foreground', bg: 'bg-muted' },
-          { label: 'Quản trị viên', value: stats.admins, icon: Shield, color: 'text-destructive', bg: 'bg-destructive/10' },
-          { label: 'Giáo viên', value: stats.teachers, icon: BookOpen, color: 'text-primary', bg: 'bg-primary/10' },
-          { label: 'Sinh viên', value: stats.students, icon: GraduationCap, color: 'text-accent', bg: 'bg-accent/10' },
-          { label: 'Đang hoạt động', value: stats.active, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
+          { label: t('users.totalUsers'), value: stats.total, icon: Users, color: 'text-muted-foreground', bg: 'bg-muted' },
+          { label: t('role.admin'), value: stats.admins, icon: Shield, color: 'text-destructive', bg: 'bg-destructive/10' },
+          { label: t('role.teacher'), value: stats.teachers, icon: BookOpen, color: 'text-primary', bg: 'bg-primary/10' },
+          { label: t('role.student'), value: stats.students, icon: GraduationCap, color: 'text-accent', bg: 'bg-accent/10' },
+          { label: t('users.activeUsers'), value: stats.active, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
         ].map((stat) => (
           <Card key={stat.label}>
             <CardHeader className="pb-2">
@@ -193,23 +195,23 @@ export default function UsersPage() {
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Tìm kiếm theo tên, email..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+          <Input placeholder={t('users.searchUsers')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-48"><SelectValue placeholder="Vai trò" /></SelectTrigger>
+          <SelectTrigger className="w-48"><SelectValue placeholder={t('users.role')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tất cả vai trò</SelectItem>
-            <SelectItem value="admin">Quản trị viên</SelectItem>
-            <SelectItem value="teacher">Giáo viên</SelectItem>
-            <SelectItem value="student">Sinh viên</SelectItem>
+            <SelectItem value="all">{t('users.allRoles')}</SelectItem>
+            <SelectItem value="admin">{t('role.admin')}</SelectItem>
+            <SelectItem value="teacher">{t('role.teacher')}</SelectItem>
+            <SelectItem value="student">{t('role.student')}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-48"><SelectValue placeholder="Trạng thái" /></SelectTrigger>
+          <SelectTrigger className="w-48"><SelectValue placeholder={t('users.statusLabel')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tất cả trạng thái</SelectItem>
-            <SelectItem value="active">Đang hoạt động</SelectItem>
-            <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+            <SelectItem value="all">{t('users.allStatus')}</SelectItem>
+            <SelectItem value="active">{t('users.activeStatus')}</SelectItem>
+            <SelectItem value="inactive">{t('users.inactiveStatus')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -219,11 +221,11 @@ export default function UsersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Người dùng</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Vai trò</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Ngày tạo</TableHead>
+              <TableHead>{t('users.user')}</TableHead>
+              <TableHead>{t('users.email')}</TableHead>
+              <TableHead>{t('users.role')}</TableHead>
+              <TableHead>{t('users.statusLabel')}</TableHead>
+              <TableHead>{t('users.createdAt')}</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
@@ -258,17 +260,17 @@ export default function UsersPage() {
                     {user.isActive ? (
                       <Badge variant="outline" className="gap-1 text-[10px] bg-accent/10 text-accent border-accent/20">
                         <CheckCircle2 className="h-3 w-3" />
-                        Hoạt động
+                        {t('users.active')}
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="gap-1 text-[10px] bg-muted text-muted-foreground">
                         <XCircle className="h-3 w-3" />
-                        Ngừng
+                        {t('users.inactive')}
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {new Date(user.createdAt).toLocaleDateString('vi-VN')}
+                    {new Date(user.createdAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -279,14 +281,14 @@ export default function UsersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setEditTarget(user)}>
-                          <Edit className="mr-2 h-4 w-4" />Chỉnh sửa
+                          <Edit className="mr-2 h-4 w-4" />{t('action.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setRoleChangeTarget(user)}>
-                          <Shield className="mr-2 h-4 w-4" />Đổi vai trò
+                          <Shield className="mr-2 h-4 w-4" />{t('action.changeRole')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive" onClick={() => setDeleteTarget(user)}>
-                          <Trash2 className="mr-2 h-4 w-4" />Xóa
+                          <Trash2 className="mr-2 h-4 w-4" />{t('action.delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -303,24 +305,24 @@ export default function UsersPage() {
           <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
             <Users className="h-8 w-8 text-muted-foreground/50" />
           </div>
-          <h3 className="text-lg font-medium">Không tìm thấy người dùng</h3>
-          <p className="text-muted-foreground text-sm mt-1">Thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc</p>
+          <h3 className="text-lg font-medium">{t('users.notFound')}</h3>
+          <p className="text-muted-foreground text-sm mt-1">{t('users.notFoundDesc')}</p>
         </div>
       )}
 
       <ConfirmDeleteDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Xóa người dùng"
-        description={`Bạn có chắc chắn muốn xóa "${deleteTarget?.fullName}"? Hành động này không thể hoàn tác.`}
+        title={t('confirm.deleteUser')}
+        description={`${t('confirm.sure')} "${deleteTarget?.fullName}"? ${t('confirm.irreversible')}`}
         onConfirm={handleDelete}
       />
 
       <EditDialog
         open={!!editTarget}
         onOpenChange={(open) => !open && setEditTarget(null)}
-        title="Chỉnh sửa người dùng"
-        description="Cập nhật thông tin người dùng"
+        title={`${t('action.edit')} ${t('users.user').toLowerCase()}`}
+        description={t('toast.updated')}
         fields={editFields}
         onSave={handleEditSave}
       />
@@ -329,9 +331,9 @@ export default function UsersPage() {
       <Dialog open={!!roleChangeTarget} onOpenChange={(open) => !open && setRoleChangeTarget(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Đổi vai trò</DialogTitle>
+            <DialogTitle>{t('users.changeRoleTitle')}</DialogTitle>
             <DialogDescription>
-              Chọn vai trò mới cho {roleChangeTarget?.fullName}
+              {t('users.changeRoleDesc')} {roleChangeTarget?.fullName}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-4">
@@ -350,10 +352,10 @@ export default function UsersPage() {
                   <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${config.className}`}>
                     <RIcon className="h-4 w-4" />
                   </div>
-                  <div className="text-left">
-                    <p className="font-medium text-sm">{config.label}</p>
-                  </div>
-                  {isSelected && <Badge className="ml-auto text-[10px]">Hiện tại</Badge>}
+                  <span className="font-medium text-sm">{config.label}</span>
+                  {isSelected && (
+                    <Badge variant="outline" className="ml-auto text-[10px]">{t('users.selected')}</Badge>
+                  )}
                 </button>
               );
             })}
