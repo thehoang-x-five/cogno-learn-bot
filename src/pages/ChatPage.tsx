@@ -345,7 +345,7 @@ export default function ChatPage() {
             {isTyping && (
               <div className="flex gap-4 message-appear">
                 <Avatar className="h-8 w-8"><AvatarFallback className="bg-accent text-accent-foreground"><Bot className="h-4 w-4" /></AvatarFallback></Avatar>
-                <div className="bg-chat-assistant rounded-2xl rounded-tl-sm px-4 py-3">
+                <div className="bg-secondary dark:bg-secondary/80 text-foreground rounded-2xl rounded-tl-sm px-4 py-3">
                   <div className="flex gap-1.5">
                     <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground" />
                     <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground" />
