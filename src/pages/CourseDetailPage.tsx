@@ -102,14 +102,14 @@ export default function CourseDetailPage() {
   const [deleteCourseOpen, setDeleteCourseOpen] = useState(false);
 
   const courseEditFields: EditField[] = [
-    { key: 'code', label: language === 'vi' ? 'Mã môn học' : 'Course Code', value: course.code },
-    { key: 'name', label: language === 'vi' ? 'Tên môn học' : 'Course Name', value: course.name },
-    { key: 'description', label: language === 'vi' ? 'Mô tả' : 'Description', value: course.description, type: 'textarea' },
-    { key: 'semester', label: language === 'vi' ? 'Học kỳ' : 'Semester', value: course.semester },
+    { key: 'code', label: t('courses.code'), value: course.code },
+    { key: 'name', label: t('courses.name'), value: course.name },
+    { key: 'description', label: t('courses.description'), value: course.description, type: 'textarea' },
+    { key: 'semester', label: t('courses.semester'), value: course.semester },
   ];
 
   const quizEditFields: EditField[] = editQuizTarget ? [
-    { key: 'title', label: language === 'vi' ? 'Tên quiz' : 'Quiz Name', value: editQuizTarget.title },
+    { key: 'title', label: t('quiz.quizName'), value: editQuizTarget.title },
   ] : [];
 
   // File upload handlers
