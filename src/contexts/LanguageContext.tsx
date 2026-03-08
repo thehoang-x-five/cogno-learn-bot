@@ -48,6 +48,7 @@ const translations: Record<string, Record<Language, string>> = {
   'action.sendMessage': { vi: 'Gửi tin nhắn', en: 'Send Message' },
   'action.changeRole': { vi: 'Đổi vai trò', en: 'Change Role' },
   'action.removeFromCourse': { vi: 'Xóa khỏi môn', en: 'Remove from Course' },
+  'action.close': { vi: 'Đóng', en: 'Close' },
 
   // Dashboard
   'dashboard.title': { vi: 'Dashboard', en: 'Dashboard' },
@@ -64,12 +65,19 @@ const translations: Record<string, Record<Language, string>> = {
   'admin.processedDocs': { vi: 'Tài liệu đã xử lý', en: 'Processed Documents' },
   'admin.conversations': { vi: 'Cuộc hội thoại', en: 'Conversations' },
   'admin.systemHealth': { vi: 'Sức khỏe hệ thống', en: 'System Health' },
+  'admin.serviceStatus': { vi: 'Trạng thái các dịch vụ', en: 'Service Status' },
   'admin.recentRegistrations': { vi: 'Đăng ký gần đây', en: 'Recent Registrations' },
-  'admin.usageByDay': { vi: 'Lượt sử dụng theo ngày', en: 'Daily Usage' },
-  'admin.userDistribution': { vi: 'Phân bố người dùng', en: 'User Distribution' },
-  'admin.aiUsage': { vi: 'Sử dụng AI', en: 'AI Usage' },
-  'admin.online': { vi: 'Hoạt động', en: 'Online' },
+  'admin.newUsersJoined': { vi: 'Người dùng mới tham gia hệ thống', en: 'New users joined the system' },
+  'admin.usageByDay': { vi: 'Hoạt động theo ngày', en: 'Daily Activity' },
+  'admin.usageByDayDesc': { vi: 'Số lượng chat & quiz trong tuần', en: 'Chats & quizzes this week' },
+  'admin.userDistribution': { vi: 'Phân bổ người dùng', en: 'User Distribution' },
+  'admin.aiUsage': { vi: 'Sử dụng Token AI', en: 'AI Token Usage' },
+  'admin.aiUsageDesc': { vi: 'Thống kê token tháng này', en: 'Token stats this month' },
+  'admin.online': { vi: 'Online', en: 'Online' },
   'admin.degraded': { vi: 'Chậm', en: 'Degraded' },
+  'admin.traffic': { vi: 'Lưu lượng truy cập hôm nay', en: 'Today\'s Traffic' },
+  'admin.comparedLastMonth': { vi: 'so với tháng trước', en: 'compared to last month' },
+  'admin.estimatedCost': { vi: 'Chi phí ước tính', en: 'Estimated Cost' },
 
   // Teacher Dashboard
   'teacher.coursesTaught': { vi: 'Môn học đang dạy', en: 'Courses Teaching' },
@@ -77,24 +85,35 @@ const translations: Record<string, Record<Language, string>> = {
   'teacher.docsUploaded': { vi: 'Tài liệu đã upload', en: 'Documents Uploaded' },
   'teacher.quizzesCreated': { vi: 'Quiz đã tạo', en: 'Quizzes Created' },
   'teacher.myCourses': { vi: 'Môn học của tôi', en: 'My Courses' },
-  'teacher.pendingDocs': { vi: 'Tài liệu chờ xử lý', en: 'Pending Documents' },
+  'teacher.myCoursesDesc': { vi: 'Tổng quan hoạt động các môn đang dạy', en: 'Overview of courses you\'re teaching' },
+  'teacher.pendingDocs': { vi: 'Tài liệu đang xử lý', en: 'Processing Documents' },
   'teacher.lowPerformance': { vi: 'Sinh viên cần hỗ trợ', en: 'Students Needing Support' },
-  'teacher.pendingQuestions': { vi: 'câu hỏi chờ', en: 'pending questions' },
+  'teacher.lowPerformanceDesc': { vi: 'Sinh viên có điểm quiz dưới 50%', en: 'Students with quiz scores below 50%' },
+  'teacher.pendingQuestions': { vi: 'câu hỏi mới', en: 'new questions' },
+  'teacher.uploadNewDoc': { vi: 'Upload tài liệu mới', en: 'Upload New Document' },
+  'teacher.waitingProcess': { vi: 'Chờ xử lý', en: 'Waiting' },
 
   // Student Dashboard
   'student.courses': { vi: 'Môn học', en: 'Courses' },
   'student.questionsAsked': { vi: 'Câu hỏi đã hỏi', en: 'Questions Asked' },
   'student.quizCompleted': { vi: 'Quiz hoàn thành', en: 'Quiz Completed' },
   'student.avgScore': { vi: 'Điểm trung bình', en: 'Average Score' },
-  'student.myCourses': { vi: 'Môn học của tôi', en: 'My Courses' },
+  'student.progress': { vi: 'Tiến độ học tập', en: 'Learning Progress' },
+  'student.progressDesc': { vi: 'Các môn đang theo học', en: 'Courses you\'re enrolled in' },
+  'student.recentResults': { vi: 'Kết quả Quiz gần đây', en: 'Recent Quiz Results' },
+  'student.recentResultsDesc': { vi: 'Lịch sử làm bài', en: 'Quiz history' },
+  'student.studyStreak': { vi: 'Chuỗi học liên tiếp', en: 'Study Streak' },
+  'student.streakRecord': { vi: 'kỷ lục', en: 'record' },
+  'student.days': { vi: 'ngày', en: 'days' },
+  'student.askAINow': { vi: 'Hỏi AI ngay!', en: 'Ask AI now!' },
+  'student.askAIDesc': { vi: 'Đặt câu hỏi về bất kỳ môn học nào', en: 'Ask questions about any course' },
+  'student.chatWithAI': { vi: 'Chat với AI', en: 'Chat with AI' },
   'student.upcomingQuizzes': { vi: 'Quiz sắp tới', en: 'Upcoming Quizzes' },
-  'student.recentResults': { vi: 'Kết quả gần đây', en: 'Recent Results' },
-  'student.studyStreak': { vi: 'Chuỗi học tập', en: 'Study Streak' },
-  'student.achievements': { vi: 'Thành tích', en: 'Achievements' },
-  'student.aiSuggestions': { vi: 'Gợi ý từ AI', en: 'AI Suggestions' },
-  'student.progress': { vi: 'Tiến độ', en: 'Progress' },
-  'student.continueStudy': { vi: 'Tiếp tục học', en: 'Continue Studying' },
-  'student.startQuiz': { vi: 'Làm bài', en: 'Take Quiz' },
+  'student.examSchedule': { vi: 'Lịch thi sắp tới', en: 'Upcoming Exams' },
+  'student.daysLeft': { vi: 'Còn', en: '' },
+  'student.daysLeftSuffix': { vi: 'ngày', en: 'days left' },
+  'student.room': { vi: 'Phòng', en: 'Room' },
+  'student.takeQuiz': { vi: 'Làm bài', en: 'Take Quiz' },
 
   // Courses
   'courses.title': { vi: 'Môn học', en: 'Courses' },
@@ -111,6 +130,15 @@ const translations: Record<string, Record<Language, string>> = {
   'courses.chatAbout': { vi: 'Chat về môn này', en: 'Chat about this course' },
   'courses.lecturer': { vi: 'Giảng viên', en: 'Lecturer' },
   'courses.docs': { vi: 'tài liệu', en: 'documents' },
+  'courses.createTitle': { vi: 'Tạo môn học mới', en: 'Create New Course' },
+  'courses.createDesc': { vi: 'Thêm môn học mới vào hệ thống', en: 'Add a new course to the system' },
+  'courses.code': { vi: 'Mã môn học', en: 'Course Code' },
+  'courses.name': { vi: 'Tên môn học', en: 'Course Name' },
+  'courses.description': { vi: 'Mô tả', en: 'Description' },
+  'courses.semester': { vi: 'Học kỳ', en: 'Semester' },
+  'courses.status': { vi: 'Trạng thái', en: 'Status' },
+  'courses.statusDesc': { vi: 'Mở cho sinh viên đăng ký', en: 'Open for student enrollment' },
+  'courses.createButton': { vi: 'Tạo môn học', en: 'Create Course' },
 
   // Course Detail
   'courseDetail.settings': { vi: 'Cài đặt', en: 'Settings' },
@@ -157,6 +185,9 @@ const translations: Record<string, Record<Language, string>> = {
   'courseDetail.questions': { vi: 'câu hỏi', en: 'questions' },
   'courseDetail.createdOn': { vi: 'Tạo ngày', en: 'Created on' },
   'courseDetail.quizAvailable': { vi: 'quiz có sẵn', en: 'quizzes available' },
+  'courseDetail.viewDetails': { vi: 'Xem chi tiết', en: 'View Details' },
+  'courseDetail.sendMessage': { vi: 'Gửi tin nhắn', en: 'Send Message' },
+  'courseDetail.removeStudent': { vi: 'Xóa khỏi môn học', en: 'Remove from Course' },
 
   // Documents
   'docs.title': { vi: 'Tài liệu', en: 'Documents' },
@@ -182,6 +213,8 @@ const translations: Record<string, Record<Language, string>> = {
   'docs.statusError': { vi: 'Lỗi', en: 'Error' },
   'docs.notFound': { vi: 'Không tìm thấy tài liệu', en: 'No documents found' },
   'docs.notFoundDesc': { vi: 'Thử tìm kiếm với từ khóa khác hoặc chọn môn học khác', en: 'Try a different keyword or course filter' },
+  'docs.unsupportedFormat': { vi: 'Định dạng không hỗ trợ', en: 'Unsupported format' },
+  'docs.notSupported': { vi: 'không phải PDF, DOCX hoặc TXT', en: 'is not PDF, DOCX or TXT' },
 
   // Quizzes
   'quiz.title': { vi: 'Quiz', en: 'Quizzes' },
@@ -207,6 +240,11 @@ const translations: Record<string, Record<Language, string>> = {
   'quiz.aiCreated': { vi: 'Quiz AI đã tạo', en: 'AI-Created Quizzes' },
   'quiz.resultByQuiz': { vi: 'Kết quả theo Quiz', en: 'Results by Quiz' },
   'quiz.explanation': { vi: 'Giải thích', en: 'Explanation' },
+  'quiz.questionNum': { vi: 'Câu', en: 'Question' },
+  'quiz.noQuizzes': { vi: 'Chưa có quiz nào', en: 'No quizzes yet' },
+  'quiz.noQuizzesDesc': { vi: 'Tạo quiz mới để bắt đầu', en: 'Create a new quiz to get started' },
+  'quiz.noAttempts': { vi: 'Chưa có lượt làm nào', en: 'No attempts yet' },
+  'quiz.noAttemptsDesc': { vi: 'Hoàn thành quiz để xem lịch sử', en: 'Complete a quiz to see history' },
 
   // Users
   'users.title': { vi: 'Quản lý người dùng', en: 'User Management' },
@@ -226,10 +264,16 @@ const translations: Record<string, Record<Language, string>> = {
   'users.allStatus': { vi: 'Tất cả trạng thái', en: 'All Status' },
   'users.active': { vi: 'Hoạt động', en: 'Active' },
   'users.inactive': { vi: 'Ngừng', en: 'Inactive' },
+  'users.activeStatus': { vi: 'Đang hoạt động', en: 'Active' },
+  'users.inactiveStatus': { vi: 'Ngừng hoạt động', en: 'Inactive' },
   'users.notFound': { vi: 'Không tìm thấy người dùng', en: 'No users found' },
   'users.notFoundDesc': { vi: 'Thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc', en: 'Try a different search or filter' },
   'users.changeRoleTitle': { vi: 'Đổi vai trò', en: 'Change Role' },
   'users.changeRoleDesc': { vi: 'Chọn vai trò mới cho', en: 'Select a new role for' },
+  'users.missingInfo': { vi: 'Thiếu thông tin', en: 'Missing Information' },
+  'users.fillRequired': { vi: 'Vui lòng nhập đầy đủ họ tên và email.', en: 'Please fill in full name and email.' },
+  'users.user': { vi: 'Người dùng', en: 'User' },
+  'users.selected': { vi: 'Đang chọn', en: 'Selected' },
 
   // Chat
   'chat.newConversation': { vi: 'Cuộc trò chuyện mới', en: 'New Conversation' },
@@ -239,6 +283,8 @@ const translations: Record<string, Record<Language, string>> = {
   'chat.welcomeDesc': { vi: 'Hãy hỏi tôi bất kỳ câu hỏi nào về môn học của bạn. Tôi sẽ trả lời dựa trên tài liệu đã được upload.', en: 'Ask me any question about your course. I\'ll answer based on uploaded documents.' },
   'chat.attachFile': { vi: 'Đính kèm file', en: 'Attach file' },
   'chat.attachDesc': { vi: 'Kéo thả file vào ô chat hoặc sử dụng trang Tài liệu để upload.', en: 'Drag & drop files or use the Documents page to upload.' },
+  'chat.created': { vi: 'Cuộc trò chuyện mới đã được tạo.', en: 'New conversation created.' },
+  'chat.page': { vi: 'tr.', en: 'p.' },
 
   // Settings
   'settings.title': { vi: 'Cài đặt hệ thống', en: 'System Settings' },
@@ -255,6 +301,28 @@ const translations: Record<string, Record<Language, string>> = {
   'settings.themeDark': { vi: 'Tối', en: 'Dark' },
   'settings.langVi': { vi: 'Tiếng Việt', en: 'Vietnamese' },
   'settings.langEn': { vi: 'English', en: 'English' },
+  'settings.saved': { vi: 'Đã lưu cài đặt', en: 'Settings Saved' },
+  'settings.savedDesc': { vi: 'Các thay đổi đã được áp dụng thành công.', en: 'Changes have been applied successfully.' },
+  'settings.resetDone': { vi: 'Đã khôi phục mặc định', en: 'Reset to Default' },
+  'settings.resetDoneDesc': { vi: 'Cài đặt đã được đặt lại về giá trị mặc định.', en: 'Settings have been reset to default values.' },
+  'settings.systemInfo': { vi: 'Thông tin hệ thống', en: 'System Information' },
+  'settings.systemInfoDesc': { vi: 'Cấu hình thông tin cơ bản của hệ thống', en: 'Basic system configuration' },
+  'settings.siteName': { vi: 'Tên hệ thống', en: 'System Name' },
+  'settings.siteDescription': { vi: 'Mô tả', en: 'Description' },
+  'settings.systemStatus': { vi: 'Trạng thái hệ thống', en: 'System Status' },
+  'settings.systemStatusDesc': { vi: 'Quản lý trạng thái hoạt động của hệ thống', en: 'Manage system operation status' },
+  'settings.maintenanceMode': { vi: 'Chế độ bảo trì', en: 'Maintenance Mode' },
+  'settings.maintenanceDesc': { vi: 'Tạm ngưng truy cập hệ thống để bảo trì', en: 'Temporarily suspend system access for maintenance' },
+  'settings.running': { vi: 'Hoạt động', en: 'Running' },
+  'settings.llmConfig': { vi: 'Cấu hình LLM', en: 'LLM Configuration' },
+  'settings.llmConfigDesc': { vi: 'Chọn và cấu hình mô hình ngôn ngữ lớn', en: 'Select and configure large language model' },
+  'settings.provider': { vi: 'Nhà cung cấp', en: 'Provider' },
+  'settings.model': { vi: 'Model', en: 'Model' },
+  'settings.apiKeySecure': { vi: 'API key được mã hóa và lưu trữ an toàn', en: 'API key is encrypted and stored securely' },
+  'settings.temperature': { vi: 'Temperature', en: 'Temperature' },
+  'settings.temperatureDesc': { vi: 'Độ sáng tạo của câu trả lời (0-2)', en: 'Creativity of responses (0-2)' },
+  'settings.maxTokens': { vi: 'Max Tokens', en: 'Max Tokens' },
+  'settings.maxTokensDesc': { vi: 'Độ dài tối đa của câu trả lời', en: 'Maximum response length' },
 
   // Profile
   'profile.title': { vi: 'Tài khoản', en: 'Account' },
@@ -337,6 +405,11 @@ const translations: Record<string, Record<Language, string>> = {
   'toast.linkCopied': { vi: 'Đã sao chép link', en: 'Link Copied' },
   'toast.uploading': { vi: 'Đang tải lên', en: 'Uploading' },
   'toast.processDone': { vi: 'Đã xử lý xong', en: 'Processing Complete' },
+  'toast.roleChanged': { vi: 'Đã đổi vai trò', en: 'Role Changed' },
+  'toast.codeCopied': { vi: 'Đã sao chép mã', en: 'Code Copied' },
+  'toast.addedToSystem': { vi: 'đã được thêm vào hệ thống', en: 'has been added to the system' },
+  'toast.readyToUse': { vi: 'đã sẵn sàng sử dụng', en: 'is ready to use' },
+  'toast.beingProcessed': { vi: 'đang được tải lên và xử lý', en: 'is being uploaded and processed' },
 
   // Confirm dialogs
   'confirm.deleteCourse': { vi: 'Xóa môn học', en: 'Delete Course' },
@@ -346,6 +419,8 @@ const translations: Record<string, Record<Language, string>> = {
   'confirm.deleteStudent': { vi: 'Xóa sinh viên khỏi môn', en: 'Remove Student' },
   'confirm.deleteConversation': { vi: 'Xóa cuộc trò chuyện', en: 'Delete Conversation' },
   'confirm.irreversible': { vi: 'Hành động này không thể hoàn tác.', en: 'This action cannot be undone.' },
+  'confirm.sure': { vi: 'Bạn có chắc chắn muốn xóa', en: 'Are you sure you want to delete' },
+  'confirm.button': { vi: 'Xác nhận xóa', en: 'Confirm Delete' },
 
   // Status
   'status.ready': { vi: 'Sẵn sàng', en: 'Ready' },
@@ -359,6 +434,43 @@ const translations: Record<string, Record<Language, string>> = {
   'time.minAgo': { vi: 'phút trước', en: 'min ago' },
   'time.hourAgo': { vi: 'giờ trước', en: 'hours ago' },
   'time.dayAgo': { vi: 'ngày trước', en: 'days ago' },
+
+  // Quiz Result
+  'quizResult.title': { vi: 'Kết quả Quiz', en: 'Quiz Results' },
+  'quizResult.completed': { vi: 'Hoàn thành', en: 'Completed' },
+  'quizResult.score': { vi: 'Điểm số', en: 'Score' },
+  'quizResult.time': { vi: 'Thời gian', en: 'Time' },
+  'quizResult.correct': { vi: 'Đúng', en: 'Correct' },
+  'quizResult.wrong': { vi: 'Sai', en: 'Wrong' },
+  'quizResult.reviewAnswers': { vi: 'Xem lại đáp án', en: 'Review Answers' },
+  'quizResult.yourAnswer': { vi: 'Câu trả lời của bạn', en: 'Your Answer' },
+  'quizResult.correctAnswer': { vi: 'Đáp án đúng', en: 'Correct Answer' },
+
+  // Quiz Create Dialog
+  'quizCreate.title': { vi: 'Tạo Quiz bằng AI', en: 'Create Quiz with AI' },
+  'quizCreate.desc': { vi: 'AI sẽ tự động tạo câu hỏi từ tài liệu môn học', en: 'AI will auto-generate questions from course documents' },
+  'quizCreate.quizName': { vi: 'Tên Quiz', en: 'Quiz Name' },
+  'quizCreate.course': { vi: 'Môn học', en: 'Course' },
+  'quizCreate.chapter': { vi: 'Chương / Phạm vi', en: 'Chapter / Scope' },
+  'quizCreate.numQuestions': { vi: 'Số câu hỏi', en: 'Number of Questions' },
+  'quizCreate.difficulty': { vi: 'Độ khó', en: 'Difficulty' },
+  'quizCreate.easy': { vi: 'Dễ', en: 'Easy' },
+  'quizCreate.medium': { vi: 'Trung bình', en: 'Medium' },
+  'quizCreate.hard': { vi: 'Khó', en: 'Hard' },
+  'quizCreate.mixed': { vi: 'Hỗn hợp', en: 'Mixed' },
+  'quizCreate.generating': { vi: 'AI đang tạo câu hỏi...', en: 'AI is generating questions...' },
+  'quizCreate.create': { vi: 'Tạo Quiz', en: 'Create Quiz' },
+
+  // Edit Dialog
+  'edit.title': { vi: 'Chỉnh sửa', en: 'Edit' },
+  'edit.saveChanges': { vi: 'Lưu thay đổi', en: 'Save Changes' },
+
+  // Preview Dialog
+  'preview.title': { vi: 'Xem trước tài liệu', en: 'Document Preview' },
+  'preview.type': { vi: 'Loại file', en: 'File Type' },
+  'preview.size': { vi: 'Kích thước', en: 'Size' },
+  'preview.content': { vi: 'Nội dung', en: 'Content' },
+  'preview.sampleContent': { vi: 'Nội dung mẫu của tài liệu sẽ được hiển thị tại đây. Trong phiên bản thực, nội dung sẽ được trích xuất từ file PDF/DOCX/TXT.', en: 'Sample document content will be displayed here. In production, content will be extracted from PDF/DOCX/TXT files.' },
 };
 
 interface LanguageContextType {

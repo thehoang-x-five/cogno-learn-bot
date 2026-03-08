@@ -10,13 +10,19 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
+import { Course } from '@/types';
 
 interface CreateCourseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCourseCreated?: (course: Course) => void;
 }
 
-export default function CreateCourseDialog({ open, onOpenChange }: CreateCourseDialogProps) {
+export default function CreateCourseDialog({ open, onOpenChange, onCourseCreated }: CreateCourseDialogProps) {
+  const { t } = useLanguage();
+  const { toast } = useToast();
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -24,27 +30,56 @@ export default function CreateCourseDialog({ open, onOpenChange }: CreateCourseD
   const [isActive, setIsActive] = useState(true);
 
   const handleCreate = () => {
-    console.log('Creating course:', { code, name, description, semester, isActive });
+    if (!code || !name) {
+      toast({ 
+        title: t('users.missingInfo'), 
+        description: t('users.fillRequired'),
+        variant: 'destructive' 
+      });
+      return;
+    }
+
+    const newCourse: Course = {
+      id: Date.now().toString(),
+      code,
+      name,
+      description,
+      semester,
+      isActive,
+      createdAt: new Date().toISOString(),
+      teacherCount: 1,
+      studentCount: 0,
+      documentCount: 0,
+    };
+
+    onCourseCreated?.(newCourse);
+    toast({ 
+      title: t('toast.created'), 
+      description: `${t('courses.name')} "${name}" ${t('toast.addedToSystem')}.` 
+    });
+    
     onOpenChange(false);
-    setCode(''); setName(''); setDescription('');
+    setCode(''); 
+    setName(''); 
+    setDescription('');
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Tạo môn học mới</DialogTitle>
-          <DialogDescription>Thêm môn học mới vào hệ thống</DialogDescription>
+          <DialogTitle>{t('courses.createTitle')}</DialogTitle>
+          <DialogDescription>{t('courses.createDesc')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="code">Mã môn học</Label>
+              <Label htmlFor="code">{t('courses.code')}</Label>
               <Input id="code" placeholder="VD: CS102" value={code} onChange={(e) => setCode(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="semester">Học kỳ</Label>
+              <Label htmlFor="semester">{t('courses.semester')}</Label>
               <Select value={semester} onValueChange={setSemester}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -57,27 +92,27 @@ export default function CreateCourseDialog({ open, onOpenChange }: CreateCourseD
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Tên môn học</Label>
+            <Label htmlFor="name">{t('courses.name')}</Label>
             <Input id="name" placeholder="VD: Mạng máy tính" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="desc">Mô tả</Label>
-            <Textarea id="desc" placeholder="Mô tả ngắn về môn học..." value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Label htmlFor="desc">{t('courses.description')}</Label>
+            <Textarea id="desc" placeholder={t('courses.description') + '...'} value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <Label>Trạng thái</Label>
-              <p className="text-sm text-muted-foreground">Mở cho sinh viên đăng ký</p>
+              <Label>{t('courses.status')}</Label>
+              <p className="text-sm text-muted-foreground">{t('courses.statusDesc')}</p>
             </div>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Hủy</Button>
-          <Button onClick={handleCreate}>Tạo môn học</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('action.cancel')}</Button>
+          <Button onClick={handleCreate}>{t('courses.createButton')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
