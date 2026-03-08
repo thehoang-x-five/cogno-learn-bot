@@ -315,7 +315,7 @@ export default function ChatPage() {
                           __html: message.content
                             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                             .replace(/`([^`]+)`/g, '<code class="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">$1</code>')
-                            .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-sidebar text-sidebar-foreground p-3 rounded-lg text-xs overflow-x-auto my-3 font-mono"><code>$2</code></pre>')
+                            .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-muted dark:bg-muted/60 text-foreground p-3 rounded-lg text-xs overflow-x-auto my-3 font-mono"><code>$2</code></pre>')
                             .replace(/## (.*)/g, '<h3 class="font-semibold text-base mt-4 mb-2">$1</h3>')
                             .replace(/\n\n/g, '</p><p class="my-2">')
                             .replace(/\n(\d+\.)/g, '<br/>$1'),
