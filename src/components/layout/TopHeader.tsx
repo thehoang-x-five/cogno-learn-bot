@@ -151,7 +151,7 @@ export default function TopHeader({ onMenuClick }: TopHeaderProps) {
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-primary text-xs font-medium">
+            <DropdownMenuItem onClick={() => navigate('/notifications')} className="justify-center text-primary text-xs font-medium cursor-pointer">
               {t('notif.viewAll')}
             </DropdownMenuItem>
           </DropdownMenuContent>

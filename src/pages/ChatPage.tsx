@@ -358,9 +358,9 @@ export default function ChatPage() {
           </div>
         </ScrollArea>
 
-        <div className="border-t p-2 sm:p-4 bg-card/80 backdrop-blur-sm">
+        <div className="border-t p-2 sm:p-4 bg-card/80 dark:bg-card/60 backdrop-blur-sm">
           <div className="max-w-3xl mx-auto">
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-secondary/50 border focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/30 transition-all">
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-secondary/50 dark:bg-secondary/30 border border-border/40 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/30 transition-all">
               <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => toast({ title: t('chat.attachFile'), description: t('chat.attachDesc') })}>
                 <Paperclip className="h-4 w-4 text-muted-foreground" />
               </Button>
