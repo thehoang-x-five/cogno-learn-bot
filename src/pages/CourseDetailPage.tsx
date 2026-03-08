@@ -197,7 +197,7 @@ export default function CourseDetailPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
         {[
           { icon: Users, label: t('courseDetail.students'), value: course.studentsCount },
           { icon: FileText, label: t('courseDetail.documents'), value: course.documentsCount },
