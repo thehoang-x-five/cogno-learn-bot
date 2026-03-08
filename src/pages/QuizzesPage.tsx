@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Quiz, QuizQuestion, QuizAttempt } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,7 @@ const courses = [
 
 export default function QuizzesPage() {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
   const [quizzes, setQuizzes] = useState(initialQuizzes);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeQuiz, setActiveQuiz] = useState<string | null>(null);
@@ -103,20 +105,20 @@ export default function QuizzesPage() {
   const handleDelete = () => {
     if (!deleteTarget) return;
     setQuizzes((prev) => prev.filter((q) => q.id !== deleteTarget.id));
-    toast({ title: 'Đã xóa', description: `Quiz "${deleteTarget.title}" đã được xóa.` });
+    toast({ title: t('toast.deleted'), description: `Quiz "${deleteTarget.title}" ${t('toast.quizDeleted')}` });
     setDeleteTarget(null);
   };
 
   const handleDuplicate = (quiz: Quiz) => {
-    const newQuiz: Quiz = { ...quiz, id: Date.now().toString(), title: `${quiz.title} (bản sao)`, createdAt: new Date().toISOString() };
+    const newQuiz: Quiz = { ...quiz, id: Date.now().toString(), title: `${quiz.title} (${t('quiz.copy')})`, createdAt: new Date().toISOString() };
     setQuizzes((prev) => [...prev, newQuiz]);
-    toast({ title: 'Đã nhân bản', description: `Quiz "${quiz.title}" đã được nhân bản thành công.` });
+    toast({ title: t('toast.duplicated'), description: `Quiz "${quiz.title}" ${t('toast.quizDuplicated')}` });
   };
 
   const handleShare = (quiz: Quiz) => {
     const url = `${window.location.origin}/quizzes/${quiz.id}`;
     navigator.clipboard.writeText(url);
-    toast({ title: 'Đã sao chép link', description: `Link quiz đã được sao chép vào clipboard.` });
+    toast({ title: t('toast.linkCopied'), description: t('toast.quizLinkCopied') });
   };
 
   const handleEditSave = (values: Record<string, string>) => {
@@ -124,13 +126,13 @@ export default function QuizzesPage() {
     setQuizzes((prev) => prev.map((q) =>
       q.id === editTarget.id ? { ...q, title: values.title, chapter: values.chapter } : q
     ));
-    toast({ title: 'Đã cập nhật', description: `Quiz "${values.title}" đã được cập nhật.` });
+    toast({ title: t('toast.updated'), description: `Quiz "${values.title}" ${t('toast.quizUpdated')}` });
     setEditTarget(null);
   };
 
   const editFields: EditField[] = editTarget ? [
-    { key: 'title', label: 'Tên quiz', value: editTarget.title },
-    { key: 'chapter', label: 'Chương', value: editTarget.chapter || '' },
+    { key: 'title', label: t('quiz.quizName'), value: editTarget.title },
+    { key: 'chapter', label: t('quiz.chapter'), value: editTarget.chapter || '' },
   ] : [];
 
   // Show summary
@@ -170,10 +172,10 @@ export default function QuizzesPage() {
         <Card className="w-full max-w-2xl">
           <CardHeader>
             <div className="flex items-center justify-between mb-4">
-              <Badge variant="outline">Câu {currentQuestion + 1}/{mockQuestions.length}</Badge>
+              <Badge variant="outline">{t('quiz.questionNum')} {currentQuestion + 1}/{mockQuestions.length}</Badge>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Trophy className="h-4 w-4 text-warning" />
-                Điểm: {score}/{currentQuestion + (showResult ? 1 : 0)}
+                {t('quiz.score')}: {score}/{currentQuestion + (showResult ? 1 : 0)}
               </div>
             </div>
             <Progress value={progress} className="h-2 mb-4" />
@@ -204,18 +206,18 @@ export default function QuizzesPage() {
 
             {showResult && (
               <div className="p-4 rounded-lg bg-info/10 border border-info/20 mt-4">
-                <p className="text-sm font-medium text-info mb-1">💡 Giải thích:</p>
+                <p className="text-sm font-medium text-info mb-1">💡 {t('quiz.explanation')}:</p>
                 <p className="text-sm text-foreground">{question.explanation}</p>
               </div>
             )}
 
             <div className="flex justify-end gap-3 pt-4">
-              <Button variant="outline" onClick={() => setActiveQuiz(null)}>Thoát</Button>
+              <Button variant="outline" onClick={() => setActiveQuiz(null)}>{t('action.exit')}</Button>
               {!showResult ? (
-                <Button onClick={handleAnswer} disabled={!selectedAnswer}>Trả lời</Button>
+                <Button onClick={handleAnswer} disabled={!selectedAnswer}>{t('action.answer')}</Button>
               ) : (
                 <Button onClick={handleNext} className="gap-2">
-                  {currentQuestion < mockQuestions.length - 1 ? (<>Câu tiếp theo <ArrowRight className="h-4 w-4" /></>) : 'Xem kết quả'}
+                  {currentQuestion < mockQuestions.length - 1 ? (<>{t('action.next')} <ArrowRight className="h-4 w-4" /></>) : t('action.viewResult')}
                 </Button>
               )}
             </div>
@@ -229,15 +231,15 @@ export default function QuizzesPage() {
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Quiz</h1>
+          <h1 className="text-3xl font-bold">{t('quiz.title')}</h1>
           <p className="text-muted-foreground mt-1">
-            {isTeacher ? 'Tạo và quản lý bài kiểm tra' : 'Ôn tập và kiểm tra kiến thức'}
+            {isTeacher ? t('quiz.teacherDesc') : t('quiz.studentDesc')}
           </p>
         </div>
         {isTeacher && (
           <Button variant="gradient" className="gap-2" onClick={() => setIsCreateOpen(true)}>
             <Plus className="h-4 w-4" />
-            Tạo Quiz mới
+            {t('quiz.createNew')}
           </Button>
         )}
       </div>
@@ -249,12 +251,12 @@ export default function QuizzesPage() {
               <Sparkles className="h-8 w-8 text-primary" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold">Tạo Quiz bằng AI</h3>
-              <p className="text-muted-foreground text-sm mt-1">Yêu cầu AI tạo câu hỏi ôn tập từ tài liệu môn học</p>
+              <h3 className="text-lg font-semibold">{t('quiz.aiCreate')}</h3>
+              <p className="text-muted-foreground text-sm mt-1">{t('quiz.aiDesc')}</p>
             </div>
             <Button variant="gradient" className="gap-2" onClick={() => setIsCreateOpen(true)}>
               <Sparkles className="h-4 w-4" />
-              Thử ngay
+              {t('quiz.tryNow')}
             </Button>
           </div>
         </CardContent>
@@ -262,15 +264,15 @@ export default function QuizzesPage() {
 
       <Tabs defaultValue="quizzes" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="quizzes" className="gap-2"><ClipboardList className="h-4 w-4" />Danh sách Quiz</TabsTrigger>
-          <TabsTrigger value="history" className="gap-2"><History className="h-4 w-4" />Lịch sử làm bài</TabsTrigger>
-          {isTeacher && (<TabsTrigger value="stats" className="gap-2"><BarChart3 className="h-4 w-4" />Thống kê</TabsTrigger>)}
+          <TabsTrigger value="quizzes" className="gap-2"><ClipboardList className="h-4 w-4" />{t('quiz.list')}</TabsTrigger>
+          <TabsTrigger value="history" className="gap-2"><History className="h-4 w-4" />{t('quiz.history')}</TabsTrigger>
+          {isTeacher && (<TabsTrigger value="stats" className="gap-2"><BarChart3 className="h-4 w-4" />{t('quiz.stats')}</TabsTrigger>)}
         </TabsList>
 
         <TabsContent value="quizzes" className="space-y-6">
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Tìm kiếm quiz..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+            <Input placeholder={t('quiz.searchQuiz')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -299,22 +301,22 @@ export default function QuizzesPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleStartQuiz(quiz.id)}>
-                            <Eye className="mr-2 h-4 w-4" />Xem trước
+                            <Eye className="mr-2 h-4 w-4" />{t('action.preview')}
                           </DropdownMenuItem>
                           {isTeacher && (
                             <>
                               <DropdownMenuItem onClick={() => setEditTarget(quiz)}>
-                                <Edit className="mr-2 h-4 w-4" />Chỉnh sửa
+                                <Edit className="mr-2 h-4 w-4" />{t('action.edit')}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleDuplicate(quiz)}>
-                                <Copy className="mr-2 h-4 w-4" />Nhân bản
+                                <Copy className="mr-2 h-4 w-4" />{t('action.duplicate')}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleShare(quiz)}>
-                                <Share2 className="mr-2 h-4 w-4" />Chia sẻ
+                                <Share2 className="mr-2 h-4 w-4" />{t('action.share')}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem className="text-destructive" onClick={() => setDeleteTarget(quiz)}>
-                                <Trash2 className="mr-2 h-4 w-4" />Xóa
+                                <Trash2 className="mr-2 h-4 w-4" />{t('action.delete')}
                               </DropdownMenuItem>
                             </>
                           )}
@@ -325,11 +327,11 @@ export default function QuizzesPage() {
                   <CardContent>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-1"><BookOpen className="h-4 w-4" />{course?.name.split(' - ')[0]}</div>
-                      <div className="flex items-center gap-1"><ClipboardList className="h-4 w-4" />{quiz.questionCount} câu</div>
+                      <div className="flex items-center gap-1"><ClipboardList className="h-4 w-4" />{quiz.questionCount} {t('quiz.questions')}</div>
                     </div>
                     <Button className="w-full gap-2" onClick={() => handleStartQuiz(quiz.id)}>
                       <Play className="h-4 w-4" />
-                      {isTeacher ? 'Xem trước' : 'Bắt đầu'}
+                      {isTeacher ? t('action.preview') : t('action.start')}
                     </Button>
                   </CardContent>
                 </Card>
@@ -341,8 +343,8 @@ export default function QuizzesPage() {
         <TabsContent value="history" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Lịch sử làm bài</CardTitle>
-              <CardDescription>Tất cả các lần làm quiz</CardDescription>
+              <CardTitle>{t('quiz.historyTitle')}</CardTitle>
+              <CardDescription>{t('quiz.allAttempts')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {mockAttempts.map((attempt) => {
@@ -358,10 +360,10 @@ export default function QuizzesPage() {
                         <Trophy className={`h-6 w-6 ${pct >= 80 ? 'text-accent' : pct >= 50 ? 'text-warning' : 'text-destructive'}`} />
                       </div>
                       <div>
-                        <p className="font-medium">{quiz?.title || 'Quiz đã xóa'}</p>
+                        <p className="font-medium">{quiz?.title || t('quiz.deletedQuiz')}</p>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{minutes} phút</span>
-                          <span>{attempt.completedAt ? new Date(attempt.completedAt).toLocaleDateString('vi-VN') : '—'}</span>
+                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{minutes} {t('quiz.minutes')}</span>
+                          <span>{attempt.completedAt ? new Date(attempt.completedAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US') : '—'}</span>
                         </div>
                       </div>
                     </div>
@@ -381,29 +383,29 @@ export default function QuizzesPage() {
         {isTeacher && (
           <TabsContent value="stats" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-4">
-              <Card><CardHeader className="pb-2"><CardDescription>Tổng Quiz</CardDescription></CardHeader><CardContent><div className="text-2xl font-bold">{quizzes.length}</div></CardContent></Card>
-              <Card><CardHeader className="pb-2"><CardDescription>Tổng lượt làm</CardDescription></CardHeader><CardContent><div className="text-2xl font-bold">{mockAttempts.length * 12}</div></CardContent></Card>
-              <Card><CardHeader className="pb-2"><CardDescription>Điểm TB toàn hệ thống</CardDescription></CardHeader><CardContent><div className="text-2xl font-bold text-accent">72%</div></CardContent></Card>
-              <Card><CardHeader className="pb-2"><CardDescription>Quiz AI đã tạo</CardDescription></CardHeader><CardContent><div className="text-2xl font-bold text-primary">{quizzes.filter(q => q.isAiGenerated).length}</div></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardDescription>{t('quiz.totalQuiz')}</CardDescription></CardHeader><CardContent><div className="text-2xl font-bold">{quizzes.length}</div></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardDescription>{t('quiz.totalAttempts')}</CardDescription></CardHeader><CardContent><div className="text-2xl font-bold">{mockAttempts.length * 12}</div></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardDescription>{t('quiz.systemAvg')}</CardDescription></CardHeader><CardContent><div className="text-2xl font-bold text-accent">72%</div></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardDescription>{t('quiz.aiCreated')}</CardDescription></CardHeader><CardContent><div className="text-2xl font-bold text-primary">{quizzes.filter(q => q.isAiGenerated).length}</div></CardContent></Card>
             </div>
 
             <Card>
-              <CardHeader><CardTitle>Kết quả theo Quiz</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t('quiz.resultByQuiz')}</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 {quizzes.map((quiz) => (
                   <div key={quiz.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                     <div>
                       <p className="font-medium">{quiz.title}</p>
-                      <p className="text-xs text-muted-foreground">{quiz.questionCount} câu • {quiz.chapter}</p>
+                      <p className="text-xs text-muted-foreground">{quiz.questionCount} {t('quiz.questions')} • {quiz.chapter}</p>
                     </div>
                     <div className="flex items-center gap-6 text-sm">
                       <div className="text-center">
                         <p className="font-bold">{Math.floor(Math.random() * 30 + 20)}</p>
-                        <p className="text-xs text-muted-foreground">Lượt làm</p>
+                        <p className="text-xs text-muted-foreground">{t('quiz.attempts')}</p>
                       </div>
                       <div className="text-center">
                         <p className="font-bold text-accent">{Math.floor(Math.random() * 30 + 60)}%</p>
-                        <p className="text-xs text-muted-foreground">Điểm TB</p>
+                        <p className="text-xs text-muted-foreground">{t('quiz.avgScore')}</p>
                       </div>
                     </div>
                   </div>
@@ -435,16 +437,16 @@ export default function QuizzesPage() {
       <ConfirmDeleteDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Xóa quiz"
-        description={`Bạn có chắc chắn muốn xóa "${deleteTarget?.title}"? Tất cả câu hỏi và kết quả liên quan sẽ bị mất.`}
+        title={t('confirm.deleteQuiz')}
+        description={`${t('confirm.sure')} "${deleteTarget?.title}"? ${t('confirm.quizDeleteDesc')}`}
         onConfirm={handleDelete}
       />
 
       <EditDialog
         open={!!editTarget}
         onOpenChange={(open) => !open && setEditTarget(null)}
-        title="Chỉnh sửa quiz"
-        description="Cập nhật thông tin quiz"
+        title={`${t('action.edit')} quiz`}
+        description={t('toast.updated')}
         fields={editFields}
         onSave={handleEditSave}
       />
