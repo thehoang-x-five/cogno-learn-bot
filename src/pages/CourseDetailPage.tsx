@@ -386,7 +386,7 @@ export default function CourseDetailPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => navigate('/quizzes')}><Eye className="mr-2 h-4 w-4" />{t('action.preview')}</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setEditQuizTarget(quiz)}><Edit className="mr-2 h-4 w-4" />{t('action.edit')}</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { const newQ = { ...quiz, id: Date.now().toString(), title: `${quiz.title} (${language === 'vi' ? 'bản sao' : 'copy'})` }; setQuizzes(prev => [...prev, newQ]); toast({ title: t('toast.duplicated') }); }}>
+                          <DropdownMenuItem onClick={() => { const newQ = { ...quiz, id: Date.now().toString(), title: `${quiz.title} (${t('courseDetail.copySuffix')})` }; setQuizzes(prev => [...prev, newQ]); toast({ title: t('toast.duplicated') }); }}>
                             <Copy className="mr-2 h-4 w-4" />{t('action.duplicate')}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
