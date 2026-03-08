@@ -22,8 +22,10 @@ import {
   Users, UserPlus, Search, MoreVertical, Edit, Trash2, Shield, GraduationCap, BookOpen, CheckCircle2, XCircle, Mail,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ConfirmDeleteDialog from '@/components/shared/ConfirmDeleteDialog';
+import EditDialog, { EditField } from '@/components/shared/EditDialog';
 
-const mockUsers: User[] = [
+const initialUsers: User[] = [
   { id: '1', email: 'admin@edu.vn', fullName: 'Nguyễn Văn Admin', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin', role: 'admin', isActive: true, createdAt: new Date(Date.now() - 365 * 86400000).toISOString() },
   { id: '2', email: 'teacher1@edu.vn', fullName: 'Trần Thị Giáo Viên', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teacher1', role: 'teacher', isActive: true, createdAt: new Date(Date.now() - 180 * 86400000).toISOString() },
   { id: '3', email: 'teacher2@edu.vn', fullName: 'Lê Văn Giảng', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teacher2', role: 'teacher', isActive: true, createdAt: new Date(Date.now() - 120 * 86400000).toISOString() },
@@ -39,6 +41,7 @@ const roleConfig: Record<UserRole, { label: string; icon: React.ElementType; cla
 };
 
 export default function UsersPage() {
+  const [users, setUsers] = useState(initialUsers);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -46,7 +49,11 @@ export default function UsersPage() {
   const [newUser, setNewUser] = useState({ email: '', fullName: '', role: 'student' as UserRole });
   const { toast } = useToast();
 
-  const filteredUsers = mockUsers.filter((user) => {
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [editTarget, setEditTarget] = useState<User | null>(null);
+  const [roleChangeTarget, setRoleChangeTarget] = useState<User | null>(null);
+
+  const filteredUsers = users.filter((user) => {
     const matchesSearch = user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' && user.isActive) || (statusFilter === 'inactive' && !user.isActive);
@@ -54,12 +61,60 @@ export default function UsersPage() {
   });
 
   const stats = {
-    total: mockUsers.length,
-    admins: mockUsers.filter((u) => u.role === 'admin').length,
-    teachers: mockUsers.filter((u) => u.role === 'teacher').length,
-    students: mockUsers.filter((u) => u.role === 'student').length,
-    active: mockUsers.filter((u) => u.isActive).length,
+    total: users.length,
+    admins: users.filter((u) => u.role === 'admin').length,
+    teachers: users.filter((u) => u.role === 'teacher').length,
+    students: users.filter((u) => u.role === 'student').length,
+    active: users.filter((u) => u.isActive).length,
   };
+
+  const handleAddUser = () => {
+    if (!newUser.fullName || !newUser.email) {
+      toast({ title: 'Thiếu thông tin', description: 'Vui lòng nhập đầy đủ họ tên và email.', variant: 'destructive' });
+      return;
+    }
+    const user: User = {
+      id: Date.now().toString(),
+      email: newUser.email,
+      fullName: newUser.fullName,
+      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newUser.email}`,
+      role: newUser.role,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    setUsers((prev) => [...prev, user]);
+    setIsAddDialogOpen(false);
+    setNewUser({ email: '', fullName: '', role: 'student' });
+    toast({ title: 'Đã thêm người dùng', description: `${user.fullName} đã được thêm vào hệ thống.` });
+  };
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+    toast({ title: 'Đã xóa', description: `Người dùng "${deleteTarget.fullName}" đã được xóa.` });
+    setDeleteTarget(null);
+  };
+
+  const handleEditSave = (values: Record<string, string>) => {
+    if (!editTarget) return;
+    setUsers((prev) => prev.map((u) =>
+      u.id === editTarget.id ? { ...u, fullName: values.fullName, email: values.email } : u
+    ));
+    toast({ title: 'Đã cập nhật', description: `Thông tin "${values.fullName}" đã được cập nhật.` });
+    setEditTarget(null);
+  };
+
+  const handleRoleChange = (userId: string, newRole: UserRole) => {
+    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
+    const user = users.find((u) => u.id === userId);
+    toast({ title: 'Đã đổi vai trò', description: `${user?.fullName} đã được chuyển sang ${roleConfig[newRole].label}.` });
+    setRoleChangeTarget(null);
+  };
+
+  const editFields: EditField[] = editTarget ? [
+    { key: 'fullName', label: 'Họ và tên', value: editTarget.fullName },
+    { key: 'email', label: 'Email', value: editTarget.email, type: 'email' },
+  ] : [];
 
   return (
     <div className="p-6 lg:p-8 space-y-6 page-enter">
@@ -103,7 +158,7 @@ export default function UsersPage() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Hủy</Button>
-              <Button onClick={() => { setIsAddDialogOpen(false); setNewUser({ email: '', fullName: '', role: 'student' }); }}>Thêm người dùng</Button>
+              <Button onClick={handleAddUser}>Thêm người dùng</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -223,10 +278,16 @@ export default function UsersPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => toast({ title: 'Chỉnh sửa người dùng', description: `Đang mở form chỉnh sửa ${user.fullName}.` })}><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toast({ title: 'Đổi vai trò', description: `Chức năng đổi vai trò cho ${user.fullName} sẽ sớm được cập nhật.` })}><Shield className="mr-2 h-4 w-4" />Đổi vai trò</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditTarget(user)}>
+                          <Edit className="mr-2 h-4 w-4" />Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setRoleChangeTarget(user)}>
+                          <Shield className="mr-2 h-4 w-4" />Đổi vai trò
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa người dùng', description: `Xác nhận xóa ${user.fullName}? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive" onClick={() => setDeleteTarget(user)}>
+                          <Trash2 className="mr-2 h-4 w-4" />Xóa
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -246,6 +307,59 @@ export default function UsersPage() {
           <p className="text-muted-foreground text-sm mt-1">Thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc</p>
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Xóa người dùng"
+        description={`Bạn có chắc chắn muốn xóa "${deleteTarget?.fullName}"? Hành động này không thể hoàn tác.`}
+        onConfirm={handleDelete}
+      />
+
+      <EditDialog
+        open={!!editTarget}
+        onOpenChange={(open) => !open && setEditTarget(null)}
+        title="Chỉnh sửa người dùng"
+        description="Cập nhật thông tin người dùng"
+        fields={editFields}
+        onSave={handleEditSave}
+      />
+
+      {/* Role Change Dialog */}
+      <Dialog open={!!roleChangeTarget} onOpenChange={(open) => !open && setRoleChangeTarget(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Đổi vai trò</DialogTitle>
+            <DialogDescription>
+              Chọn vai trò mới cho {roleChangeTarget?.fullName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-4">
+            {(['student', 'teacher', 'admin'] as UserRole[]).map((r) => {
+              const config = roleConfig[r];
+              const RIcon = config.icon;
+              const isSelected = roleChangeTarget?.role === r;
+              return (
+                <button
+                  key={r}
+                  onClick={() => roleChangeTarget && handleRoleChange(roleChangeTarget.id, r)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-all ${
+                    isSelected ? 'border-primary bg-primary/5' : 'border-border hover:bg-secondary/50'
+                  }`}
+                >
+                  <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${config.className}`}>
+                    <RIcon className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-sm">{config.label}</p>
+                  </div>
+                  {isSelected && <Badge className="ml-auto text-[10px]">Hiện tại</Badge>}
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

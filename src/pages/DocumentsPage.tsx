@@ -14,14 +14,16 @@ import {
 import {
   FileText, Upload, Search, MoreVertical, Download, Trash2, Eye,
   CheckCircle2, Clock, AlertCircle, Loader2, File, FileType,
-  HardDrive, Layers, Database,
+  Database,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import ConfirmDeleteDialog from '@/components/shared/ConfirmDeleteDialog';
+import PreviewDialog from '@/components/shared/PreviewDialog';
 
-const mockDocuments: Document[] = [
+const initialDocuments: Document[] = [
   { id: '1', courseId: '3', uploadedBy: '2', filename: 'slide_chuong1_gioi_thieu_oop.pdf', filePath: '/docs/1', fileType: 'pdf', fileSize: 2048000, status: 'ready', totalChunks: 45, createdAt: new Date(Date.now() - 86400000).toISOString() },
   { id: '2', courseId: '3', uploadedBy: '2', filename: 'slide_chuong2_tinh_chat_oop.pdf', filePath: '/docs/2', fileType: 'pdf', fileSize: 3145728, status: 'ready', totalChunks: 62, createdAt: new Date(Date.now() - 172800000).toISOString() },
   { id: '3', courseId: '3', uploadedBy: '2', filename: 'giao_trinh_lap_trinh_oop.docx', filePath: '/docs/3', fileType: 'docx', fileSize: 5242880, status: 'processing', totalChunks: 0, createdAt: new Date(Date.now() - 3600000).toISOString() },
@@ -59,22 +61,41 @@ const getFileIcon = (fileType: string) => {
 };
 
 export default function DocumentsPage() {
+  const [documents, setDocuments] = useState(initialDocuments);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
 
-  const filteredDocuments = mockDocuments.filter((doc) => {
+  const [deleteTarget, setDeleteTarget] = useState<Document | null>(null);
+  const [previewTarget, setPreviewTarget] = useState<Document | null>(null);
+
+  const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.filename.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCourse = selectedCourse === 'all' || doc.courseId === selectedCourse;
     return matchesSearch && matchesCourse;
   });
 
   const stats = {
-    total: mockDocuments.length,
-    ready: mockDocuments.filter((d) => d.status === 'ready').length,
-    processing: mockDocuments.filter((d) => d.status === 'processing').length,
-    totalChunks: mockDocuments.reduce((sum, d) => sum + d.totalChunks, 0),
+    total: documents.length,
+    ready: documents.filter((d) => d.status === 'ready').length,
+    processing: documents.filter((d) => d.status === 'processing').length,
+    totalChunks: documents.reduce((sum, d) => sum + d.totalChunks, 0),
+  };
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    setDocuments((prev) => prev.filter((d) => d.id !== deleteTarget.id));
+    toast({ title: 'Đã xóa', description: `Tài liệu "${deleteTarget.filename}" đã được xóa.` });
+    setDeleteTarget(null);
+  };
+
+  const handleDownload = (doc: Document) => {
+    // Simulate download
+    const link = document.createElement('a');
+    link.href = '#';
+    link.download = doc.filename;
+    toast({ title: 'Đang tải xuống', description: `${doc.filename} (${formatFileSize(doc.fileSize)}) đang được tải xuống...` });
   };
 
   return (
@@ -117,7 +138,7 @@ export default function DocumentsPage() {
         }`}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setIsDragging(false); }}
+        onDrop={(e) => { e.preventDefault(); setIsDragging(false); toast({ title: 'Đã nhận file', description: 'File đang được xử lý và thêm vào hệ thống.' }); }}
       >
         <CardContent className="flex flex-col items-center justify-center py-10">
           <div className={`h-14 w-14 rounded-2xl ${isDragging ? 'bg-primary/20 scale-110' : 'bg-primary/10'} flex items-center justify-center mb-4 transition-all`}>
@@ -127,7 +148,7 @@ export default function DocumentsPage() {
           <p className="text-muted-foreground text-sm mb-4">
             Kéo thả file hoặc click để chọn • PDF, DOCX, TXT
           </p>
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => toast({ title: 'Chọn file', description: 'Hãy kéo thả file vào vùng này để tải lên.' })}>
             <Upload className="h-4 w-4" />
             Chọn file
           </Button>
@@ -213,9 +234,16 @@ export default function DocumentsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => toast({ title: 'Xem trước', description: `Đang mở ${doc.filename}...` })}><Eye className="mr-2 h-4 w-4" />Xem trước</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toast({ title: 'Tải xuống', description: `Đang tải ${doc.filename}...` })}><Download className="mr-2 h-4 w-4" />Tải xuống</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => toast({ title: 'Xóa tài liệu', description: `Xác nhận xóa ${doc.filename}? Chức năng sẽ sớm được cập nhật.`, variant: 'destructive' })}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setPreviewTarget(doc)}>
+                          <Eye className="mr-2 h-4 w-4" />Xem trước
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDownload(doc)}>
+                          <Download className="mr-2 h-4 w-4" />Tải xuống
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive" onClick={() => setDeleteTarget(doc)}>
+                          <Trash2 className="mr-2 h-4 w-4" />Xóa
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -235,6 +263,22 @@ export default function DocumentsPage() {
           <p className="text-muted-foreground text-sm mt-1">Thử tìm kiếm với từ khóa khác hoặc chọn môn học khác</p>
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Xóa tài liệu"
+        description={`Bạn có chắc chắn muốn xóa "${deleteTarget?.filename}"? Tài liệu và tất cả chunks đã xử lý sẽ bị xóa vĩnh viễn.`}
+        onConfirm={handleDelete}
+      />
+
+      <PreviewDialog
+        open={!!previewTarget}
+        onOpenChange={(open) => !open && setPreviewTarget(null)}
+        filename={previewTarget?.filename || ''}
+        fileType={previewTarget?.fileType || ''}
+        fileSize={previewTarget ? formatFileSize(previewTarget.fileSize) : ''}
+      />
     </div>
   );
 }
