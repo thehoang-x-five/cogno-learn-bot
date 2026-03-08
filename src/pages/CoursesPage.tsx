@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Course } from '@/types';
+import type { Course } from '@/types/course';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,16 +17,10 @@ import {
 import CreateCourseDialog from '@/components/course/CreateCourseDialog';
 import ConfirmDeleteDialog from '@/components/shared/ConfirmDeleteDialog';
 import EditDialog, { EditField } from '@/components/shared/EditDialog';
+import LoadingState from '@/components/shared/LoadingState';
+import EmptyState from '@/components/shared/EmptyState';
 import { cn } from '@/lib/utils';
-
-const initialCourses: Course[] = [
-  { id: '1', code: 'CS101', name: 'Nhập môn lập trình', description: 'Môn học cơ sở về lập trình với Python, bao gồm các khái niệm cơ bản như biến, vòng lặp, hàm...', semester: 'HK1-2025', isActive: true, createdAt: new Date().toISOString(), enrollmentRole: 'student', teacherCount: 2, studentCount: 120, documentCount: 15 },
-  { id: '2', code: 'CS201', name: 'Cấu trúc dữ liệu và giải thuật', description: 'Học về các cấu trúc dữ liệu như mảng, danh sách liên kết, cây, đồ thị và các giải thuật sắp xếp, tìm kiếm...', semester: 'HK1-2025', isActive: true, createdAt: new Date().toISOString(), enrollmentRole: 'student', teacherCount: 1, studentCount: 95, documentCount: 22 },
-  { id: '3', code: 'CS301', name: 'Lập trình hướng đối tượng', description: 'Các nguyên lý OOP: đóng gói, kế thừa, đa hình, trừu tượng. Thực hành với Java.', semester: 'HK1-2025', isActive: true, createdAt: new Date().toISOString(), enrollmentRole: 'teacher', teacherCount: 1, studentCount: 88, documentCount: 18 },
-  { id: '4', code: 'CS401', name: 'Cơ sở dữ liệu', description: 'Thiết kế và quản trị cơ sở dữ liệu quan hệ, SQL, normalization, indexing...', semester: 'HK1-2025', isActive: true, createdAt: new Date().toISOString(), enrollmentRole: 'student', teacherCount: 2, studentCount: 110, documentCount: 20 },
-  { id: '5', code: 'CS501', name: 'Trí tuệ nhân tạo', description: 'Giới thiệu về AI, Machine Learning, Neural Networks và các ứng dụng thực tế.', semester: 'HK1-2025', isActive: true, createdAt: new Date().toISOString(), enrollmentRole: 'student', teacherCount: 1, studentCount: 75, documentCount: 12 },
-  { id: '6', code: 'CS601', name: 'Phát triển Web', description: 'Full-stack web development với React, Node.js, và các công nghệ hiện đại.', semester: 'HK1-2025', isActive: false, createdAt: new Date().toISOString(), enrollmentRole: 'student', teacherCount: 2, studentCount: 130, documentCount: 25 },
-];
+import { useCourses } from '@/hooks/useDataFetching';
 
 const courseColors = ['bg-primary/10', 'bg-accent/10', 'bg-warning/10', 'bg-info/10', 'bg-destructive/10', 'bg-secondary'];
 const courseTextColors = ['text-primary', 'text-accent', 'text-warning', 'text-info', 'text-destructive', 'text-muted-foreground'];
@@ -35,17 +29,17 @@ export default function CoursesPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [courses, setCourses] = useState(initialCourses);
+  const { toast } = useToast();
+  const { data: courses, isLoading, setData: setCourses } = useCourses();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { toast } = useToast();
-
   const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
   const [editTarget, setEditTarget] = useState<Course | null>(null);
 
-  const filteredCourses = courses.filter((course) => {
+  const filteredCourses = (courses || []).filter((course) => {
     const matchesSearch = course.name.toLowerCase().includes(searchQuery.toLowerCase()) || course.code.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filter === 'all' || (filter === 'active' && course.isActive) || (filter === 'inactive' && !course.isActive);
     return matchesSearch && matchesFilter;
@@ -53,36 +47,36 @@ export default function CoursesPage() {
 
   const canManageCourses = user?.role === 'admin' || user?.role === 'teacher';
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (!deleteTarget) return;
-    setCourses((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+    setCourses((prev) => prev ? prev.filter((c) => c.id !== deleteTarget.id) : prev);
     toast({ title: t('toast.deleted'), description: `${t('courses.name')} "${deleteTarget.name}" ${t('toast.deleted').toLowerCase()}.` });
     setDeleteTarget(null);
-  };
+  }, [deleteTarget, setCourses, toast, t]);
 
-  const handleEdit = (values: Record<string, string>) => {
+  const handleEdit = useCallback((values: Record<string, string>) => {
     if (!editTarget) return;
-    setCourses((prev) => prev.map((c) =>
+    setCourses((prev) => prev ? prev.map((c) =>
       c.id === editTarget.id ? { ...c, name: values.name, code: values.code, description: values.description, semester: values.semester } : c
-    ));
+    ) : prev);
     toast({ title: t('toast.updated'), description: `${t('courses.name')} "${values.name}" ${t('toast.updated').toLowerCase()}.` });
     setEditTarget(null);
-  };
+  }, [editTarget, setCourses, toast, t]);
 
-  const handleShare = (course: Course) => {
+  const handleShare = useCallback((course: Course) => {
     const url = `${window.location.origin}/courses/${course.id}`;
     navigator.clipboard.writeText(url);
     toast({ title: t('toast.linkCopied'), description: `Link ${course.name} ${t('toast.copied').toLowerCase()}.` });
-  };
+  }, [toast, t]);
 
-  const handleCourseCreated = (newCourse: Course) => {
-    setCourses((prev) => [newCourse, ...prev]);
-  };
+  const handleCourseCreated = useCallback((newCourse: Course) => {
+    setCourses((prev) => prev ? [newCourse, ...prev] : [newCourse]);
+  }, [setCourses]);
 
   const editFields: EditField[] = editTarget ? [
     { key: 'code', label: t('courses.code'), value: editTarget.code, placeholder: 'VD: CS101' },
     { key: 'name', label: t('courses.name'), value: editTarget.name, placeholder: t('courses.name') },
-    { key: 'description', label: t('courses.description'), value: editTarget.description, type: 'textarea', placeholder: t('courses.description') },
+    { key: 'description', label: t('courses.description'), value: editTarget.description || '', type: 'textarea', placeholder: t('courses.description') },
     { key: 'semester', label: t('courses.semester'), value: editTarget.semester, placeholder: 'VD: HK1-2025' },
   ] : [];
 
@@ -114,6 +108,21 @@ export default function CoursesPage() {
       )}
     </DropdownMenuContent>
   );
+
+  if (isLoading) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-48 rounded bg-muted animate-pulse" />
+            <div className="h-4 w-64 rounded bg-muted animate-pulse" />
+          </div>
+          <div className="h-10 w-32 rounded bg-muted animate-pulse" />
+        </div>
+        <LoadingState variant="cards" count={6} className="lg:grid-cols-3" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 page-enter">
@@ -156,92 +165,91 @@ export default function CoursesPage() {
         </div>
       </div>
 
-      <div className={cn(
-        viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3 stagger-children' : 'space-y-3 stagger-children'
-      )}>
-        {filteredCourses.map((course, index) => (
-          <Card key={course.id} className={cn(
-            'hover-lift group cursor-pointer transition-all',
-            viewMode === 'list' && 'flex flex-row items-center'
-          )} onClick={() => navigate(`/courses/${course.id}`)}>
-            {viewMode === 'grid' ? (
-              <>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`h-12 w-12 rounded-xl ${courseColors[index % 6]} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                        <BookOpen className={`h-6 w-6 ${courseTextColors[index % 6]}`} />
+      {filteredCourses.length > 0 ? (
+        <div className={cn(
+          viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3 stagger-children' : 'space-y-3 stagger-children'
+        )}>
+          {filteredCourses.map((course, index) => (
+            <Card key={course.id} className={cn(
+              'hover-lift group cursor-pointer transition-all focus-within:ring-2 focus-within:ring-primary/30',
+              viewMode === 'list' && 'flex flex-row items-center'
+            )} onClick={() => navigate(`/courses/${course.id}`)} tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && navigate(`/courses/${course.id}`)}>
+              {viewMode === 'grid' ? (
+                <>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-12 w-12 rounded-xl ${courseColors[index % 6]} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <BookOpen className={`h-6 w-6 ${courseTextColors[index % 6]}`} />
+                        </div>
+                        <div>
+                          <Badge variant={course.isActive ? 'default' : 'secondary'} className="mb-1 text-[10px]">{course.code}</Badge>
+                          <CardTitle className="text-base leading-tight">{course.name}</CardTitle>
+                        </div>
                       </div>
-                      <div>
-                        <Badge variant={course.isActive ? 'default' : 'secondary'} className="mb-1 text-[10px]">{course.code}</Badge>
-                        <CardTitle className="text-base leading-tight">{course.name}</CardTitle>
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        {renderCourseActions(course)}
+                      </DropdownMenu>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      {renderCourseActions(course)}
-                    </DropdownMenu>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="line-clamp-2 mb-4 text-xs">{course.description}</CardDescription>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{course.studentCount} SV</div>
+                      <div className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{course.documentCount} {t('courses.docs')}</div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                      <Badge variant="outline" className="text-[10px]">{course.semester}</Badge>
+                      {course.enrollmentRole && (
+                        <Badge variant={course.enrollmentRole === 'teacher' ? 'default' : 'secondary'} className="text-[10px]">
+                          {course.enrollmentRole === 'teacher' ? t('role.teacher') : t('role.student')}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </>
+              ) : (
+                <div className="flex items-center gap-4 p-4 w-full">
+                  <div className={`h-10 w-10 rounded-lg ${courseColors[index % 6]} flex items-center justify-center shrink-0`}>
+                    <BookOpen className={`h-5 w-5 ${courseTextColors[index % 6]}`} />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="line-clamp-2 mb-4 text-xs">{course.description}</CardDescription>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{course.studentCount} SV</div>
-                    <div className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{course.documentCount} {t('courses.docs')}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px]">{course.code}</Badge>
+                      <span className="font-medium text-sm">{course.name}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{course.description}</p>
                   </div>
-                  <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+                    <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{course.studentCount}</span>
+                    <span className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{course.documentCount}</span>
                     <Badge variant="outline" className="text-[10px]">{course.semester}</Badge>
-                    {course.enrollmentRole && (
-                      <Badge variant={course.enrollmentRole === 'teacher' ? 'default' : 'secondary'} className="text-[10px]">
-                        {course.enrollmentRole === 'teacher' ? t('role.teacher') : t('role.student')}
-                      </Badge>
-                    )}
                   </div>
-                </CardContent>
-              </>
-            ) : (
-              <div className="flex items-center gap-4 p-4 w-full">
-                <div className={`h-10 w-10 rounded-lg ${courseColors[index % 6]} flex items-center justify-center shrink-0`}>
-                  <BookOpen className={`h-5 w-5 ${courseTextColors[index % 6]}`} />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    {renderCourseActions(course)}
+                  </DropdownMenu>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px]">{course.code}</Badge>
-                    <span className="font-medium text-sm">{course.name}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">{course.description}</p>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
-                  <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{course.studentCount}</span>
-                  <span className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{course.documentCount}</span>
-                  <Badge variant="outline" className="text-[10px]">{course.semester}</Badge>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  {renderCourseActions(course)}
-                </DropdownMenu>
-              </div>
-            )}
-          </Card>
-        ))}
-      </div>
-
-      {filteredCourses.length === 0 && (
-        <div className="text-center py-16 animate-fade-in">
-          <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-            <BookOpen className="h-8 w-8 text-muted-foreground/50" />
-          </div>
-          <h3 className="text-lg font-medium">{t('courses.notFound')}</h3>
-          <p className="text-muted-foreground text-sm mt-1">{t('courses.notFoundDesc')}</p>
+              )}
+            </Card>
+          ))}
         </div>
+      ) : (
+        <EmptyState
+          icon={BookOpen}
+          title={t('courses.notFound')}
+          description={t('courses.notFoundDesc')}
+          action={canManageCourses ? { label: t('courses.create'), onClick: () => setIsCreateOpen(true), icon: Plus } : undefined}
+        />
       )}
 
       <CreateCourseDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} onCourseCreated={handleCourseCreated} />

@@ -1,45 +1,28 @@
-import { useState } from 'react';
-import { User, UserRole } from '@/types';
+import { useState, useCallback } from 'react';
+import type { User, UserRole } from '@/types/user';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Users, UserPlus, Search, MoreVertical, Edit, Trash2, Shield, GraduationCap, BookOpen, CheckCircle2, XCircle, Mail,
-} from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Users, UserPlus, Search, MoreVertical, Edit, Trash2, Shield, GraduationCap, BookOpen, CheckCircle2, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import StatCard from '@/components/shared/StatCard';
 import EmptyState from '@/components/shared/EmptyState';
+import LoadingState from '@/components/shared/LoadingState';
 import ConfirmDeleteDialog from '@/components/shared/ConfirmDeleteDialog';
 import EditDialog, { EditField } from '@/components/shared/EditDialog';
-
-const initialUsers: User[] = [
-  { id: '1', email: 'admin@edu.vn', fullName: 'Nguyễn Văn Admin', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin', role: 'admin', isActive: true, createdAt: new Date(Date.now() - 365 * 86400000).toISOString() },
-  { id: '2', email: 'teacher1@edu.vn', fullName: 'Trần Thị Giáo Viên', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teacher1', role: 'teacher', isActive: true, createdAt: new Date(Date.now() - 180 * 86400000).toISOString() },
-  { id: '3', email: 'teacher2@edu.vn', fullName: 'Lê Văn Giảng', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teacher2', role: 'teacher', isActive: true, createdAt: new Date(Date.now() - 120 * 86400000).toISOString() },
-  { id: '4', email: 'student1@edu.vn', fullName: 'Phạm Minh Sinh', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=student1', role: 'student', isActive: true, createdAt: new Date(Date.now() - 90 * 86400000).toISOString() },
-  { id: '5', email: 'student2@edu.vn', fullName: 'Hoàng Thị Học', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=student2', role: 'student', isActive: true, createdAt: new Date(Date.now() - 60 * 86400000).toISOString() },
-  { id: '6', email: 'student3@edu.vn', fullName: 'Võ Văn Viên', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=student3', role: 'student', isActive: false, createdAt: new Date(Date.now() - 30 * 86400000).toISOString() },
-];
+import { useUsers } from '@/hooks/useDataFetching';
 
 export default function UsersPage() {
   const { t, language } = useLanguage();
-  const [users, setUsers] = useState(initialUsers);
+  const { data: users, isLoading, setData: setUsers } = useUsers();
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -57,7 +40,8 @@ export default function UsersPage() {
     student: { label: t('role.student'), icon: GraduationCap, className: 'bg-accent/10 text-accent border-accent/20' },
   };
 
-  const filteredUsers = users.filter((user) => {
+  const allUsers = users || [];
+  const filteredUsers = allUsers.filter((user) => {
     const matchesSearch = user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' && user.isActive) || (statusFilter === 'inactive' && !user.isActive);
@@ -65,14 +49,14 @@ export default function UsersPage() {
   });
 
   const stats = {
-    total: users.length,
-    admins: users.filter((u) => u.role === 'admin').length,
-    teachers: users.filter((u) => u.role === 'teacher').length,
-    students: users.filter((u) => u.role === 'student').length,
-    active: users.filter((u) => u.isActive).length,
+    total: allUsers.length,
+    admins: allUsers.filter((u) => u.role === 'admin').length,
+    teachers: allUsers.filter((u) => u.role === 'teacher').length,
+    students: allUsers.filter((u) => u.role === 'student').length,
+    active: allUsers.filter((u) => u.isActive).length,
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = useCallback(() => {
     if (!newUser.fullName || !newUser.email) {
       toast({ title: t('users.missingInfo'), description: t('users.fillRequired'), variant: 'destructive' });
       return;
@@ -82,43 +66,56 @@ export default function UsersPage() {
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newUser.email}`,
       role: newUser.role, isActive: true, createdAt: new Date().toISOString(),
     };
-    setUsers((prev) => [...prev, user]);
+    setUsers((prev) => prev ? [...prev, user] : [user]);
     setIsAddDialogOpen(false);
     setNewUser({ email: '', fullName: '', role: 'student' });
     toast({ title: t('toast.added'), description: `${user.fullName} ${t('toast.addedToSystem')}.` });
-  };
+  }, [newUser, setUsers, toast, t]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (!deleteTarget) return;
-    setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+    setUsers((prev) => prev ? prev.filter((u) => u.id !== deleteTarget.id) : prev);
     toast({ title: t('toast.deleted'), description: `${t('users.user')} "${deleteTarget.fullName}" ${t('toast.deleted').toLowerCase()}.` });
     setDeleteTarget(null);
-  };
+  }, [deleteTarget, setUsers, toast, t]);
 
-  const handleEditSave = (values: Record<string, string>) => {
+  const handleEditSave = useCallback((values: Record<string, string>) => {
     if (!editTarget) return;
-    setUsers((prev) => prev.map((u) => u.id === editTarget.id ? { ...u, fullName: values.fullName, email: values.email } : u));
+    setUsers((prev) => prev ? prev.map((u) => u.id === editTarget.id ? { ...u, fullName: values.fullName, email: values.email } : u) : prev);
     toast({ title: t('toast.updated'), description: `"${values.fullName}" ${t('toast.updated').toLowerCase()}.` });
     setEditTarget(null);
-  };
+  }, [editTarget, setUsers, toast, t]);
 
-  const handleRoleChange = (userId: string, newRole: UserRole) => {
-    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
-    const user = users.find((u) => u.id === userId);
+  const handleRoleChange = useCallback((userId: string, newRole: UserRole) => {
+    setUsers((prev) => prev ? prev.map((u) => u.id === userId ? { ...u, role: newRole } : u) : prev);
+    const user = allUsers.find((u) => u.id === userId);
     toast({ title: t('toast.roleChanged'), description: `${user?.fullName} → ${roleConfig[newRole].label}.` });
     setRoleChangeTarget(null);
-  };
+  }, [allUsers, setUsers, toast, t, roleConfig]);
 
-  const handleToggleStatus = (userId: string) => {
-    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, isActive: !u.isActive } : u));
-    const user = users.find((u) => u.id === userId);
+  const handleToggleStatus = useCallback((userId: string) => {
+    const user = allUsers.find((u) => u.id === userId);
+    setUsers((prev) => prev ? prev.map((u) => u.id === userId ? { ...u, isActive: !u.isActive } : u) : prev);
     toast({ title: t('toast.updated'), description: `${user?.fullName} ${user?.isActive ? t('users.deactivated') : t('users.activated')}.` });
-  };
+  }, [allUsers, setUsers, toast, t]);
 
   const editFields: EditField[] = editTarget ? [
     { key: 'fullName', label: t('users.fullName'), value: editTarget.fullName },
     { key: 'email', label: t('users.email'), value: editTarget.email, type: 'email' },
   ] : [];
+
+  if (isLoading) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        <div className="space-y-2">
+          <div className="h-8 w-48 rounded bg-muted animate-pulse" />
+          <div className="h-4 w-64 rounded bg-muted animate-pulse" />
+        </div>
+        <LoadingState variant="cards" count={5} className="lg:grid-cols-5" />
+        <LoadingState variant="table" count={5} />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 page-enter">
@@ -168,7 +165,6 @@ export default function UsersPage() {
         </Dialog>
       </div>
 
-      {/* Stats */}
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 stagger-children">
         <StatCard title={t('users.totalUsers')} value={stats.total} icon={Users} iconColor="text-muted-foreground" iconBg="bg-muted" />
         <StatCard title={t('role.admin')} value={stats.admins} icon={Shield} iconColor="text-destructive" iconBg="bg-destructive/10" />
@@ -177,7 +173,6 @@ export default function UsersPage() {
         <StatCard title={t('users.activeUsers')} value={stats.active} icon={CheckCircle2} iconColor="text-accent" iconBg="bg-accent/10" className="col-span-2 sm:col-span-1" />
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1 sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -204,7 +199,6 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Users Table */}
       {filteredUsers.length > 0 ? (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
@@ -267,7 +261,7 @@ export default function UsersPage() {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -292,7 +286,7 @@ export default function UsersPage() {
             </Table>
           </div>
           <div className="border-t px-4 py-3 flex items-center justify-between text-sm text-muted-foreground">
-            <span>{filteredUsers.length} / {users.length} {t('users.user').toLowerCase()}</span>
+            <span>{filteredUsers.length} / {allUsers.length} {t('users.user').toLowerCase()}</span>
           </div>
         </Card>
       ) : (
@@ -312,7 +306,6 @@ export default function UsersPage() {
         description={t('toast.updated')} fields={editFields} onSave={handleEditSave}
       />
 
-      {/* Role Change Dialog */}
       <Dialog open={!!roleChangeTarget} onOpenChange={(open) => !open && setRoleChangeTarget(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
