@@ -1,9 +1,9 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 
 type Language = 'vi' | 'en';
 
 const translations: Record<string, Record<Language, string>> = {
-  // Sidebar
+  // Sidebar navigation
   'nav.dashboard': { vi: 'Dashboard', en: 'Dashboard' },
   'nav.courses': { vi: 'Môn học', en: 'Courses' },
   'nav.chat': { vi: 'Chat AI', en: 'AI Chat' },
@@ -33,14 +33,130 @@ const translations: Record<string, Record<Language, string>> = {
   'action.share': { vi: 'Chia sẻ', en: 'Share' },
   'action.reset': { vi: 'Khôi phục mặc định', en: 'Reset to Default' },
   'action.start': { vi: 'Bắt đầu', en: 'Start' },
+  'action.back': { vi: 'Quay lại', en: 'Back' },
+  'action.add': { vi: 'Thêm', en: 'Add' },
+  'action.viewDetail': { vi: 'Xem chi tiết', en: 'View Details' },
+  'action.viewAll': { vi: 'Xem tất cả', en: 'View All' },
+  'action.copyCode': { vi: 'Sao chép mã', en: 'Copy Code' },
+  'action.copyLink': { vi: 'Chia sẻ liên kết', en: 'Share Link' },
+  'action.send': { vi: 'Gửi', en: 'Send' },
+  'action.exit': { vi: 'Thoát', en: 'Exit' },
+  'action.answer': { vi: 'Trả lời', en: 'Answer' },
+  'action.next': { vi: 'Câu tiếp theo', en: 'Next Question' },
+  'action.viewResult': { vi: 'Xem kết quả', en: 'View Results' },
+  'action.retry': { vi: 'Làm lại', en: 'Retry' },
+  'action.sendMessage': { vi: 'Gửi tin nhắn', en: 'Send Message' },
+  'action.changeRole': { vi: 'Đổi vai trò', en: 'Change Role' },
+  'action.removeFromCourse': { vi: 'Xóa khỏi môn', en: 'Remove from Course' },
 
   // Dashboard
   'dashboard.title': { vi: 'Dashboard', en: 'Dashboard' },
+  'dashboard.greeting.morning': { vi: 'Chào buổi sáng', en: 'Good morning' },
+  'dashboard.greeting.afternoon': { vi: 'Chào buổi chiều', en: 'Good afternoon' },
+  'dashboard.greeting.evening': { vi: 'Chào buổi tối', en: 'Good evening' },
+  'dashboard.admin.subtitle': { vi: 'Tổng quan hệ thống EduAssist', en: 'EduAssist system overview' },
+  'dashboard.teacher.subtitle': { vi: 'Quản lý môn học và theo dõi sinh viên', en: 'Manage courses and track students' },
+  'dashboard.student.subtitle': { vi: 'Tiếp tục hành trình học tập của bạn', en: 'Continue your learning journey' },
+
+  // Admin Dashboard
+  'admin.totalUsers': { vi: 'Tổng người dùng', en: 'Total Users' },
+  'admin.activeCourses': { vi: 'Môn học hoạt động', en: 'Active Courses' },
+  'admin.processedDocs': { vi: 'Tài liệu đã xử lý', en: 'Processed Documents' },
+  'admin.conversations': { vi: 'Cuộc hội thoại', en: 'Conversations' },
+  'admin.systemHealth': { vi: 'Sức khỏe hệ thống', en: 'System Health' },
+  'admin.recentRegistrations': { vi: 'Đăng ký gần đây', en: 'Recent Registrations' },
+  'admin.usageByDay': { vi: 'Lượt sử dụng theo ngày', en: 'Daily Usage' },
+  'admin.userDistribution': { vi: 'Phân bố người dùng', en: 'User Distribution' },
+  'admin.aiUsage': { vi: 'Sử dụng AI', en: 'AI Usage' },
+  'admin.online': { vi: 'Hoạt động', en: 'Online' },
+  'admin.degraded': { vi: 'Chậm', en: 'Degraded' },
+
+  // Teacher Dashboard
+  'teacher.coursesTaught': { vi: 'Môn học đang dạy', en: 'Courses Teaching' },
+  'teacher.totalStudents': { vi: 'Tổng sinh viên', en: 'Total Students' },
+  'teacher.docsUploaded': { vi: 'Tài liệu đã upload', en: 'Documents Uploaded' },
+  'teacher.quizzesCreated': { vi: 'Quiz đã tạo', en: 'Quizzes Created' },
+  'teacher.myCourses': { vi: 'Môn học của tôi', en: 'My Courses' },
+  'teacher.pendingDocs': { vi: 'Tài liệu chờ xử lý', en: 'Pending Documents' },
+  'teacher.lowPerformance': { vi: 'Sinh viên cần hỗ trợ', en: 'Students Needing Support' },
+  'teacher.pendingQuestions': { vi: 'câu hỏi chờ', en: 'pending questions' },
+
+  // Student Dashboard
+  'student.courses': { vi: 'Môn học', en: 'Courses' },
+  'student.questionsAsked': { vi: 'Câu hỏi đã hỏi', en: 'Questions Asked' },
+  'student.quizCompleted': { vi: 'Quiz hoàn thành', en: 'Quiz Completed' },
+  'student.avgScore': { vi: 'Điểm trung bình', en: 'Average Score' },
+  'student.myCourses': { vi: 'Môn học của tôi', en: 'My Courses' },
+  'student.upcomingQuizzes': { vi: 'Quiz sắp tới', en: 'Upcoming Quizzes' },
+  'student.recentResults': { vi: 'Kết quả gần đây', en: 'Recent Results' },
+  'student.studyStreak': { vi: 'Chuỗi học tập', en: 'Study Streak' },
+  'student.achievements': { vi: 'Thành tích', en: 'Achievements' },
+  'student.aiSuggestions': { vi: 'Gợi ý từ AI', en: 'AI Suggestions' },
+  'student.progress': { vi: 'Tiến độ', en: 'Progress' },
+  'student.continueStudy': { vi: 'Tiếp tục học', en: 'Continue Studying' },
+  'student.startQuiz': { vi: 'Làm bài', en: 'Take Quiz' },
 
   // Courses
   'courses.title': { vi: 'Môn học', en: 'Courses' },
   'courses.create': { vi: 'Thêm môn học', en: 'Add Course' },
   'courses.search': { vi: 'Tìm kiếm môn học...', en: 'Search courses...' },
+  'courses.admin.subtitle': { vi: 'Quản lý tất cả môn học trong hệ thống', en: 'Manage all courses in the system' },
+  'courses.teacher.subtitle': { vi: 'Môn học bạn đang giảng dạy', en: 'Courses you are teaching' },
+  'courses.student.subtitle': { vi: 'Các môn học bạn đang theo học', en: 'Courses you are enrolled in' },
+  'courses.all': { vi: 'Tất cả', en: 'All' },
+  'courses.active': { vi: 'Đang mở', en: 'Active' },
+  'courses.inactive': { vi: 'Đã đóng', en: 'Closed' },
+  'courses.notFound': { vi: 'Không tìm thấy môn học', en: 'No courses found' },
+  'courses.notFoundDesc': { vi: 'Thử tìm kiếm với từ khóa khác', en: 'Try a different keyword' },
+  'courses.chatAbout': { vi: 'Chat về môn này', en: 'Chat about this course' },
+  'courses.lecturer': { vi: 'Giảng viên', en: 'Lecturer' },
+  'courses.docs': { vi: 'tài liệu', en: 'documents' },
+
+  // Course Detail
+  'courseDetail.settings': { vi: 'Cài đặt', en: 'Settings' },
+  'courseDetail.editInfo': { vi: 'Chỉnh sửa thông tin', en: 'Edit Information' },
+  'courseDetail.copyCode': { vi: 'Sao chép mã môn', en: 'Copy Course Code' },
+  'courseDetail.shareLink': { vi: 'Chia sẻ liên kết', en: 'Share Link' },
+  'courseDetail.deleteCourse': { vi: 'Xóa môn học', en: 'Delete Course' },
+  'courseDetail.operating': { vi: 'Đang hoạt động', en: 'Active' },
+  'courseDetail.students': { vi: 'Sinh viên', en: 'Students' },
+  'courseDetail.documents': { vi: 'Tài liệu', en: 'Documents' },
+  'courseDetail.quiz': { vi: 'Quiz', en: 'Quizzes' },
+  'courseDetail.avgScore': { vi: 'Điểm TB', en: 'Avg Score' },
+  'courseDetail.overview': { vi: 'Tổng quan', en: 'Overview' },
+  'courseDetail.recentActivity': { vi: 'Hoạt động gần đây', en: 'Recent Activity' },
+  'courseDetail.examSchedule': { vi: 'Lịch thi', en: 'Exam Schedule' },
+  'courseDetail.quickAccess': { vi: 'Truy cập nhanh', en: 'Quick Access' },
+  'courseDetail.chatAI': { vi: 'Chat AI', en: 'AI Chat' },
+  'courseDetail.chatAIDesc': { vi: 'Hỏi đáp với trợ lý AI', en: 'Q&A with AI assistant' },
+  'courseDetail.takeQuiz': { vi: 'Làm Quiz', en: 'Take Quiz' },
+  'courseDetail.viewDocs': { vi: 'Xem tài liệu', en: 'View Documents' },
+  'courseDetail.uploadDoc': { vi: 'Tải lên tài liệu', en: 'Upload Document' },
+  'courseDetail.uploadDocDesc': { vi: 'Kéo thả file hoặc click để chọn', en: 'Drag & drop or click to choose' },
+  'courseDetail.chooseFile': { vi: 'Chọn file', en: 'Choose File' },
+  'courseDetail.filename': { vi: 'Tên file', en: 'Filename' },
+  'courseDetail.size': { vi: 'Kích thước', en: 'Size' },
+  'courseDetail.chunks': { vi: 'Chunks', en: 'Chunks' },
+  'courseDetail.status': { vi: 'Trạng thái', en: 'Status' },
+  'courseDetail.uploadDate': { vi: 'Ngày tải', en: 'Upload Date' },
+  'courseDetail.searchQuiz': { vi: 'Tìm kiếm quiz...', en: 'Search quizzes...' },
+  'courseDetail.createQuiz': { vi: 'Tạo Quiz mới', en: 'Create New Quiz' },
+  'courseDetail.attempts': { vi: 'Lượt làm', en: 'Attempts' },
+  'courseDetail.viewResults': { vi: 'Xem kết quả', en: 'View Results' },
+  'courseDetail.takeExam': { vi: 'Làm bài', en: 'Take Exam' },
+  'courseDetail.searchStudent': { vi: 'Tìm kiếm sinh viên...', en: 'Search students...' },
+  'courseDetail.addStudent': { vi: 'Thêm sinh viên', en: 'Add Student' },
+  'courseDetail.addStudentTitle': { vi: 'Thêm sinh viên vào môn học', en: 'Add Student to Course' },
+  'courseDetail.addStudentDesc': { vi: 'Nhập email sinh viên để thêm vào môn', en: 'Enter student email to add to course' },
+  'courseDetail.studentEmail': { vi: 'Email sinh viên', en: 'Student Email' },
+  'courseDetail.progress': { vi: 'Tiến độ', en: 'Progress' },
+  'courseDetail.quizDone': { vi: 'Quiz đã làm', en: 'Quizzes Done' },
+  'courseDetail.lastActive': { vi: 'Hoạt động cuối', en: 'Last Active' },
+  'courseDetail.midterm': { vi: 'Giữa kỳ', en: 'Midterm' },
+  'courseDetail.final': { vi: 'Cuối kỳ', en: 'Final' },
+  'courseDetail.questions': { vi: 'câu hỏi', en: 'questions' },
+  'courseDetail.createdOn': { vi: 'Tạo ngày', en: 'Created on' },
+  'courseDetail.quizAvailable': { vi: 'quiz có sẵn', en: 'quizzes available' },
 
   // Documents
   'docs.title': { vi: 'Tài liệu', en: 'Documents' },
@@ -79,10 +195,50 @@ const translations: Record<string, Record<Language, string>> = {
   'quiz.history': { vi: 'Lịch sử làm bài', en: 'History' },
   'quiz.stats': { vi: 'Thống kê', en: 'Statistics' },
   'quiz.questions': { vi: 'câu', en: 'questions' },
+  'quiz.searchQuiz': { vi: 'Tìm kiếm quiz...', en: 'Search quizzes...' },
+  'quiz.score': { vi: 'Điểm', en: 'Score' },
+  'quiz.historyTitle': { vi: 'Lịch sử làm bài', en: 'Quiz History' },
+  'quiz.allAttempts': { vi: 'Tất cả các lần làm quiz', en: 'All quiz attempts' },
+  'quiz.minutes': { vi: 'phút', en: 'min' },
+  'quiz.deletedQuiz': { vi: 'Quiz đã xóa', en: 'Deleted Quiz' },
+  'quiz.totalQuiz': { vi: 'Tổng Quiz', en: 'Total Quizzes' },
+  'quiz.totalAttempts': { vi: 'Tổng lượt làm', en: 'Total Attempts' },
+  'quiz.systemAvg': { vi: 'Điểm TB toàn hệ thống', en: 'System Average' },
+  'quiz.aiCreated': { vi: 'Quiz AI đã tạo', en: 'AI-Created Quizzes' },
+  'quiz.resultByQuiz': { vi: 'Kết quả theo Quiz', en: 'Results by Quiz' },
+  'quiz.explanation': { vi: 'Giải thích', en: 'Explanation' },
 
   // Users
-  'users.title': { vi: 'Người dùng', en: 'Users' },
-  'users.subtitle': { vi: 'Quản lý tài khoản người dùng', en: 'Manage user accounts' },
+  'users.title': { vi: 'Quản lý người dùng', en: 'User Management' },
+  'users.subtitle': { vi: 'Quản lý tài khoản và phân quyền người dùng trong hệ thống', en: 'Manage user accounts and permissions' },
+  'users.addUser': { vi: 'Thêm người dùng', en: 'Add User' },
+  'users.addUserTitle': { vi: 'Thêm người dùng mới', en: 'Add New User' },
+  'users.addUserDesc': { vi: 'Tạo tài khoản mới cho người dùng. Họ sẽ nhận được email xác nhận.', en: 'Create a new account. They will receive a confirmation email.' },
+  'users.fullName': { vi: 'Họ và tên', en: 'Full Name' },
+  'users.email': { vi: 'Email', en: 'Email' },
+  'users.role': { vi: 'Vai trò', en: 'Role' },
+  'users.statusLabel': { vi: 'Trạng thái', en: 'Status' },
+  'users.createdAt': { vi: 'Ngày tạo', en: 'Created' },
+  'users.totalUsers': { vi: 'Tổng người dùng', en: 'Total Users' },
+  'users.activeUsers': { vi: 'Đang hoạt động', en: 'Active' },
+  'users.searchUsers': { vi: 'Tìm kiếm theo tên, email...', en: 'Search by name, email...' },
+  'users.allRoles': { vi: 'Tất cả vai trò', en: 'All Roles' },
+  'users.allStatus': { vi: 'Tất cả trạng thái', en: 'All Status' },
+  'users.active': { vi: 'Hoạt động', en: 'Active' },
+  'users.inactive': { vi: 'Ngừng', en: 'Inactive' },
+  'users.notFound': { vi: 'Không tìm thấy người dùng', en: 'No users found' },
+  'users.notFoundDesc': { vi: 'Thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc', en: 'Try a different search or filter' },
+  'users.changeRoleTitle': { vi: 'Đổi vai trò', en: 'Change Role' },
+  'users.changeRoleDesc': { vi: 'Chọn vai trò mới cho', en: 'Select a new role for' },
+
+  // Chat
+  'chat.newConversation': { vi: 'Cuộc trò chuyện mới', en: 'New Conversation' },
+  'chat.selectCourse': { vi: 'Chọn môn học', en: 'Select Course' },
+  'chat.placeholder': { vi: 'Nhập câu hỏi của bạn...', en: 'Type your question...' },
+  'chat.welcomeTitle': { vi: 'Xin chào! Tôi là EduAssist AI', en: 'Hello! I\'m EduAssist AI' },
+  'chat.welcomeDesc': { vi: 'Hãy hỏi tôi bất kỳ câu hỏi nào về môn học của bạn. Tôi sẽ trả lời dựa trên tài liệu đã được upload.', en: 'Ask me any question about your course. I\'ll answer based on uploaded documents.' },
+  'chat.attachFile': { vi: 'Đính kèm file', en: 'Attach file' },
+  'chat.attachDesc': { vi: 'Kéo thả file vào ô chat hoặc sử dụng trang Tài liệu để upload.', en: 'Drag & drop files or use the Documents page to upload.' },
 
   // Settings
   'settings.title': { vi: 'Cài đặt hệ thống', en: 'System Settings' },
@@ -129,7 +285,7 @@ const translations: Record<string, Record<Language, string>> = {
   'profile.language': { vi: 'Ngôn ngữ', en: 'Language' },
   'profile.languageDesc': { vi: 'Chọn ngôn ngữ hiển thị', en: 'Choose display language' },
 
-  // TopHeader breadcrumbs
+  // Breadcrumbs
   'breadcrumb.dashboard': { vi: 'Dashboard', en: 'Dashboard' },
   'breadcrumb.courses': { vi: 'Môn học', en: 'Courses' },
   'breadcrumb.chat': { vi: 'Chat AI', en: 'AI Chat' },
@@ -144,9 +300,29 @@ const translations: Record<string, Record<Language, string>> = {
   'notif.viewAll': { vi: 'Xem tất cả thông báo', en: 'View all notifications' },
 
   // Login
-  'login.welcome': { vi: 'Chào mừng đến với', en: 'Welcome to' },
-  'login.subtitle': { vi: 'Trợ lý Học tập AI thông minh', en: 'Smart AI Learning Assistant' },
-  'login.selectRole': { vi: 'Chọn vai trò để trải nghiệm', en: 'Select a role to explore' },
+  'login.welcome': { vi: 'Chào mừng trở lại', en: 'Welcome Back' },
+  'login.subtitle': { vi: 'Đăng nhập để tiếp tục hành trình học tập', en: 'Sign in to continue your learning journey' },
+  'login.google': { vi: 'Đăng nhập với Google', en: 'Sign in with Google' },
+  'login.loading': { vi: 'Đang đăng nhập...', en: 'Signing in...' },
+  'login.demoQuick': { vi: 'Demo nhanh', en: 'Quick Demo' },
+  'login.heroTitle1': { vi: 'Hệ thống Trợ lý', en: 'AI Learning' },
+  'login.heroTitle2': { vi: 'Học tập AI', en: 'Assistant' },
+  'login.heroDesc': { vi: 'Nền tảng AI-powered hỗ trợ sinh viên và giáo viên trong việc học tập, giảng dạy hiệu quả hơn với công nghệ RAG.', en: 'AI-powered platform to help students and teachers learn and teach more effectively with RAG technology.' },
+  'login.terms': { vi: 'Bằng việc đăng nhập, bạn đồng ý với', en: 'By signing in, you agree to the' },
+  'login.termsLink': { vi: 'Điều khoản', en: 'Terms' },
+  'login.privacyLink': { vi: 'Chính sách bảo mật', en: 'Privacy Policy' },
+  'login.and': { vi: 'và', en: 'and' },
+  'login.admin': { vi: 'Quản trị', en: 'Admin' },
+  'login.teaching': { vi: 'Giảng dạy', en: 'Teaching' },
+  'login.learning': { vi: 'Học tập', en: 'Learning' },
+  'login.feature1': { vi: 'Trợ lý AI thông minh', en: 'Smart AI Assistant' },
+  'login.feature1Desc': { vi: 'Hỏi đáp dựa trên tài liệu môn học thực tế với RAG', en: 'Q&A based on real course materials with RAG' },
+  'login.feature2': { vi: 'Quản lý tài liệu', en: 'Document Management' },
+  'login.feature2Desc': { vi: 'Upload và tổ chức slide, giáo trình dễ dàng', en: 'Upload and organize slides, textbooks easily' },
+  'login.feature3': { vi: 'Tạo Quiz tự động', en: 'Auto Quiz Generation' },
+  'login.feature3Desc': { vi: 'AI tự động tạo câu hỏi ôn tập từ nội dung', en: 'AI auto-generates review questions from content' },
+  'login.feature4': { vi: 'Theo dõi tiến độ', en: 'Progress Tracking' },
+  'login.feature4Desc': { vi: 'Giáo viên theo dõi học tập của sinh viên', en: 'Teachers track student learning progress' },
 
   // Toast messages
   'toast.saved': { vi: 'Đã lưu', en: 'Saved' },
@@ -156,6 +332,33 @@ const translations: Record<string, Record<Language, string>> = {
   'toast.created': { vi: 'Đã tạo', en: 'Created' },
   'toast.uploaded': { vi: 'Đã tải lên', en: 'Uploaded' },
   'toast.downloading': { vi: 'Đang tải xuống', en: 'Downloading' },
+  'toast.added': { vi: 'Đã thêm', en: 'Added' },
+  'toast.duplicated': { vi: 'Đã nhân bản', en: 'Duplicated' },
+  'toast.linkCopied': { vi: 'Đã sao chép link', en: 'Link Copied' },
+  'toast.uploading': { vi: 'Đang tải lên', en: 'Uploading' },
+  'toast.processDone': { vi: 'Đã xử lý xong', en: 'Processing Complete' },
+
+  // Confirm dialogs
+  'confirm.deleteCourse': { vi: 'Xóa môn học', en: 'Delete Course' },
+  'confirm.deleteDoc': { vi: 'Xóa tài liệu', en: 'Delete Document' },
+  'confirm.deleteQuiz': { vi: 'Xóa quiz', en: 'Delete Quiz' },
+  'confirm.deleteUser': { vi: 'Xóa người dùng', en: 'Delete User' },
+  'confirm.deleteStudent': { vi: 'Xóa sinh viên khỏi môn', en: 'Remove Student' },
+  'confirm.deleteConversation': { vi: 'Xóa cuộc trò chuyện', en: 'Delete Conversation' },
+  'confirm.irreversible': { vi: 'Hành động này không thể hoàn tác.', en: 'This action cannot be undone.' },
+
+  // Status
+  'status.ready': { vi: 'Sẵn sàng', en: 'Ready' },
+  'status.processing': { vi: 'Đang xử lý', en: 'Processing' },
+  'status.pending': { vi: 'Chờ xử lý', en: 'Pending' },
+  'status.error': { vi: 'Lỗi', en: 'Error' },
+  'status.active': { vi: 'Hoạt động', en: 'Active' },
+  'status.stopped': { vi: 'Ngừng', en: 'Stopped' },
+
+  // Time ago
+  'time.minAgo': { vi: 'phút trước', en: 'min ago' },
+  'time.hourAgo': { vi: 'giờ trước', en: 'hours ago' },
+  'time.dayAgo': { vi: 'ngày trước', en: 'days ago' },
 };
 
 interface LanguageContextType {
@@ -172,14 +375,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return (stored as Language) || 'vi';
   });
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('eduassist-lang', lang);
-  };
+  }, []);
 
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
     return translations[key]?.[language] || key;
-  };
+  }, [language]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
