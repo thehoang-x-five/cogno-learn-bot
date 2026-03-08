@@ -1,24 +1,18 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Bell, ClipboardList, FileText, MessageSquare, CheckCheck, Trash2,
-  BookOpen, AlertCircle, Award, UserPlus,
+  BookOpen, AlertCircle, Award,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-
-interface Notification {
-  id: string;
-  title: string;
-  description: string;
-  time: string;
-  type: 'quiz' | 'document' | 'chat' | 'course' | 'system' | 'achievement';
-  read: boolean;
-}
+import LoadingState from '@/components/shared/LoadingState';
+import { useNotifications } from '@/hooks/useDataFetching';
+import type { Notification } from '@/types/notification';
 
 const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
   quiz: { icon: ClipboardList, color: 'text-warning', bg: 'bg-warning/10' },
@@ -32,43 +26,45 @@ const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: s
 export default function NotificationsPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { data: notifications, isLoading, setData: setNotifications } = useNotifications();
 
-  const [notifications, setNotifications] = useState<Notification[]>([
-    { id: '1', title: t('notif.newQuiz'), description: 'CS301 - Lập trình OOP • Hạn nộp: 15/03/2026', time: t('notif.timeAgo5m'), type: 'quiz', read: false },
-    { id: '2', title: t('notif.docProcessed'), description: 'slide_chuong3.pdf đã được phân tích và index thành công', time: t('notif.timeAgo1h'), type: 'document', read: false },
-    { id: '3', title: t('notif.quizScore'), description: t('notif.quizScoreDesc'), time: t('notif.timeAgo3h'), type: 'quiz', read: false },
-    { id: '4', title: 'AI đã trả lời câu hỏi của bạn', description: 'Trong hội thoại "Hỏi về OOP và tính đa hình"', time: '5 giờ trước', type: 'chat', read: true },
-    { id: '5', title: '3 sinh viên mới tham gia CS301', description: 'Nguyễn Văn A, Trần Thị B, Lê Văn C đã đăng ký', time: '1 ngày trước', type: 'course', read: true },
-    { id: '6', title: 'Bảo trì hệ thống dự kiến', description: 'Hệ thống sẽ bảo trì từ 02:00 - 04:00 ngày 10/03', time: '1 ngày trước', type: 'system', read: true },
-    { id: '7', title: 'Hoàn thành 10 quiz liên tiếp! 🎉', description: 'Bạn đã đạt huy hiệu "Quiz Master"', time: '2 ngày trước', type: 'achievement', read: true },
-    { id: '8', title: 'Tài liệu mới: giaotrinh_chuong4.pdf', description: 'Giáo viên đã upload tài liệu mới cho CS201', time: '3 ngày trước', type: 'document', read: true },
-  ]);
+  const allNotifs = notifications || [];
+  const unreadCount = allNotifs.filter((n) => !n.read).length;
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllRead = useCallback(() => {
+    setNotifications((prev) => prev ? prev.map((n) => ({ ...n, read: true })) : prev);
     toast({ title: '✓ Đã đánh dấu tất cả đã đọc' });
-  };
+  }, [setNotifications, toast]);
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
-  };
+  const markAsRead = useCallback((id: string) => {
+    setNotifications((prev) => prev ? prev.map((n) => n.id === id ? { ...n, read: true } : n) : prev);
+  }, [setNotifications]);
 
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const deleteNotification = useCallback((id: string) => {
+    setNotifications((prev) => prev ? prev.filter((n) => n.id !== id) : prev);
     toast({ title: '🗑️ Đã xóa thông báo' });
+  }, [setNotifications, toast]);
+
+  const filterNotifications = (tab: string): Notification[] => {
+    if (tab === 'all') return allNotifs;
+    if (tab === 'unread') return allNotifs.filter((n) => !n.read);
+    return allNotifs.filter((n) => n.type === tab);
   };
 
-  const filterNotifications = (tab: string) => {
-    if (tab === 'all') return notifications;
-    if (tab === 'unread') return notifications.filter((n) => !n.read);
-    return notifications.filter((n) => n.type === tab);
-  };
+  if (isLoading) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+        <div className="space-y-2">
+          <div className="h-8 w-48 rounded bg-muted animate-pulse" />
+          <div className="h-4 w-64 rounded bg-muted animate-pulse" />
+        </div>
+        <LoadingState variant="list" count={6} />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6 page-enter">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
@@ -126,19 +122,19 @@ export default function NotificationsPage() {
                       <div
                         key={notif.id}
                         onClick={() => markAsRead(notif.id)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && markAsRead(notif.id)}
                         className={cn(
-                          'flex items-start gap-4 p-4 sm:p-5 cursor-pointer transition-all duration-200 group',
+                          'flex items-start gap-4 p-4 sm:p-5 cursor-pointer transition-all duration-200 group focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none',
                           !notif.read
                             ? 'bg-primary/[0.03] dark:bg-primary/[0.06] hover:bg-primary/[0.06] dark:hover:bg-primary/[0.08]'
                             : 'hover:bg-muted/40'
                         )}
                       >
-                        {/* Icon */}
                         <div className={cn('h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105', config.bg)}>
                           <Icon className={cn('h-5 w-5', config.color)} />
                         </div>
-
-                        {/* Content */}
                         <div className="flex-1 min-w-0 space-y-1">
                           <div className="flex items-start justify-between gap-2">
                             <p className={cn('text-sm leading-tight', !notif.read ? 'font-semibold text-foreground' : 'font-medium text-foreground/80')}>
@@ -154,11 +150,9 @@ export default function NotificationsPage() {
                             <Badge variant="outline" className="text-[10px] h-5 px-1.5 capitalize">{notif.type}</Badge>
                           </div>
                         </div>
-
-                        {/* Actions */}
                         <Button
                           variant="ghost" size="icon"
-                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-muted-foreground hover:text-destructive"
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity shrink-0 text-muted-foreground hover:text-destructive"
                           onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }}
                         >
                           <Trash2 className="h-4 w-4" />
