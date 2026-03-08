@@ -20,15 +20,15 @@ export default function DashboardPage() {
   const subtitle = user?.role === 'admin' ? t('dashboard.admin.subtitle') : user?.role === 'teacher' ? t('dashboard.teacher.subtitle') : t('dashboard.student.subtitle');
 
   return (
-    <div className="p-6 lg:p-8 space-y-8 page-enter">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 page-enter">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             {greeting()}, {user?.fullName?.split(' ').pop()}! 👋
           </h1>
-          <p className="text-muted-foreground mt-1">{subtitle}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{subtitle}</p>
         </div>
-        <Badge variant="outline" className="hidden sm:flex gap-1.5 px-3 py-1.5">
+        <Badge variant="outline" className="hidden sm:flex gap-1.5 px-3 py-1.5 shrink-0">
           <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
           {roleLabel}
         </Badge>

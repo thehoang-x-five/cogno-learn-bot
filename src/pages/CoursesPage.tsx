@@ -116,41 +116,43 @@ export default function CoursesPage() {
   );
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 page-enter">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 page-enter">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">{t('courses.title')}</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('courses.title')}</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
             {user?.role === 'admin' ? t('courses.admin.subtitle') : user?.role === 'teacher' ? t('courses.teacher.subtitle') : t('courses.student.subtitle')}
           </p>
         </div>
         {canManageCourses && (
-          <Button variant="gradient" className="gap-2" onClick={() => setIsCreateOpen(true)}>
+          <Button variant="gradient" className="gap-2 w-full sm:w-auto" onClick={() => setIsCreateOpen(true)}>
             <Plus className="h-4 w-4" />
             {t('courses.create')}
           </Button>
         )}
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+        <div className="relative flex-1 sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder={t('courses.search')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
-        <div className="flex gap-1 bg-secondary rounded-lg p-1">
-          {(['all', 'active', 'inactive'] as const).map((f) => (
-            <Button key={f} variant={filter === f ? 'default' : 'ghost'} size="sm" onClick={() => setFilter(f)} className="text-xs h-7">
-              {f === 'all' ? t('courses.all') : f === 'active' ? t('courses.active') : t('courses.inactive')}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 bg-secondary rounded-lg p-1">
+            {(['all', 'active', 'inactive'] as const).map((f) => (
+              <Button key={f} variant={filter === f ? 'default' : 'ghost'} size="sm" onClick={() => setFilter(f)} className="text-xs h-7">
+                {f === 'all' ? t('courses.all') : f === 'active' ? t('courses.active') : t('courses.inactive')}
+              </Button>
+            ))}
+          </div>
+          <div className="flex gap-1 bg-secondary rounded-lg p-1 ml-auto">
+            <Button variant={viewMode === 'grid' ? 'default' : 'ghost'} size="icon" className="h-7 w-7" onClick={() => setViewMode('grid')}>
+              <Grid3X3 className="h-3.5 w-3.5" />
             </Button>
-          ))}
-        </div>
-        <div className="flex gap-1 bg-secondary rounded-lg p-1 ml-auto">
-          <Button variant={viewMode === 'grid' ? 'default' : 'ghost'} size="icon" className="h-7 w-7" onClick={() => setViewMode('grid')}>
-            <Grid3X3 className="h-3.5 w-3.5" />
-          </Button>
-          <Button variant={viewMode === 'list' ? 'default' : 'ghost'} size="icon" className="h-7 w-7" onClick={() => setViewMode('list')}>
-            <List className="h-3.5 w-3.5" />
-          </Button>
+            <Button variant={viewMode === 'list' ? 'default' : 'ghost'} size="icon" className="h-7 w-7" onClick={() => setViewMode('list')}>
+              <List className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
       </div>
 
