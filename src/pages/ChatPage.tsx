@@ -270,7 +270,7 @@ export default function ChatPage() {
                   {t('chat.welcomeDesc')}
                 </p>
                 <div className="grid grid-cols-2 gap-3 max-w-md">
-                  {['OOP là gì?', 'Giải thích tính kế thừa', 'Cho ví dụ đa hình', 'Tạo 5 câu quiz'].map((q) => (
+                  {[t('chat.suggestion1'), t('chat.suggestion2'), t('chat.suggestion3'), t('chat.suggestion4')].map((q) => (
                     <Button key={q} variant="outline" className="text-sm h-auto py-3 justify-start" onClick={() => setInputValue(q)}>
                       <Sparkles className="h-3.5 w-3.5 mr-2 text-primary shrink-0" />{q}
                     </Button>
