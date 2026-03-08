@@ -181,7 +181,7 @@ export default function CourseDetailPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => setEditCourseOpen(true)}><Edit className="mr-2 h-4 w-4" />{t('courseDetail.editInfo')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: t('toast.copied'), description: `${language === 'vi' ? 'Mã môn' : 'Code'}: ${course.code}` }); }}>
+              <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: t('toast.copied'), description: `${t('courseDetail.copyLabel')}: ${course.code}` }); }}>
                 <Copy className="mr-2 h-4 w-4" />{t('courseDetail.copyCode')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/courses/${id}`); toast({ title: t('toast.linkCopied') }); }}>
