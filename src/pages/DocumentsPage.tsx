@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Document, DocumentStatus } from '@/types';
+import { Document, DocumentStatus, FileType as DocFileType } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
