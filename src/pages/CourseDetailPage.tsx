@@ -160,7 +160,7 @@ export default function CourseDetailPage() {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 page-enter">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate('/courses')}>
@@ -168,8 +168,8 @@ export default function CourseDetailPage() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="text-base font-mono">{course.code}</Badge>
-            <h1 className="text-3xl font-bold">{course.name}</h1>
+            <Badge variant="outline" className="text-sm sm:text-base font-mono">{course.code}</Badge>
+            <h1 className="text-2xl sm:text-3xl font-bold">{course.name}</h1>
             {course.isActive && <Badge className="bg-success/10 text-success border-success/20">{t('courseDetail.operating')}</Badge>}
           </div>
           <p className="text-muted-foreground mt-1">{course.semester} • {course.description}</p>
@@ -197,7 +197,7 @@ export default function CourseDetailPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
         {[
           { icon: Users, label: t('courseDetail.students'), value: course.studentsCount },
           { icon: FileText, label: t('courseDetail.documents'), value: course.documentsCount },

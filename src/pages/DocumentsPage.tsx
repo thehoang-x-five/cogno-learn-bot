@@ -14,13 +14,14 @@ import {
 } from '@/components/ui/select';
 import {
   FileText, Upload, Search, MoreVertical, Download, Trash2, Eye,
-  CheckCircle2, Clock, AlertCircle, Loader2, File, FileType,
-  Database,
+  CheckCircle2, Clock, AlertCircle, Loader2, File, FileType, Database,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import StatCard from '@/components/shared/StatCard';
+import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDeleteDialog from '@/components/shared/ConfirmDeleteDialog';
 import PreviewDialog from '@/components/shared/PreviewDialog';
 
@@ -60,7 +61,6 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadingFiles, setUploadingFiles] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -100,12 +100,11 @@ export default function DocumentsPage() {
 
   const processFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
     const allowedExts = ['.pdf', '.docx', '.txt'];
 
     Array.from(files).forEach((file) => {
       const ext = '.' + file.name.split('.').pop()?.toLowerCase();
-      if (!allowedTypes.includes(file.type) && !allowedExts.includes(ext)) {
+      if (!allowedExts.includes(ext)) {
         toast({ title: t('docs.unsupportedFormat'), description: `"${file.name}" ${t('docs.notSupported')}.`, variant: 'destructive' });
         return;
       }
@@ -115,118 +114,67 @@ export default function DocumentsPage() {
       const fileType: DocFileType = (['pdf', 'docx', 'txt'].includes(rawExt) ? rawExt : 'txt') as DocFileType;
 
       const newDoc: Document = {
-        id: tempId,
-        courseId: selectedCourse === 'all' ? '3' : selectedCourse,
-        uploadedBy: '2',
-        filename: file.name,
-        filePath: `/docs/${tempId}`,
-        fileType,
-        fileSize: file.size,
-        status: 'processing',
-        totalChunks: 0,
-        createdAt: new Date().toISOString(),
+        id: tempId, courseId: selectedCourse === 'all' ? '3' : selectedCourse, uploadedBy: '2',
+        filename: file.name, filePath: `/docs/${tempId}`, fileType, fileSize: file.size,
+        status: 'processing', totalChunks: 0, createdAt: new Date().toISOString(),
       };
       setDocuments(prev => [newDoc, ...prev]);
-      setUploadingFiles(prev => [...prev, tempId]);
-
       toast({ title: t('toast.uploading'), description: `"${file.name}" ${t('toast.beingProcessed')}...` });
 
       setTimeout(() => {
         setDocuments(prev => prev.map(d =>
           d.id === tempId ? { ...d, status: 'ready' as DocumentStatus, totalChunks: Math.floor(Math.random() * 60 + 20) } : d
         ));
-        setUploadingFiles(prev => prev.filter(id => id !== tempId));
         toast({ title: t('toast.processDone'), description: `"${file.name}" ${t('toast.readyToUse')}.` });
       }, 3000 + Math.random() * 2000);
     });
   };
 
-  const handleFileDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    processFiles(e.dataTransfer.files);
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    processFiles(e.target.files);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
   return (
-    <div className="p-6 lg:p-8 space-y-6 page-enter">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 page-enter">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">{t('docs.title')}</h1>
-          <p className="text-muted-foreground mt-1">{t('docs.subtitle')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('docs.title')}</h1>
+          <p className="text-muted-foreground mt-1 text-sm">{t('docs.subtitle')}</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4 stagger-children">
-        {[
-          { label: t('docs.total'), value: stats.total, icon: FileText, color: 'text-primary', bg: 'bg-primary/10' },
-          { label: t('docs.processed'), value: stats.ready, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
-          { label: t('docs.processing'), value: stats.processing, icon: Loader2, color: 'text-warning', bg: 'bg-warning/10' },
-          { label: t('docs.totalChunks'), value: stats.totalChunks, icon: Database, color: 'text-info', bg: 'bg-info/10' },
-        ].map((stat) => (
-          <Card key={stat.label}>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <div className={`h-7 w-7 rounded-md ${stat.bg} flex items-center justify-center`}>
-                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                </div>
-                {stat.label}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 stagger-children">
+        <StatCard title={t('docs.total')} value={stats.total} icon={FileText} iconColor="text-primary" iconBg="bg-primary/10" />
+        <StatCard title={t('docs.processed')} value={stats.ready} icon={CheckCircle2} iconColor="text-accent" iconBg="bg-accent/10" />
+        <StatCard title={t('docs.processing')} value={stats.processing} icon={Loader2} iconColor="text-warning" iconBg="bg-warning/10" />
+        <StatCard title={t('docs.totalChunks')} value={stats.totalChunks} icon={Database} iconColor="text-info" iconBg="bg-info/10" />
       </div>
 
       {/* Upload Area */}
       <Card
-        className={`border-2 border-dashed transition-all duration-300 ${
-          isDragging ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-border hover:border-primary/30'
-        }`}
+        className={`border-2 border-dashed transition-all duration-300 ${isDragging ? 'border-primary bg-primary/5 scale-[1.005]' : 'border-border/60 hover:border-primary/30'}`}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
-        onDrop={handleFileDrop}
+        onDrop={(e) => { e.preventDefault(); setIsDragging(false); processFiles(e.dataTransfer.files); }}
       >
-        <CardContent className="flex flex-col items-center justify-center py-10">
+        <CardContent className="flex flex-col items-center justify-center py-8 sm:py-10">
           <div className={`h-14 w-14 rounded-2xl ${isDragging ? 'bg-primary/20 scale-110' : 'bg-primary/10'} flex items-center justify-center mb-4 transition-all`}>
-            <Upload className={`h-7 w-7 ${isDragging ? 'text-primary animate-bounce' : 'text-primary'}`} />
+            <Upload className={`h-7 w-7 text-primary ${isDragging ? 'animate-bounce' : ''}`} />
           </div>
           <h3 className="text-base font-semibold mb-1">{t('docs.upload')}</h3>
-          <p className="text-muted-foreground text-sm mb-4">
-            {t('docs.uploadDesc')}
-          </p>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,.docx,.txt"
-            multiple
-            className="hidden"
-            onChange={handleFileSelect}
-          />
+          <p className="text-muted-foreground text-sm mb-4 text-center">{t('docs.uploadDesc')}</p>
+          <input ref={fileInputRef} type="file" accept=".pdf,.docx,.txt" multiple className="hidden" onChange={(e) => { processFiles(e.target.files); if (fileInputRef.current) fileInputRef.current.value = ''; }} />
           <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
-            <Upload className="h-4 w-4" />
-            {t('docs.chooseFile')}
+            <Upload className="h-4 w-4" /> {t('docs.chooseFile')}
           </Button>
         </CardContent>
       </Card>
 
       {/* Filters */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1 sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder={t('docs.searchDocs')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
         <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-          <SelectTrigger className="w-64">
-            <SelectValue placeholder={t('chat.selectCourse')} />
-          </SelectTrigger>
+          <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder={t('chat.selectCourse')} /></SelectTrigger>
           <SelectContent>
             {courses.map((course) => (
               <SelectItem key={course.id} value={course.id}>{course.id === 'all' ? t('docs.allCourses') : course.name}</SelectItem>
@@ -236,111 +184,91 @@ export default function DocumentsPage() {
       </div>
 
       {/* Documents Table */}
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('docs.filename')}</TableHead>
-              <TableHead>{t('docs.course')}</TableHead>
-              <TableHead>{t('docs.size')}</TableHead>
-              <TableHead>{t('docs.chunks')}</TableHead>
-              <TableHead>{t('docs.status')}</TableHead>
-              <TableHead>{t('docs.date')}</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredDocuments.map((doc) => {
-              const status = statusConfig[doc.status];
-              const StatusIcon = status.icon;
-              const course = courses.find((c) => c.id === doc.courseId);
-
-              return (
-                <TableRow key={doc.id} className="hover:bg-secondary/30 transition-colors">
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      {getFileIcon(doc.fileType)}
-                      <span className="font-medium text-sm">{doc.filename}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="text-[10px]">{course?.name.split(' - ')[0]}</Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{formatFileSize(doc.fileSize)}</TableCell>
-                  <TableCell>
-                    {doc.status === 'processing' ? (
-                      <div className="flex items-center gap-2">
-                        <Progress value={45} className="w-16 h-1.5" />
-                        <span className="text-xs text-muted-foreground">45%</span>
-                      </div>
-                    ) : (
-                      <span className={`text-sm ${doc.totalChunks > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
-                        {doc.totalChunks || '-'}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={`gap-1 text-[10px] ${status.className}`}>
-                      <StatusIcon className={`h-3 w-3 ${doc.status === 'processing' ? 'animate-spin' : ''}`} />
-                      {status.label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {new Date(doc.createdAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setPreviewTarget(doc)}>
-                          <Eye className="mr-2 h-4 w-4" />{t('action.preview')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDownload(doc)}>
-                          <Download className="mr-2 h-4 w-4" />{t('action.download')}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive" onClick={() => setDeleteTarget(doc)}>
-                          <Trash2 className="mr-2 h-4 w-4" />{t('action.delete')}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+      {filteredDocuments.length > 0 ? (
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30">
+                  <TableHead>{t('docs.filename')}</TableHead>
+                  <TableHead className="hidden sm:table-cell">{t('docs.course')}</TableHead>
+                  <TableHead className="hidden md:table-cell">{t('docs.size')}</TableHead>
+                  <TableHead className="hidden lg:table-cell">{t('docs.chunks')}</TableHead>
+                  <TableHead>{t('docs.status')}</TableHead>
+                  <TableHead className="hidden md:table-cell">{t('docs.date')}</TableHead>
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </Card>
-
-      {filteredDocuments.length === 0 && (
-        <div className="text-center py-16 animate-fade-in">
-          <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-            <FileText className="h-8 w-8 text-muted-foreground/50" />
+              </TableHeader>
+              <TableBody>
+                {filteredDocuments.map((doc) => {
+                  const status = statusConfig[doc.status];
+                  const StatusIcon = status.icon;
+                  const course = courses.find((c) => c.id === doc.courseId);
+                  return (
+                    <TableRow key={doc.id} className="group">
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {getFileIcon(doc.fileType)}
+                          <div>
+                            <span className="font-medium text-sm">{doc.filename}</span>
+                            <p className="text-xs text-muted-foreground sm:hidden">{formatFileSize(doc.fileSize)}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant="outline" className="text-[10px] h-5">{course?.name.split(' - ')[0]}</Badge>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground text-sm">{formatFileSize(doc.fileSize)}</TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {doc.status === 'processing' ? (
+                          <div className="flex items-center gap-2">
+                            <Progress value={45} className="w-16 h-1.5" />
+                            <span className="text-xs text-muted-foreground">45%</span>
+                          </div>
+                        ) : (
+                          <span className={`text-sm ${doc.totalChunks > 0 ? 'font-mono' : 'text-muted-foreground'}`}>{doc.totalChunks || '—'}</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={`gap-1 text-[10px] h-5 ${status.className}`}>
+                          <StatusIcon className={`h-3 w-3 ${doc.status === 'processing' ? 'animate-spin' : ''}`} />
+                          {status.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
+                        {new Date(doc.createdAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setPreviewTarget(doc)}><Eye className="mr-2 h-4 w-4" />{t('action.preview')}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDownload(doc)}><Download className="mr-2 h-4 w-4" />{t('action.download')}</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteTarget(doc)}><Trash2 className="mr-2 h-4 w-4" />{t('action.delete')}</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
-          <h3 className="text-lg font-medium">{t('docs.notFound')}</h3>
-          <p className="text-muted-foreground text-sm mt-1">{t('docs.notFoundDesc')}</p>
-        </div>
+          <div className="border-t px-4 py-3 flex items-center justify-between text-sm text-muted-foreground">
+            <span>{filteredDocuments.length} / {documents.length} {t('docs.filename').toLowerCase()}</span>
+          </div>
+        </Card>
+      ) : (
+        <EmptyState icon={FileText} title={t('docs.notFound')} description={t('docs.notFoundDesc')} action={{ label: t('docs.chooseFile'), onClick: () => fileInputRef.current?.click(), icon: Upload }} />
       )}
 
-      <ConfirmDeleteDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={t('confirm.deleteDoc')}
-        description={`${t('confirm.sure')} "${deleteTarget?.filename}"? ${t('confirm.irreversible')}`}
-        onConfirm={handleDelete}
-      />
-
-      <PreviewDialog
-        open={!!previewTarget}
-        onOpenChange={(open) => !open && setPreviewTarget(null)}
-        filename={previewTarget?.filename || ''}
-        fileType={previewTarget?.fileType || ''}
-        fileSize={previewTarget ? formatFileSize(previewTarget.fileSize) : ''}
-      />
+      <ConfirmDeleteDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)} title={t('confirm.deleteDoc')} description={`${t('confirm.sure')} "${deleteTarget?.filename}"? ${t('confirm.irreversible')}`} onConfirm={handleDelete} />
+      <PreviewDialog open={!!previewTarget} onOpenChange={(open) => !open && setPreviewTarget(null)} filename={previewTarget?.filename || ''} fileType={previewTarget?.fileType || ''} fileSize={previewTarget ? formatFileSize(previewTarget.fileSize) : ''} />
     </div>
   );
 }
