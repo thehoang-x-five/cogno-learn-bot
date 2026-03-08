@@ -2,9 +2,11 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from '@/components/ui/button';
 import { GraduationCap, Home, ArrowLeft, SearchX } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const NotFound = () => {
   const location = useLocation();
+  const { t } = useLanguage();
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
@@ -24,20 +26,18 @@ const NotFound = () => {
         </div>
 
         <h1 className="text-7xl font-black gradient-text mb-4">404</h1>
-        <h2 className="text-xl font-semibold mb-2">Trang không tồn tại</h2>
-        <p className="text-muted-foreground mb-8">
-          Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn tại trong hệ thống EduAssist.
-        </p>
+        <h2 className="text-xl font-semibold mb-2">{t('notFound.title')}</h2>
+        <p className="text-muted-foreground mb-8">{t('notFound.desc')}</p>
 
         <div className="flex items-center justify-center gap-3">
           <Button variant="outline" onClick={() => window.history.back()} className="gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Quay lại
+            {t('action.back')}
           </Button>
           <Link to="/dashboard">
             <Button className="gap-2">
               <Home className="h-4 w-4" />
-              Về trang chủ
+              {t('action.goHome')}
             </Button>
           </Link>
         </div>

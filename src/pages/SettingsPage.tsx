@@ -31,63 +31,57 @@ export default function SettingsPage() {
   const { language, setLanguage, t } = useLanguage();
   const [activeTab, setActiveTab] = useState('general');
   
-  // General settings
   const [siteName, setSiteName] = useState('EduAssist');
-  const [siteDescription, setSiteDescription] = useState('Hệ thống Trợ lý Học tập AI');
+  const [siteDescription, setSiteDescription] = useState(language === 'vi' ? 'Hệ thống Trợ lý Học tập AI' : 'AI Learning Assistant System');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   
-  // LLM settings
   const [selectedProvider, setSelectedProvider] = useState('openai');
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
   const [apiKey, setApiKey] = useState('sk-***************************');
   const [temperature, setTemperature] = useState('0.7');
   const [maxTokens, setMaxTokens] = useState('2000');
   
-  // RAG settings
   const [chunkSize, setChunkSize] = useState('500');
   const [chunkOverlap, setChunkOverlap] = useState('50');
   const [topK, setTopK] = useState('5');
   const [embeddingModel, setEmbeddingModel] = useState('text-embedding-3-small');
   
-  // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [quizReminders, setQuizReminders] = useState(true);
   const [systemAlerts, setSystemAlerts] = useState(true);
 
   const handleSave = () => {
-    toast({
-      title: 'Đã lưu cài đặt',
-      description: 'Các thay đổi đã được áp dụng thành công.',
-    });
+    toast({ title: t('settings.saved'), description: t('settings.savedDesc') });
   };
 
   const handleReset = () => {
-    toast({
-      title: 'Đã khôi phục mặc định',
-      description: 'Cài đặt đã được đặt lại về giá trị mặc định.',
-      variant: 'destructive',
-    });
+    toast({ title: t('settings.resetDone'), description: t('settings.resetDoneDesc'), variant: 'destructive' });
   };
 
   const currentProvider = llmProviders.find((p) => p.id === selectedProvider);
+
+  const activityLogs = [
+    { action: t('settings.logLogin'), user: 'admin@edu.vn', time: `5 ${t('settings.minutes')} ${language === 'vi' ? 'trước' : 'ago'}` },
+    { action: t('settings.logUpdateLLM'), user: 'admin@edu.vn', time: `1 ${t('settings.hours')} ${language === 'vi' ? 'trước' : 'ago'}` },
+    { action: t('settings.logAddUser'), user: 'admin@edu.vn', time: `2 ${t('settings.hours')} ${language === 'vi' ? 'trước' : 'ago'}` },
+    { action: t('settings.logDeleteDoc'), user: 'admin@edu.vn', time: `1 ${language === 'vi' ? 'ngày trước' : 'day ago'}` },
+  ];
 
   return (
     <div className="p-6 lg:p-8 space-y-6 page-enter">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Cài đặt hệ thống</h1>
-          <p className="text-muted-foreground mt-1">
-            Cấu hình và tùy chỉnh hệ thống EduAssist
-          </p>
+          <h1 className="text-3xl font-bold">{t('settings.title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('settings.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleReset} className="gap-2">
             <RotateCcw className="h-4 w-4" />
-            Khôi phục mặc định
+            {t('action.reset')}
           </Button>
           <Button onClick={handleSave} className="gap-2">
             <Save className="h-4 w-4" />
-            Lưu thay đổi
+            {t('action.save')}
           </Button>
         </div>
       </div>
@@ -128,9 +122,7 @@ export default function SettingsPage() {
                 <Palette className="h-5 w-5" />
                 {t('settings.theme')}
               </CardTitle>
-              <CardDescription>
-                {language === 'vi' ? 'Chọn giao diện sáng hoặc tối' : 'Choose light or dark theme'}
-              </CardDescription>
+              <CardDescription>{t('settings.themeChoose')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -146,10 +138,9 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <p className="font-semibold">{t('settings.themeLight')}</p>
-                      <p className="text-xs text-muted-foreground">{language === 'vi' ? 'Giao diện sáng, dễ đọc ban ngày' : 'Bright theme, easy to read in daylight'}</p>
+                      <p className="text-xs text-muted-foreground">{t('settings.themeLightDesc')}</p>
                     </div>
                   </div>
-                  {/* Mini preview */}
                   <div className="rounded-lg border bg-background p-2 space-y-1.5">
                     <div className="h-2 w-16 rounded bg-foreground/20" />
                     <div className="h-2 w-24 rounded bg-foreground/10" />
@@ -168,7 +159,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <p className="font-semibold">{t('settings.themeDark')}</p>
-                      <p className="text-xs text-muted-foreground">{language === 'vi' ? 'Giao diện tối, bảo vệ mắt' : 'Dark theme, easy on the eyes'}</p>
+                      <p className="text-xs text-muted-foreground">{t('settings.themeDarkDesc')}</p>
                     </div>
                   </div>
                   <div className="rounded-lg border bg-sidebar p-2 space-y-1.5">
@@ -187,9 +178,7 @@ export default function SettingsPage() {
                 <Globe className="h-5 w-5" />
                 {t('settings.language')}
               </CardTitle>
-              <CardDescription>
-                {language === 'vi' ? 'Chọn ngôn ngữ hiển thị cho toàn hệ thống' : 'Choose the display language for the entire system'}
-              </CardDescription>
+              <CardDescription>{t('settings.langChoose')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2">
@@ -230,29 +219,19 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5" />
-                Thông tin hệ thống
+                {t('settings.systemInfo')}
               </CardTitle>
-              <CardDescription>
-                Cấu hình thông tin cơ bản của hệ thống
-              </CardDescription>
+              <CardDescription>{t('settings.systemInfoDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="siteName">Tên hệ thống</Label>
-                  <Input
-                    id="siteName"
-                    value={siteName}
-                    onChange={(e) => setSiteName(e.target.value)}
-                  />
+                  <Label htmlFor="siteName">{t('settings.siteName')}</Label>
+                  <Input id="siteName" value={siteName} onChange={(e) => setSiteName(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="siteDescription">Mô tả</Label>
-                  <Input
-                    id="siteDescription"
-                    value={siteDescription}
-                    onChange={(e) => setSiteDescription(e.target.value)}
-                  />
+                  <Label htmlFor="siteDescription">{t('settings.siteDescription')}</Label>
+                  <Input id="siteDescription" value={siteDescription} onChange={(e) => setSiteDescription(e.target.value)} />
                 </div>
               </div>
             </CardContent>
@@ -262,48 +241,29 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Server className="h-5 w-5" />
-                Trạng thái hệ thống
+                {t('settings.systemStatus')}
               </CardTitle>
-              <CardDescription>
-                Quản lý trạng thái hoạt động của hệ thống
-              </CardDescription>
+              <CardDescription>{t('settings.systemStatusDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Chế độ bảo trì</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Tạm ngưng truy cập hệ thống để bảo trì
-                  </p>
+                  <Label>{t('settings.maintenanceMode')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('settings.maintenanceDesc')}</p>
                 </div>
-                <Switch
-                  checked={maintenanceMode}
-                  onCheckedChange={setMaintenanceMode}
-                />
+                <Switch checked={maintenanceMode} onCheckedChange={setMaintenanceMode} />
               </div>
               <Separator />
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10">
-                  <CheckCircle2 className="h-5 w-5 text-success" />
-                  <div>
-                    <p className="font-medium">Database</p>
-                    <p className="text-sm text-muted-foreground">Hoạt động</p>
+                {['Database', 'Vector DB', 'LLM API'].map((name) => (
+                  <div key={name} className="flex items-center gap-3 p-3 rounded-lg bg-success/10">
+                    <CheckCircle2 className="h-5 w-5 text-success" />
+                    <div>
+                      <p className="font-medium">{name}</p>
+                      <p className="text-sm text-muted-foreground">{t('settings.running')}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10">
-                  <CheckCircle2 className="h-5 w-5 text-success" />
-                  <div>
-                    <p className="font-medium">Vector DB</p>
-                    <p className="text-sm text-muted-foreground">Hoạt động</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10">
-                  <CheckCircle2 className="h-5 w-5 text-success" />
-                  <div>
-                    <p className="font-medium">LLM API</p>
-                    <p className="text-sm text-muted-foreground">Hoạt động</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -315,40 +275,30 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
-                Cấu hình LLM
+                {t('settings.llmConfig')}
               </CardTitle>
-              <CardDescription>
-                Chọn và cấu hình mô hình ngôn ngữ lớn
-              </CardDescription>
+              <CardDescription>{t('settings.llmConfigDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Nhà cung cấp</Label>
+                  <Label>{t('settings.provider')}</Label>
                   <Select value={selectedProvider} onValueChange={setSelectedProvider}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {llmProviders.map((provider) => (
-                        <SelectItem key={provider.id} value={provider.id}>
-                          {provider.name}
-                        </SelectItem>
+                        <SelectItem key={provider.id} value={provider.id}>{provider.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Model</Label>
+                  <Label>{t('settings.model')}</Label>
                   <Select value={selectedModel} onValueChange={setSelectedModel}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {currentProvider?.models.map((model) => (
-                        <SelectItem key={model} value={model}>
-                          {model}
-                        </SelectItem>
+                        <SelectItem key={model} value={model}>{model}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -362,46 +312,20 @@ export default function SettingsPage() {
                   <Key className="h-4 w-4" />
                   API Key
                 </Label>
-                <Input
-                  id="apiKey"
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  API key được mã hóa và lưu trữ an toàn
-                </p>
+                <Input id="apiKey" type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
+                <p className="text-xs text-muted-foreground">{t('settings.apiKeySecure')}</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="temperature">Temperature</Label>
-                  <Input
-                    id="temperature"
-                    type="number"
-                    min="0"
-                    max="2"
-                    step="0.1"
-                    value={temperature}
-                    onChange={(e) => setTemperature(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Độ sáng tạo của câu trả lời (0-2)
-                  </p>
+                  <Label htmlFor="temperature">{t('settings.temperature')}</Label>
+                  <Input id="temperature" type="number" min="0" max="2" step="0.1" value={temperature} onChange={(e) => setTemperature(e.target.value)} />
+                  <p className="text-xs text-muted-foreground">{t('settings.temperatureDesc')}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="maxTokens">Max Tokens</Label>
-                  <Input
-                    id="maxTokens"
-                    type="number"
-                    min="100"
-                    max="8000"
-                    value={maxTokens}
-                    onChange={(e) => setMaxTokens(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Độ dài tối đa của câu trả lời
-                  </p>
+                  <Label htmlFor="maxTokens">{t('settings.maxTokens')}</Label>
+                  <Input id="maxTokens" type="number" min="100" max="8000" value={maxTokens} onChange={(e) => setMaxTokens(e.target.value)} />
+                  <p className="text-xs text-muted-foreground">{t('settings.maxTokensDesc')}</p>
                 </div>
               </div>
             </CardContent>
@@ -411,17 +335,15 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5" />
-                System Prompt
+                {t('settings.systemPrompt')}
               </CardTitle>
-              <CardDescription>
-                Cấu hình prompt hệ thống cho chatbot
-              </CardDescription>
+              <CardDescription>{t('settings.systemPromptDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
                 className="min-h-32"
-                placeholder="Bạn là trợ giảng AI thông minh..."
-                defaultValue="Bạn là trợ giảng AI thông minh của hệ thống EduAssist. Nhiệm vụ của bạn là hỗ trợ sinh viên học tập dựa trên tài liệu môn học đã được cung cấp. Trả lời chính xác, dễ hiểu và luôn trích dẫn nguồn từ tài liệu khi có thể."
+                placeholder={t('settings.systemPromptPlaceholder')}
+                defaultValue={t('settings.systemPromptDefault')}
               />
             </CardContent>
           </Card>
@@ -433,37 +355,21 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Database className="h-5 w-5" />
-                Cấu hình RAG Pipeline
+                {t('settings.ragConfig')}
               </CardTitle>
-              <CardDescription>
-                Tùy chỉnh quy trình xử lý tài liệu và tìm kiếm
-              </CardDescription>
+              <CardDescription>{t('settings.ragConfigDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="chunkSize">Chunk Size (tokens)</Label>
-                  <Input
-                    id="chunkSize"
-                    type="number"
-                    value={chunkSize}
-                    onChange={(e) => setChunkSize(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Kích thước mỗi đoạn văn bản khi chia nhỏ tài liệu
-                  </p>
+                  <Input id="chunkSize" type="number" value={chunkSize} onChange={(e) => setChunkSize(e.target.value)} />
+                  <p className="text-xs text-muted-foreground">{t('settings.chunkSizeDesc')}</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="chunkOverlap">Chunk Overlap (tokens)</Label>
-                  <Input
-                    id="chunkOverlap"
-                    type="number"
-                    value={chunkOverlap}
-                    onChange={(e) => setChunkOverlap(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Độ chồng lấp giữa các chunks liền kề
-                  </p>
+                  <Input id="chunkOverlap" type="number" value={chunkOverlap} onChange={(e) => setChunkOverlap(e.target.value)} />
+                  <p className="text-xs text-muted-foreground">{t('settings.chunkOverlapDesc')}</p>
                 </div>
               </div>
               
@@ -473,9 +379,7 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <Label>Embedding Model</Label>
                   <Select value={embeddingModel} onValueChange={setEmbeddingModel}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="text-embedding-3-small">text-embedding-3-small</SelectItem>
                       <SelectItem value="text-embedding-3-large">text-embedding-3-large</SelectItem>
@@ -485,17 +389,8 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="topK">Top K Results</Label>
-                  <Input
-                    id="topK"
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={topK}
-                    onChange={(e) => setTopK(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Số lượng chunks tối đa trả về khi tìm kiếm
-                  </p>
+                  <Input id="topK" type="number" min="1" max="20" value={topK} onChange={(e) => setTopK(e.target.value)} />
+                  <p className="text-xs text-muted-foreground">{t('settings.topKDesc')}</p>
                 </div>
               </div>
             </CardContent>
@@ -503,28 +398,26 @@ export default function SettingsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Thống kê Vector Database</CardTitle>
-              <CardDescription>
-                Thông tin về dữ liệu đã được index
-              </CardDescription>
+              <CardTitle>{t('settings.vectorStats')}</CardTitle>
+              <CardDescription>{t('settings.vectorStatsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-4">
                 <div className="p-4 rounded-lg bg-muted/50 text-center">
                   <p className="text-2xl font-bold">145</p>
-                  <p className="text-sm text-muted-foreground">Tổng chunks</p>
+                  <p className="text-sm text-muted-foreground">{t('settings.totalChunks')}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50 text-center">
                   <p className="text-2xl font-bold">6</p>
-                  <p className="text-sm text-muted-foreground">Tài liệu</p>
+                  <p className="text-sm text-muted-foreground">{t('settings.documents')}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50 text-center">
                   <p className="text-2xl font-bold">1536</p>
-                  <p className="text-sm text-muted-foreground">Dimension</p>
+                  <p className="text-sm text-muted-foreground">{t('settings.dimension')}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50 text-center">
                   <p className="text-2xl font-bold">2.3 MB</p>
-                  <p className="text-sm text-muted-foreground">Dung lượng</p>
+                  <p className="text-sm text-muted-foreground">{t('settings.storage')}</p>
                 </div>
               </div>
             </CardContent>
@@ -537,50 +430,33 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5" />
-                Thông báo Email
+                {t('settings.emailNotif')}
               </CardTitle>
-              <CardDescription>
-                Cấu hình gửi thông báo qua email
-              </CardDescription>
+              <CardDescription>{t('settings.emailNotifConfig')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Thông báo email</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Gửi thông báo quan trọng qua email
-                  </p>
+                  <Label>{t('settings.emailNotifLabel')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('settings.emailNotifDesc')}</p>
                 </div>
-                <Switch
-                  checked={emailNotifications}
-                  onCheckedChange={setEmailNotifications}
-                />
+                <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Nhắc nhở Quiz</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Gửi email nhắc nhở khi có quiz mới
-                  </p>
+                  <Label>{t('settings.quizReminder')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('settings.quizReminderDesc')}</p>
                 </div>
-                <Switch
-                  checked={quizReminders}
-                  onCheckedChange={setQuizReminders}
-                />
+                <Switch checked={quizReminders} onCheckedChange={setQuizReminders} />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Cảnh báo hệ thống</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Thông báo khi có lỗi hoặc sự cố
-                  </p>
+                  <Label>{t('settings.systemAlerts')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('settings.systemAlertsDesc')}</p>
                 </div>
-                <Switch
-                  checked={systemAlerts}
-                  onCheckedChange={setSystemAlerts}
-                />
+                <Switch checked={systemAlerts} onCheckedChange={setSystemAlerts} />
               </div>
             </CardContent>
           </Card>
@@ -592,49 +468,41 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Cài đặt bảo mật
+                {t('settings.securitySettings')}
               </CardTitle>
-              <CardDescription>
-                Cấu hình bảo mật và xác thực
-              </CardDescription>
+              <CardDescription>{t('settings.securityDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Xác thực 2 yếu tố (2FA)</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Yêu cầu xác thực 2 bước cho admin
-                  </p>
+                  <Label>{t('settings.2fa')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('settings.2faDesc')}</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Giới hạn đăng nhập sai</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Khóa tài khoản sau 5 lần đăng nhập sai
-                  </p>
+                  <Label>{t('settings.loginLimit')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('settings.loginLimitDesc')}</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Session Timeout</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Tự động đăng xuất sau 30 phút không hoạt động
-                  </p>
+                  <Label>{t('settings.sessionTimeout')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('settings.sessionTimeoutDesc')}</p>
                 </div>
                 <Select defaultValue="30">
                   <SelectTrigger className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="15">15 phút</SelectItem>
-                    <SelectItem value="30">30 phút</SelectItem>
-                    <SelectItem value="60">60 phút</SelectItem>
-                    <SelectItem value="120">2 giờ</SelectItem>
+                    <SelectItem value="15">15 {t('settings.minutes')}</SelectItem>
+                    <SelectItem value="30">30 {t('settings.minutes')}</SelectItem>
+                    <SelectItem value="60">60 {t('settings.minutes')}</SelectItem>
+                    <SelectItem value="120">2 {t('settings.hours')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -643,23 +511,13 @@ export default function SettingsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Nhật ký hoạt động</CardTitle>
-              <CardDescription>
-                Hoạt động gần đây của quản trị viên
-              </CardDescription>
+              <CardTitle>{t('settings.activityLog')}</CardTitle>
+              <CardDescription>{t('settings.activityLogDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {[
-                  { action: 'Đăng nhập hệ thống', user: 'admin@edu.vn', time: '5 phút trước' },
-                  { action: 'Cập nhật cấu hình LLM', user: 'admin@edu.vn', time: '1 giờ trước' },
-                  { action: 'Thêm người dùng mới', user: 'admin@edu.vn', time: '2 giờ trước' },
-                  { action: 'Xóa tài liệu', user: 'admin@edu.vn', time: '1 ngày trước' },
-                ].map((log, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                  >
+                {activityLogs.map((log, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                     <div>
                       <p className="font-medium">{log.action}</p>
                       <p className="text-sm text-muted-foreground">{log.user}</p>

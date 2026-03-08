@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Trash2 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ConfirmDeleteDialogProps {
   open: boolean;
@@ -25,6 +26,8 @@ export default function ConfirmDeleteDialog({
   description,
   onConfirm,
 }: ConfirmDeleteDialogProps) {
+  const { t } = useLanguage();
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -40,12 +43,12 @@ export default function ConfirmDeleteDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Hủy</AlertDialogCancel>
+          <AlertDialogCancel>{t('action.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Xóa
+            {t('action.delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

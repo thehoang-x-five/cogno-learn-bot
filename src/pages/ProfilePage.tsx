@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const { theme, toggleTheme, setTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const { toast } = useToast();
   const [fullName, setFullName] = useState(user?.fullName || '');
@@ -37,18 +37,18 @@ export default function ProfilePage() {
   };
 
   const activityLog = [
-    { action: language === 'vi' ? 'Đăng nhập hệ thống' : 'System login', time: language === 'vi' ? '5 phút trước' : '5 min ago', type: 'auth' },
-    { action: language === 'vi' ? 'Chat AI - Hỏi về OOP' : 'AI Chat - Asked about OOP', time: language === 'vi' ? '1 giờ trước' : '1 hour ago', type: 'chat' },
-    { action: language === 'vi' ? 'Hoàn thành Quiz Chương 2' : 'Completed Chapter 2 Quiz', time: language === 'vi' ? '3 giờ trước' : '3 hours ago', type: 'quiz' },
-    { action: language === 'vi' ? 'Xem tài liệu slide_chuong3.pdf' : 'Viewed slide_chuong3.pdf', time: language === 'vi' ? '5 giờ trước' : '5 hours ago', type: 'doc' },
-    { action: language === 'vi' ? 'Đăng nhập hệ thống' : 'System login', time: language === 'vi' ? '1 ngày trước' : '1 day ago', type: 'auth' },
+    { action: language === 'vi' ? 'Đăng nhập hệ thống' : 'System login', time: `5 ${t('time.minAgo')}`, type: 'auth' },
+    { action: language === 'vi' ? 'Chat AI - Hỏi về OOP' : 'AI Chat - Asked about OOP', time: `1 ${t('time.hourAgo')}`, type: 'chat' },
+    { action: language === 'vi' ? 'Hoàn thành Quiz Chương 2' : 'Completed Chapter 2 Quiz', time: `3 ${t('time.hourAgo')}`, type: 'quiz' },
+    { action: language === 'vi' ? 'Xem tài liệu slide_chuong3.pdf' : 'Viewed slide_chuong3.pdf', time: `5 ${t('time.hourAgo')}`, type: 'doc' },
+    { action: language === 'vi' ? 'Đăng nhập hệ thống' : 'System login', time: `1 ${t('time.dayAgo')}`, type: 'auth' },
   ];
 
   const activityIcons: Record<string, React.ElementType> = { auth: Shield, chat: MessageSquare, quiz: ClipboardList, doc: BookOpen };
   const activityColors: Record<string, string> = { auth: 'bg-info/10 text-info', chat: 'bg-primary/10 text-primary', quiz: 'bg-warning/10 text-warning', doc: 'bg-accent/10 text-accent' };
 
   const handleSave = () => {
-    toast({ title: t('toast.updated'), description: language === 'vi' ? 'Thông tin tài khoản đã được lưu.' : 'Account info has been saved.' });
+    toast({ title: t('toast.updated'), description: t('profile.savedDesc') });
   };
 
   return (
@@ -66,7 +66,6 @@ export default function ProfilePage() {
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
-          {/* Profile Card */}
           <Card className="overflow-hidden">
             <div className="h-24 bg-gradient-primary" />
             <CardContent className="relative pt-0">
@@ -74,9 +73,7 @@ export default function ProfilePage() {
                 <div className="relative">
                   <Avatar className="h-24 w-24 border-4 border-card">
                     <AvatarImage src={user?.avatarUrl} alt={user?.fullName} />
-                    <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-                      {user?.fullName?.charAt(0)}
-                    </AvatarFallback>
+                    <AvatarFallback className="text-2xl bg-primary/10 text-primary">{user?.fullName?.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <Button size="icon" variant="outline" className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-card">
                     <Camera className="h-4 w-4" />
@@ -95,7 +92,6 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Edit Form */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">{t('profile.personalInfo')}</CardTitle>
@@ -121,7 +117,6 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Appearance & Language */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
@@ -156,7 +151,6 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Stats */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
