@@ -235,7 +235,7 @@ export default function ChatPage() {
 
       {/* Main Chat Area */}
       <div className={cn('flex-1 flex flex-col min-w-0', isMobile && showConversations && 'hidden')}>
-        <div className="h-14 border-b flex items-center justify-between px-3 sm:px-6 bg-card/80 backdrop-blur-sm">
+        <div className="h-14 border-b flex items-center justify-between px-3 sm:px-6 bg-card/80 dark:bg-card/60 backdrop-blur-sm">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {isMobile && (
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setShowConversations(true)}>
