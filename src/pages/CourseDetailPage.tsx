@@ -503,7 +503,7 @@ export default function CourseDetailPage() {
 
       <ConfirmDeleteDialog open={!!deleteDocTarget} onOpenChange={(open) => !open && setDeleteDocTarget(null)}
         title={t('confirm.deleteDoc')}
-        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to delete'} "${deleteDocTarget?.filename}"?`}
+        description={`${t('courseDetail.confirmDeleteDoc')} "${deleteDocTarget?.filename}"?`}
         onConfirm={() => { setDocuments(prev => prev.filter(d => d.id !== deleteDocTarget?.id)); toast({ title: t('toast.deleted') }); setDeleteDocTarget(null); }}
       />
 
