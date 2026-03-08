@@ -491,6 +491,12 @@ const translations: Record<string, Record<Language, string>> = {
 
   // Time ago
   'time.minAgo': { vi: 'phút trước', en: 'min ago' },
+
+  // Profile activity items
+  'profile.act.login': { vi: 'Đăng nhập hệ thống', en: 'System login' },
+  'profile.act.chatOOP': { vi: 'Chat AI - Hỏi về OOP', en: 'AI Chat - Asked about OOP' },
+  'profile.act.quizDone': { vi: 'Hoàn thành Quiz Chương 2', en: 'Completed Chapter 2 Quiz' },
+  'profile.act.viewDoc': { vi: 'Xem tài liệu slide_chuong3.pdf', en: 'Viewed slide_chuong3.pdf' },
   'time.hourAgo': { vi: 'giờ trước', en: 'hours ago' },
   'time.dayAgo': { vi: 'ngày trước', en: 'days ago' },
 

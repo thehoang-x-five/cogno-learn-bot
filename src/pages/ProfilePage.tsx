@@ -37,11 +37,11 @@ export default function ProfilePage() {
   };
 
   const activityLog = [
-    { action: language === 'vi' ? 'Đăng nhập hệ thống' : 'System login', time: `5 ${t('time.minAgo')}`, type: 'auth' },
-    { action: language === 'vi' ? 'Chat AI - Hỏi về OOP' : 'AI Chat - Asked about OOP', time: `1 ${t('time.hourAgo')}`, type: 'chat' },
-    { action: language === 'vi' ? 'Hoàn thành Quiz Chương 2' : 'Completed Chapter 2 Quiz', time: `3 ${t('time.hourAgo')}`, type: 'quiz' },
-    { action: language === 'vi' ? 'Xem tài liệu slide_chuong3.pdf' : 'Viewed slide_chuong3.pdf', time: `5 ${t('time.hourAgo')}`, type: 'doc' },
-    { action: language === 'vi' ? 'Đăng nhập hệ thống' : 'System login', time: `1 ${t('time.dayAgo')}`, type: 'auth' },
+    { action: t('profile.act.login'), time: `5 ${t('time.minAgo')}`, type: 'auth' },
+    { action: t('profile.act.chatOOP'), time: `1 ${t('time.hourAgo')}`, type: 'chat' },
+    { action: t('profile.act.quizDone'), time: `3 ${t('time.hourAgo')}`, type: 'quiz' },
+    { action: t('profile.act.viewDoc'), time: `5 ${t('time.hourAgo')}`, type: 'doc' },
+    { action: t('profile.act.login'), time: `1 ${t('time.dayAgo')}`, type: 'auth' },
   ];
 
   const activityIcons: Record<string, React.ElementType> = { auth: Shield, chat: MessageSquare, quiz: ClipboardList, doc: BookOpen };
