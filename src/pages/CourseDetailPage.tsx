@@ -512,7 +512,7 @@ export default function CourseDetailPage() {
 
       <ConfirmDeleteDialog open={!!deleteQuizTarget} onOpenChange={(open) => !open && setDeleteQuizTarget(null)}
         title={t('confirm.deleteQuiz')}
-        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to delete'} "${deleteQuizTarget?.title}"?`}
+        description={`${t('courseDetail.confirmDeleteQuiz')} "${deleteQuizTarget?.title}"?`}
         onConfirm={() => { setQuizzes(prev => prev.filter(q => q.id !== deleteQuizTarget?.id)); toast({ title: t('toast.deleted') }); setDeleteQuizTarget(null); }}
       />
 
