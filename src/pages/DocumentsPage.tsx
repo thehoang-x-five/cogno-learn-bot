@@ -93,11 +93,62 @@ export default function DocumentsPage() {
   };
 
   const handleDownload = (doc: Document) => {
-    // Simulate download
-    const link = document.createElement('a');
-    link.href = '#';
-    link.download = doc.filename;
     toast({ title: 'Đang tải xuống', description: `${doc.filename} (${formatFileSize(doc.fileSize)}) đang được tải xuống...` });
+  };
+
+  const processFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    const allowedExts = ['.pdf', '.docx', '.txt'];
+
+    Array.from(files).forEach((file) => {
+      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!allowedTypes.includes(file.type) && !allowedExts.includes(ext)) {
+        toast({ title: 'Định dạng không hỗ trợ', description: `"${file.name}" không phải PDF, DOCX hoặc TXT.`, variant: 'destructive' });
+        return;
+      }
+
+      const tempId = Date.now().toString() + Math.random().toString(36).slice(2);
+      const fileType = ext.replace('.', '') as string;
+
+      // Add as processing
+      const newDoc: Document = {
+        id: tempId,
+        courseId: selectedCourse === 'all' ? '3' : selectedCourse,
+        uploadedBy: '2',
+        filename: file.name,
+        filePath: `/docs/${tempId}`,
+        fileType,
+        fileSize: file.size,
+        status: 'processing',
+        totalChunks: 0,
+        createdAt: new Date().toISOString(),
+      };
+      setDocuments(prev => [newDoc, ...prev]);
+      setUploadingFiles(prev => [...prev, tempId]);
+
+      toast({ title: 'Đang tải lên', description: `"${file.name}" đang được tải lên và xử lý...` });
+
+      // Simulate processing
+      setTimeout(() => {
+        setDocuments(prev => prev.map(d =>
+          d.id === tempId ? { ...d, status: 'ready' as DocumentStatus, totalChunks: Math.floor(Math.random() * 60 + 20) } : d
+        ));
+        setUploadingFiles(prev => prev.filter(id => id !== tempId));
+        toast({ title: 'Đã xử lý xong', description: `"${file.name}" đã sẵn sàng sử dụng.` });
+      }, 3000 + Math.random() * 2000);
+    });
+  };
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    processFiles(e.dataTransfer.files);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    processFiles(e.target.files);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
