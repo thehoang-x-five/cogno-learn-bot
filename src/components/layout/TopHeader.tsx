@@ -113,9 +113,9 @@ export default function TopHeader() {
               <p className="font-semibold text-sm">{t('notif.title')}</p>
             </div>
             {[
-              { title: 'Quiz mới: Ôn tập Chương 3', desc: 'CS301 - Lập trình OOP', time: language === 'vi' ? '5 phút trước' : '5 min ago', unread: true },
-              { title: language === 'vi' ? 'Tài liệu đã xử lý xong' : 'Document processed', desc: 'slide_chuong3.pdf', time: language === 'vi' ? '1 giờ trước' : '1 hour ago', unread: true },
-              { title: language === 'vi' ? 'Điểm Quiz Chương 2' : 'Chapter 2 Quiz Score', desc: language === 'vi' ? 'Bạn đạt 8/10 - Tốt!' : 'You scored 8/10 - Good!', time: language === 'vi' ? '3 giờ trước' : '3 hours ago', unread: true },
+              { title: t('notif.newQuiz'), desc: 'CS301 - Lập trình OOP', time: t('notif.timeAgo5m'), unread: true },
+              { title: t('notif.docProcessed'), desc: 'slide_chuong3.pdf', time: t('notif.timeAgo1h'), unread: true },
+              { title: t('notif.quizScore'), desc: t('notif.quizScoreDesc'), time: t('notif.timeAgo3h'), unread: true },
             ].map((notif, i) => (
               <DropdownMenuItem key={i} className="flex-col items-start gap-0.5 py-3 cursor-pointer">
                 <div className="flex items-center gap-2 w-full">
