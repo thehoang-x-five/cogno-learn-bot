@@ -93,28 +93,136 @@ export default function SettingsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
           <TabsTrigger value="general" className="gap-2">
             <Settings className="h-4 w-4" />
-            <span className="hidden sm:inline">Chung</span>
+            <span className="hidden sm:inline">{t('settings.general')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="appearance" className="gap-2">
+            <Palette className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('settings.appearance')}</span>
           </TabsTrigger>
           <TabsTrigger value="llm" className="gap-2">
             <Bot className="h-4 w-4" />
-            <span className="hidden sm:inline">LLM</span>
+            <span className="hidden sm:inline">{t('settings.llm')}</span>
           </TabsTrigger>
           <TabsTrigger value="rag" className="gap-2">
             <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">RAG</span>
+            <span className="hidden sm:inline">{t('settings.rag')}</span>
           </TabsTrigger>
           <TabsTrigger value="notifications" className="gap-2">
             <Bell className="h-4 w-4" />
-            <span className="hidden sm:inline">Thông báo</span>
+            <span className="hidden sm:inline">{t('settings.notifications')}</span>
           </TabsTrigger>
           <TabsTrigger value="security" className="gap-2">
             <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">Bảo mật</span>
+            <span className="hidden sm:inline">{t('settings.security')}</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Appearance Settings */}
+        <TabsContent value="appearance" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5" />
+                {t('settings.theme')}
+              </CardTitle>
+              <CardDescription>
+                {language === 'vi' ? 'Chọn giao diện sáng hoặc tối' : 'Choose light or dark theme'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`p-6 rounded-xl border-2 transition-all text-left ${
+                    theme === 'light' ? 'border-primary bg-primary/5 shadow-md' : 'border-border hover:border-primary/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
+                      <Sun className="h-5 w-5 text-warning" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">{t('settings.themeLight')}</p>
+                      <p className="text-xs text-muted-foreground">{language === 'vi' ? 'Giao diện sáng, dễ đọc ban ngày' : 'Bright theme, easy to read in daylight'}</p>
+                    </div>
+                  </div>
+                  {/* Mini preview */}
+                  <div className="rounded-lg border bg-background p-2 space-y-1.5">
+                    <div className="h-2 w-16 rounded bg-foreground/20" />
+                    <div className="h-2 w-24 rounded bg-foreground/10" />
+                    <div className="h-2 w-20 rounded bg-primary/30" />
+                  </div>
+                </button>
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`p-6 rounded-xl border-2 transition-all text-left ${
+                    theme === 'dark' ? 'border-primary bg-primary/5 shadow-md' : 'border-border hover:border-primary/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Moon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">{t('settings.themeDark')}</p>
+                      <p className="text-xs text-muted-foreground">{language === 'vi' ? 'Giao diện tối, bảo vệ mắt' : 'Dark theme, easy on the eyes'}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg border bg-sidebar p-2 space-y-1.5">
+                    <div className="h-2 w-16 rounded bg-sidebar-foreground/20" />
+                    <div className="h-2 w-24 rounded bg-sidebar-foreground/10" />
+                    <div className="h-2 w-20 rounded bg-primary/30" />
+                  </div>
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                {t('settings.language')}
+              </CardTitle>
+              <CardDescription>
+                {language === 'vi' ? 'Chọn ngôn ngữ hiển thị cho toàn hệ thống' : 'Choose the display language for the entire system'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <button
+                  onClick={() => setLanguage('vi')}
+                  className={`p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
+                    language === 'vi' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
+                  }`}
+                >
+                  <span className="text-2xl">🇻🇳</span>
+                  <div className="text-left">
+                    <p className="font-semibold">Tiếng Việt</p>
+                    <p className="text-xs text-muted-foreground">Vietnamese</p>
+                  </div>
+                  {language === 'vi' && <CheckCircle2 className="h-5 w-5 text-primary ml-auto" />}
+                </button>
+                <button
+                  onClick={() => setLanguage('en')}
+                  className={`p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
+                    language === 'en' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
+                  }`}
+                >
+                  <span className="text-2xl">🇺🇸</span>
+                  <div className="text-left">
+                    <p className="font-semibold">English</p>
+                    <p className="text-xs text-muted-foreground">Tiếng Anh</p>
+                  </div>
+                  {language === 'en' && <CheckCircle2 className="h-5 w-5 text-primary ml-auto" />}
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* General Settings */}
         <TabsContent value="general" className="space-y-6">
