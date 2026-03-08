@@ -236,12 +236,17 @@ export default function ChatPage() {
       {/* Main Chat Area */}
       <div className={cn('flex-1 flex flex-col min-w-0', isMobile && showConversations && 'hidden')}>
         <div className="h-14 border-b flex items-center justify-between px-3 sm:px-6 bg-card/80 backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {isMobile && (
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setShowConversations(true)}>
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            )}
+            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               <BookOpen className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <h2 className="font-semibold text-sm">{currentCourse?.name}</h2>
+            <div className="min-w-0">
+              <h2 className="font-semibold text-sm truncate">{currentCourse?.name}</h2>
               <p className="text-xs text-muted-foreground">{currentCourse?.code}</p>
             </div>
           </div>
