@@ -227,10 +227,10 @@ export default function CourseDetailPage() {
               <CardHeader><CardTitle>{t('courseDetail.recentActivity')}</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 {[
-                  { icon: FileText, text: language === 'vi' ? 'Đã tải lên slide_chuong3.pdf' : 'Uploaded slide_chuong3.pdf', time: `2 ${t('time.hourAgo')}` },
-                  { icon: ClipboardList, text: language === 'vi' ? 'Quiz Chương 2 đã hoàn thành bởi 5 SV' : 'Chapter 2 Quiz completed by 5 students', time: `5 ${t('time.hourAgo')}` },
-                  { icon: MessageSquare, text: language === 'vi' ? '12 câu hỏi mới từ sinh viên' : '12 new questions from students', time: `1 ${t('time.dayAgo')}` },
-                  { icon: Users, text: language === 'vi' ? '3 sinh viên mới đăng ký' : '3 new students enrolled', time: `2 ${t('time.dayAgo')}` },
+                  { icon: FileText, text: t('courseDetail.activity.uploaded'), time: `2 ${t('time.hourAgo')}` },
+                  { icon: ClipboardList, text: t('courseDetail.activity.quizCompleted'), time: `5 ${t('time.hourAgo')}` },
+                  { icon: MessageSquare, text: t('courseDetail.activity.newQuestions'), time: `1 ${t('time.dayAgo')}` },
+                  { icon: Users, text: t('courseDetail.activity.newStudents'), time: `2 ${t('time.dayAgo')}` },
                 ].map((activity, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
