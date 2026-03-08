@@ -414,7 +414,23 @@ export default function QuizzesPage() {
         )}
       </Tabs>
 
-      <CreateQuizDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+      <CreateQuizDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onQuizCreated={(data) => {
+          const newQuiz: Quiz = {
+            id: Date.now().toString(),
+            courseId: data.courseId,
+            createdBy: user?.id || '2',
+            title: data.title,
+            chapter: data.chapter,
+            isAiGenerated: data.isAiGenerated,
+            questionCount: data.questionCount,
+            createdAt: new Date().toISOString(),
+          };
+          setQuizzes(prev => [newQuiz, ...prev]);
+        }}
+      />
 
       <ConfirmDeleteDialog
         open={!!deleteTarget}
