@@ -71,7 +71,7 @@ export default function SettingsPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 page-enter">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">{t('settings.title')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('settings.title')}</h1>
           <p className="text-muted-foreground mt-1">{t('settings.subtitle')}</p>
         </div>
         <div className="flex gap-2">
