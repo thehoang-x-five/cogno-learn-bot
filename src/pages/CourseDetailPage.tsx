@@ -497,7 +497,7 @@ export default function CourseDetailPage() {
 
       <ConfirmDeleteDialog open={deleteCourseOpen} onOpenChange={setDeleteCourseOpen}
         title={t('confirm.deleteCourse')}
-        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to delete'} "${course.name}"? ${t('confirm.irreversible')}`}
+        description={`${t('courseDetail.confirmDeleteCourse')} "${course.name}"? ${t('confirm.irreversible')}`}
         onConfirm={() => { toast({ title: t('toast.deleted') }); navigate('/courses'); }}
       />
 
