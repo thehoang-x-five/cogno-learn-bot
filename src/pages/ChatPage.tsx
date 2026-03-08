@@ -305,9 +305,11 @@ export default function ChatPage() {
                 </Avatar>
                 <div className={cn('flex-1 space-y-2', message.role === 'user' ? 'text-right' : '')}>
                   <div className={cn('inline-block rounded-2xl px-4 py-3 max-w-full text-sm',
-                    message.role === 'user' ? 'bg-chat-user text-chat-user-foreground rounded-tr-sm' : 'bg-chat-assistant text-chat-assistant-foreground rounded-tl-sm'
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-tr-sm'
+                      : 'bg-secondary dark:bg-secondary/80 text-foreground rounded-tl-sm'
                   )}>
-                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <div className="prose prose-sm max-w-none dark:prose-invert [&_strong]:text-inherit [&_h3]:text-inherit [&_code]:text-inherit">
                       {message.role === 'assistant' ? (
                         <div dangerouslySetInnerHTML={{
                           __html: message.content
