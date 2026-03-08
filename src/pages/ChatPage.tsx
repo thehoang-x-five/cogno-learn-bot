@@ -235,7 +235,7 @@ export default function ChatPage() {
 
       {/* Main Chat Area */}
       <div className={cn('flex-1 flex flex-col min-w-0', isMobile && showConversations && 'hidden')}>
-        <div className="h-14 border-b flex items-center justify-between px-3 sm:px-6 bg-card/80 backdrop-blur-sm">
+        <div className="h-14 border-b flex items-center justify-between px-3 sm:px-6 bg-card/80 dark:bg-card/60 backdrop-blur-sm">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {isMobile && (
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setShowConversations(true)}>
@@ -305,15 +305,17 @@ export default function ChatPage() {
                 </Avatar>
                 <div className={cn('flex-1 space-y-2', message.role === 'user' ? 'text-right' : '')}>
                   <div className={cn('inline-block rounded-2xl px-4 py-3 max-w-full text-sm',
-                    message.role === 'user' ? 'bg-chat-user text-chat-user-foreground rounded-tr-sm' : 'bg-chat-assistant text-chat-assistant-foreground rounded-tl-sm'
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-tr-sm'
+                      : 'bg-secondary dark:bg-secondary/80 text-foreground rounded-tl-sm'
                   )}>
-                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <div className="prose prose-sm max-w-none dark:prose-invert [&_strong]:text-inherit [&_h3]:text-inherit [&_code]:text-inherit">
                       {message.role === 'assistant' ? (
                         <div dangerouslySetInnerHTML={{
                           __html: message.content
                             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                             .replace(/`([^`]+)`/g, '<code class="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">$1</code>')
-                            .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-sidebar text-sidebar-foreground p-3 rounded-lg text-xs overflow-x-auto my-3 font-mono"><code>$2</code></pre>')
+                            .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-muted dark:bg-muted/60 text-foreground p-3 rounded-lg text-xs overflow-x-auto my-3 font-mono"><code>$2</code></pre>')
                             .replace(/## (.*)/g, '<h3 class="font-semibold text-base mt-4 mb-2">$1</h3>')
                             .replace(/\n\n/g, '</p><p class="my-2">')
                             .replace(/\n(\d+\.)/g, '<br/>$1'),
@@ -343,7 +345,7 @@ export default function ChatPage() {
             {isTyping && (
               <div className="flex gap-4 message-appear">
                 <Avatar className="h-8 w-8"><AvatarFallback className="bg-accent text-accent-foreground"><Bot className="h-4 w-4" /></AvatarFallback></Avatar>
-                <div className="bg-chat-assistant rounded-2xl rounded-tl-sm px-4 py-3">
+                <div className="bg-secondary dark:bg-secondary/80 text-foreground rounded-2xl rounded-tl-sm px-4 py-3">
                   <div className="flex gap-1.5">
                     <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground" />
                     <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground" />
@@ -356,9 +358,9 @@ export default function ChatPage() {
           </div>
         </ScrollArea>
 
-        <div className="border-t p-2 sm:p-4 bg-card/80 backdrop-blur-sm">
+        <div className="border-t p-2 sm:p-4 bg-card/80 dark:bg-card/60 backdrop-blur-sm">
           <div className="max-w-3xl mx-auto">
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-secondary/50 border focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/30 transition-all">
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-secondary/50 dark:bg-secondary/30 border border-border/40 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/30 transition-all">
               <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => toast({ title: t('chat.attachFile'), description: t('chat.attachDesc') })}>
                 <Paperclip className="h-4 w-4 text-muted-foreground" />
               </Button>

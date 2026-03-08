@@ -17,6 +17,7 @@ import QuizzesPage from "@/pages/QuizzesPage";
 import UsersPage from "@/pages/UsersPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ProfilePage from "@/pages/ProfilePage";
+import NotificationsPage from "@/pages/NotificationsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/users" element={<MainLayout><UsersPage /></MainLayout>} />
                 <Route path="/settings" element={<MainLayout><SettingsPage /></MainLayout>} />
                 <Route path="/profile" element={<MainLayout><ProfilePage /></MainLayout>} />
+                <Route path="/notifications" element={<MainLayout><NotificationsPage /></MainLayout>} />
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
