@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import StatCard from '@/components/shared/StatCard';
 import {
   BookOpen, MessageSquare, ClipboardList, Star, ArrowRight,
   Sparkles, Trophy, Target, Flame, Calendar, Clock, Play,
@@ -13,10 +14,10 @@ export default function StudentDashboard() {
   const { t, language } = useLanguage();
 
   const stats = [
-    { name: t('student.courses'), value: '6', icon: BookOpen, color: 'text-primary' },
-    { name: t('student.questionsAsked'), value: '89', icon: MessageSquare, color: 'text-accent' },
-    { name: t('student.quizCompleted'), value: '23', icon: ClipboardList, color: 'text-warning' },
-    { name: t('student.avgScore'), value: '8.5', icon: Star, color: 'text-info' },
+    { name: t('student.courses'), value: '6', icon: BookOpen, iconColor: 'text-primary', iconBg: 'bg-primary/10' },
+    { name: t('student.questionsAsked'), value: '89', icon: MessageSquare, iconColor: 'text-accent', iconBg: 'bg-accent/10' },
+    { name: t('student.quizCompleted'), value: '23', icon: ClipboardList, iconColor: 'text-warning', iconBg: 'bg-warning/10' },
+    { name: t('student.avgScore'), value: '8.5', icon: Star, iconColor: 'text-info', iconBg: 'bg-info/10' },
   ];
 
   const courses = [
@@ -44,86 +45,78 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 stagger-children">
         {stats.map((stat) => (
-          <Card key={stat.name} className="hover-lift">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{stat.name}</CardTitle>
-              <stat.icon className={`h-5 w-5 ${stat.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{stat.value}</div>
-            </CardContent>
-          </Card>
+          <StatCard key={stat.name} title={stat.name} value={stat.value} icon={stat.icon} iconColor={stat.iconColor} iconBg={stat.iconBg} />
         ))}
       </div>
 
       {/* Study Streak + CTA */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-warning/10 flex items-center justify-center">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
+        <Card className="bg-gradient-to-br from-warning/5 via-transparent to-warning/5 border-warning/20">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-warning/10 flex items-center justify-center shrink-0">
               <Flame className="h-7 w-7 text-warning" />
             </div>
             <div>
-              <p className="text-3xl font-bold">{studyStreak.current} {t('student.days')}</p>
-              <p className="text-sm text-muted-foreground">{t('student.studyStreak')} ({t('student.streakRecord')}: {studyStreak.best})</p>
+              <p className="text-3xl font-bold">{studyStreak.current} <span className="text-base font-medium text-muted-foreground">{t('student.days')}</span></p>
+              <p className="text-sm text-muted-foreground">{t('student.studyStreak')} · {t('student.streakRecord')}: {studyStreak.best}</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 border-primary/20">
-          <CardContent className="p-6 flex items-center justify-between">
+        <Card className="md:col-span-2 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 border-primary/15">
+          <CardContent className="p-5 flex items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold">{t('student.askAINow')}</h3>
-              <p className="text-sm text-muted-foreground">{t('student.askAIDesc')}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{t('student.askAIDesc')}</p>
             </div>
             <Link to="/chat">
-              <Button variant="gradient" size="lg" className="gap-2">
+              <Button variant="gradient" size="lg" className="gap-2 shrink-0">
                 <Sparkles className="h-5 w-5" />
-                {t('student.chatWithAI')}
+                <span className="hidden sm:inline">{t('student.chatWithAI')}</span>
+                <span className="sm:hidden">Chat AI</span>
               </Button>
             </Link>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Courses Progress */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>{t('student.progress')}</CardTitle>
-                <CardDescription>{t('student.progressDesc')}</CardDescription>
+                <CardTitle className="text-base">{t('student.progress')}</CardTitle>
+                <CardDescription className="mt-0.5">{t('student.progressDesc')}</CardDescription>
               </div>
               <Link to="/courses">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  {t('action.viewAll')} <ArrowRight className="h-4 w-4" />
+                <Button variant="ghost" size="sm" className="gap-1 text-xs">
+                  {t('action.viewAll')} <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {courses.map((course) => (
               <Link
-                key={course.id}
-                to={`/courses/${course.id}`}
-                className="flex items-center gap-4 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                key={course.id} to={`/courses/${course.id}`}
+                className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/60 transition-all group"
               >
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <BookOpen className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-sm">{course.name}</p>
-                    <Badge variant="outline" className="text-xs">{course.code}</Badge>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <p className="font-medium text-sm truncate">{course.name}</p>
+                    <Badge variant="outline" className="text-[10px] h-5 shrink-0">{course.code}</Badge>
                   </div>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <Progress value={course.progress} className="h-2 flex-1" />
-                    <span className="text-xs font-medium w-8">{course.progress}%</span>
+                  <div className="flex items-center gap-2">
+                    <Progress value={course.progress} className="h-1.5 flex-1" />
+                    <span className="text-xs font-medium text-muted-foreground w-8">{course.progress}%</span>
                   </div>
                 </div>
               </Link>
@@ -133,67 +126,70 @@ export default function StudentDashboard() {
 
         {/* Recent Quiz Results */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>{t('student.recentResults')}</CardTitle>
-                <CardDescription>{t('student.recentResultsDesc')}</CardDescription>
+                <CardTitle className="text-base">{t('student.recentResults')}</CardTitle>
+                <CardDescription className="mt-0.5">{t('student.recentResultsDesc')}</CardDescription>
               </div>
               <Link to="/quizzes">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  {t('action.viewAll')} <ArrowRight className="h-4 w-4" />
+                <Button variant="ghost" size="sm" className="gap-1 text-xs">
+                  {t('action.viewAll')} <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {recentQuizResults.map((result, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary/50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                    result.score / result.total >= 0.8 ? 'bg-accent/10' : result.score / result.total >= 0.5 ? 'bg-warning/10' : 'bg-destructive/10'
-                  }`}>
-                    <Trophy className={`h-5 w-5 ${
-                      result.score / result.total >= 0.8 ? 'text-accent' : result.score / result.total >= 0.5 ? 'text-warning' : 'text-destructive'
-                    }`} />
+          <CardContent className="space-y-2">
+            {recentQuizResults.map((result, i) => {
+              const pct = result.score / result.total;
+              return (
+                <div key={i} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/40 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+                      pct >= 0.8 ? 'bg-accent/10' : pct >= 0.5 ? 'bg-warning/10' : 'bg-destructive/10'
+                    }`}>
+                      <Trophy className={`h-5 w-5 ${pct >= 0.8 ? 'text-accent' : pct >= 0.5 ? 'text-warning' : 'text-destructive'}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{result.title}</p>
+                      <p className="text-xs text-muted-foreground">{result.course} · {result.date}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">{result.title}</p>
-                    <p className="text-xs text-muted-foreground">{result.course} • {result.date}</p>
+                  <div className="text-right">
+                    <span className="text-lg font-bold">{result.score}<span className="text-sm text-muted-foreground">/{result.total}</span></span>
                   </div>
                 </div>
-                <span className="text-lg font-bold">{result.score}/{result.total}</span>
-              </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Upcoming Quizzes */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Target className="h-4 w-4 text-warning" />
               {t('student.upcomingQuizzes')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {upcomingQuizzes.map((quiz, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+              <div key={i} className="flex items-center justify-between p-3.5 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
                     <ClipboardList className="h-5 w-5 text-warning" />
                   </div>
                   <div>
                     <p className="font-medium text-sm">{quiz.title}</p>
-                    <p className="text-xs text-muted-foreground">{quiz.course} • {quiz.questions} {t('quiz.questions')}</p>
+                    <p className="text-xs text-muted-foreground">{quiz.course} · {quiz.questions} {t('quiz.questions')}</p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0 ml-3">
                   <p className="text-sm font-medium">{quiz.dueDate}</p>
                   <Link to="/quizzes">
-                    <Button size="sm" variant="ghost" className="gap-1 h-7 mt-1">
+                    <Button size="sm" variant="ghost" className="gap-1 h-7 mt-0.5 text-xs">
                       <Play className="h-3 w-3" /> {t('student.takeQuiz')}
                     </Button>
                   </Link>
@@ -205,25 +201,25 @@ export default function StudentDashboard() {
 
         {/* Exam Schedule */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Calendar className="h-4 w-4 text-primary" />
               {t('student.examSchedule')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {examSchedule.map((exam, i) => (
-              <div key={i} className="p-4 rounded-lg bg-muted/50 space-y-2">
+              <div key={i} className="p-3.5 rounded-lg bg-muted/30 border border-border/50 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <Badge variant="outline">{exam.course} - {exam.type}</Badge>
-                  <Badge className="bg-destructive/10 text-destructive border-destructive/20">
-                    {t('student.daysLeft')} {exam.daysLeft} {t('student.daysLeftSuffix')}
+                  <Badge variant="outline" className="text-xs">{exam.course} — {exam.type}</Badge>
+                  <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] h-5">
+                    {exam.daysLeft} {t('student.daysLeftSuffix')}
                   </Badge>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{exam.date}</span>
                   <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{exam.time}</span>
-                  <span>{t('student.room')} {exam.room}</span>
+                  <span className="text-xs">{t('student.room')} {exam.room}</span>
                 </div>
               </div>
             ))}

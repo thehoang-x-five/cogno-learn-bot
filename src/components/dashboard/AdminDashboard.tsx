@@ -2,9 +2,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import StatCard from '@/components/shared/StatCard';
 import {
   Users, BookOpen, FileText, MessageSquare, TrendingUp,
-  Activity, BarChart3, Bot,
+  Activity, BarChart3, Bot, Cpu,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -16,10 +17,10 @@ export default function AdminDashboard() {
   const { t, language } = useLanguage();
 
   const systemStats = [
-    { name: t('admin.totalUsers'), value: '1,234', icon: Users, change: '+12%', color: 'text-primary', bg: 'bg-primary/10' },
-    { name: t('admin.activeCourses'), value: '48', icon: BookOpen, change: '+3', color: 'text-accent', bg: 'bg-accent/10' },
-    { name: t('admin.processedDocs'), value: '856', icon: FileText, change: '+24', color: 'text-warning', bg: 'bg-warning/10' },
-    { name: t('admin.conversations'), value: '5,678', icon: MessageSquare, change: '+156', color: 'text-info', bg: 'bg-info/10' },
+    { name: t('admin.totalUsers'), value: '1,234', icon: Users, change: '+12%', iconColor: 'text-primary', iconBg: 'bg-primary/10' },
+    { name: t('admin.activeCourses'), value: '48', icon: BookOpen, change: '+3', iconColor: 'text-accent', iconBg: 'bg-accent/10' },
+    { name: t('admin.processedDocs'), value: '856', icon: FileText, change: '+24', iconColor: 'text-warning', iconBg: 'bg-warning/10' },
+    { name: t('admin.conversations'), value: '5,678', icon: MessageSquare, change: '+156', iconColor: 'text-info', iconBg: 'bg-info/10' },
   ];
 
   const recentRegistrations = [
@@ -62,60 +63,59 @@ export default function AdminDashboard() {
   ];
 
   const roleLabels: Record<string, string> = {
-    admin: t('role.admin'),
-    teacher: t('role.teacher'),
-    student: t('role.student'),
+    admin: t('role.admin'), teacher: t('role.teacher'), student: t('role.student'),
+  };
+
+  const tooltipStyle = {
+    backgroundColor: 'hsl(var(--card))',
+    border: '1px solid hsl(var(--border))',
+    borderRadius: '10px',
+    fontSize: '12px',
+    boxShadow: '0 8px 30px -8px hsl(var(--foreground) / 0.1)',
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 stagger-children">
         {systemStats.map((stat) => (
-          <Card key={stat.name} className="hover-lift overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{stat.name}</CardTitle>
-              <div className={`h-9 w-9 rounded-lg ${stat.bg} flex items-center justify-center`}>
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{stat.value}</div>
-              <p className="text-xs text-accent flex items-center gap-1 mt-1">
-                <TrendingUp className="h-3 w-3" />
-                {stat.change} {t('admin.comparedLastMonth')}
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            key={stat.name}
+            title={stat.name}
+            value={stat.value}
+            icon={stat.icon}
+            change={stat.change}
+            subtitle={t('admin.comparedLastMonth')}
+            iconColor={stat.iconColor}
+            iconBg={stat.iconBg}
+          />
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Usage Chart */}
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              {t('admin.usageByDay')}
-            </CardTitle>
-            <CardDescription>{t('admin.usageByDayDesc')}</CardDescription>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  {t('admin.usageByDay')}
+                </CardTitle>
+                <CardDescription className="mt-0.5">{t('admin.usageByDayDesc')}</CardDescription>
+              </div>
+              <Badge variant="outline" className="text-xs font-normal">{t('admin.day.mon')} - {t('admin.day.sun')}</Badge>
+            </div>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={usageByDay} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="day" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
-                <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
-                />
-                <Bar dataKey="chats" name="Chat AI" fill="hsl(234, 89%, 58%)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="quizzes" name="Quiz" fill="hsl(160, 84%, 39%)" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Bar dataKey="chats" name="Chat AI" fill="hsl(234, 89%, 58%)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="quizzes" name="Quiz" fill="hsl(160, 84%, 39%)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -123,51 +123,41 @@ export default function AdminDashboard() {
 
         {/* User Distribution */}
         <Card>
-          <CardHeader>
-            <CardTitle>{t('admin.userDistribution')}</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">{t('admin.userDistribution')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie
-                  data={userDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={85}
-                  paddingAngle={4}
-                  dataKey="value"
+                  data={userDistribution} cx="50%" cy="50%"
+                  innerRadius={58} outerRadius={82} paddingAngle={5} dataKey="value" strokeWidth={0}
                 >
                   {userDistribution.map((entry, i) => (
                     <Cell key={i} fill={entry.color} />
                   ))}
                 </Pie>
-                <Legend
-                  verticalAlign="bottom"
-                  iconType="circle"
-                  iconSize={8}
-                  formatter={(value: string) => <span className="text-xs text-muted-foreground">{value}</span>}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
-                />
+                <Tooltip contentStyle={tooltipStyle} />
               </PieChart>
             </ResponsiveContainer>
+            <div className="flex items-center justify-center gap-5 -mt-2">
+              {userDistribution.map((entry) => (
+                <div key={entry.name} className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                  <span className="text-xs text-muted-foreground">{entry.name}</span>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Traffic Overview */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Activity className="h-4 w-4 text-primary" />
               {t('admin.traffic')}
             </CardTitle>
           </CardHeader>
@@ -176,21 +166,14 @@ export default function AdminDashboard() {
               <AreaChart data={trafficData}>
                 <defs>
                   <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(234, 89%, 58%)" stopOpacity={0.3} />
+                    <stop offset="5%" stopColor="hsl(234, 89%, 58%)" stopOpacity={0.2} />
                     <stop offset="95%" stopColor="hsl(234, 89%, 58%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="time" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Area type="monotone" dataKey="users" name={t('users.user')} stroke="hsl(234, 89%, 58%)" fill="url(#colorUsers)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
@@ -199,34 +182,32 @@ export default function AdminDashboard() {
 
         {/* System Health */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              {t('admin.systemHealth')}
-            </CardTitle>
-            <CardDescription>{t('admin.serviceStatus')}</CardDescription>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Cpu className="h-4 w-4 text-primary" />
+                  {t('admin.systemHealth')}
+                </CardTitle>
+                <CardDescription className="mt-0.5">{t('admin.serviceStatus')}</CardDescription>
+              </div>
+              <Badge variant="outline" className="gap-1.5 text-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+                {t('admin.online')}
+              </Badge>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             {systemHealth.map((service) => (
-              <div key={service.name} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div className="flex items-center gap-3">
-                  {service.status === 'online' ? (
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent" />
-                    </span>
-                  ) : (
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-warning" />
-                    </span>
-                  )}
+              <div key={service.name} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
+                <div className="flex items-center gap-2.5">
+                  <span className={`h-2 w-2 rounded-full ${service.status === 'online' ? 'bg-accent' : 'bg-warning'}`} />
                   <span className="font-medium text-sm">{service.name}</span>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>{service.uptime}</span>
-                  <span className="w-12 text-right">{service.latency}</span>
-                  <Badge variant="outline" className={`text-[10px] ${service.status === 'online' ? 'status-ready' : 'status-processing'}`}>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="hidden sm:inline">{service.uptime}</span>
+                  <span className="w-12 text-right font-mono">{service.latency}</span>
+                  <Badge variant="outline" className={`text-[10px] h-5 ${service.status === 'online' ? 'status-ready' : 'status-processing'}`}>
                     {service.status === 'online' ? t('admin.online') : t('admin.degraded')}
                   </Badge>
                 </div>
@@ -236,18 +217,18 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Recent Registrations */}
         <Card>
-          <CardHeader>
-            <CardTitle>{t('admin.recentRegistrations')}</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">{t('admin.recentRegistrations')}</CardTitle>
             <CardDescription>{t('admin.newUsersJoined')}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             {recentRegistrations.map((user, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary/50 transition-colors">
+              <div key={i} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/40 transition-colors group">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
+                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary group-hover:scale-105 transition-transform">
                     {user.name.charAt(0)}
                   </div>
                   <div>
@@ -256,10 +237,8 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    {roleLabels[user.role]}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">{user.time}</span>
+                  <Badge variant="outline" className="text-[10px] h-5">{roleLabels[user.role]}</Badge>
+                  <span className="text-[11px] text-muted-foreground w-16 text-right">{user.time}</span>
                 </div>
               </div>
             ))}
@@ -268,38 +247,36 @@ export default function AdminDashboard() {
 
         {/* Token Usage */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5" />
-              {t('admin.aiUsage')}
-            </CardTitle>
-            <CardDescription>{t('admin.aiUsageDesc')}</CardDescription>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Bot className="h-4 w-4 text-primary" />
+                  {t('admin.aiUsage')}
+                </CardTitle>
+                <CardDescription className="mt-0.5">{t('admin.aiUsageDesc')}</CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">GPT-4 Turbo</span>
-                <span className="text-sm font-medium">245,000 / 500,000</span>
+            {[
+              { name: 'GPT-4 Turbo', used: 245000, total: 500000 },
+              { name: 'GPT-3.5 Turbo', used: 890000, total: 2000000 },
+              { name: 'Embedding', used: 1200000, total: 5000000 },
+            ].map((model) => (
+              <div key={model.name} className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">{model.name}</span>
+                  <span className="text-muted-foreground font-mono text-xs">
+                    {(model.used / 1000).toFixed(0)}K / {(model.total / 1000).toFixed(0)}K
+                  </span>
+                </div>
+                <Progress value={(model.used / model.total) * 100} className="h-1.5" />
               </div>
-              <Progress value={49} className="h-2" />
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">GPT-3.5 Turbo</span>
-                <span className="text-sm font-medium">890,000 / 2,000,000</span>
-              </div>
-              <Progress value={44.5} className="h-2" />
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Embedding</span>
-                <span className="text-sm font-medium">1,200,000 / 5,000,000</span>
-              </div>
-              <Progress value={24} className="h-2" />
-            </div>
-            <div className="pt-2 border-t flex items-center justify-between text-sm">
+            ))}
+            <div className="pt-3 border-t flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{t('admin.estimatedCost')}</span>
-              <span className="font-semibold text-primary">$48.50</span>
+              <span className="font-bold text-primary text-lg">$48.50</span>
             </div>
           </CardContent>
         </Card>
