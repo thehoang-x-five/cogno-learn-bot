@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Document, DocumentStatus, FileType as DocFileType } from '@/types';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,13 +40,6 @@ const courses = [
   { id: '3', name: 'CS301 - Lập trình OOP' },
 ];
 
-const statusConfig: Record<DocumentStatus, { label: string; icon: React.ElementType; className: string }> = {
-  ready: { label: 'Sẵn sàng', icon: CheckCircle2, className: 'status-ready' },
-  processing: { label: 'Đang xử lý', icon: Loader2, className: 'status-processing' },
-  pending: { label: 'Chờ xử lý', icon: Clock, className: 'status-pending' },
-  error: { label: 'Lỗi', icon: AlertCircle, className: 'status-error' },
-};
-
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
@@ -61,6 +55,7 @@ const getFileIcon = (fileType: string) => {
 };
 
 export default function DocumentsPage() {
+  const { t, language } = useLanguage();
   const [documents, setDocuments] = useState(initialDocuments);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
@@ -71,6 +66,13 @@ export default function DocumentsPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<Document | null>(null);
   const [previewTarget, setPreviewTarget] = useState<Document | null>(null);
+
+  const statusConfig: Record<DocumentStatus, { label: string; icon: React.ElementType; className: string }> = {
+    ready: { label: t('docs.statusReady'), icon: CheckCircle2, className: 'status-ready' },
+    processing: { label: t('docs.statusProcessing'), icon: Loader2, className: 'status-processing' },
+    pending: { label: t('docs.statusPending'), icon: Clock, className: 'status-pending' },
+    error: { label: t('docs.statusError'), icon: AlertCircle, className: 'status-error' },
+  };
 
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.filename.toLowerCase().includes(searchQuery.toLowerCase());
@@ -88,12 +90,12 @@ export default function DocumentsPage() {
   const handleDelete = () => {
     if (!deleteTarget) return;
     setDocuments((prev) => prev.filter((d) => d.id !== deleteTarget.id));
-    toast({ title: 'Đã xóa', description: `Tài liệu "${deleteTarget.filename}" đã được xóa.` });
+    toast({ title: t('toast.deleted'), description: `"${deleteTarget.filename}" ${t('toast.deleted').toLowerCase()}.` });
     setDeleteTarget(null);
   };
 
   const handleDownload = (doc: Document) => {
-    toast({ title: 'Đang tải xuống', description: `${doc.filename} (${formatFileSize(doc.fileSize)}) đang được tải xuống...` });
+    toast({ title: t('toast.downloading'), description: `${doc.filename} (${formatFileSize(doc.fileSize)})...` });
   };
 
   const processFiles = (files: FileList | null) => {
@@ -104,7 +106,7 @@ export default function DocumentsPage() {
     Array.from(files).forEach((file) => {
       const ext = '.' + file.name.split('.').pop()?.toLowerCase();
       if (!allowedTypes.includes(file.type) && !allowedExts.includes(ext)) {
-        toast({ title: 'Định dạng không hỗ trợ', description: `"${file.name}" không phải PDF, DOCX hoặc TXT.`, variant: 'destructive' });
+        toast({ title: t('docs.unsupportedFormat'), description: `"${file.name}" ${t('docs.notSupported')}.`, variant: 'destructive' });
         return;
       }
 
@@ -112,7 +114,6 @@ export default function DocumentsPage() {
       const rawExt = ext.replace('.', '');
       const fileType: DocFileType = (['pdf', 'docx', 'txt'].includes(rawExt) ? rawExt : 'txt') as DocFileType;
 
-      // Add as processing
       const newDoc: Document = {
         id: tempId,
         courseId: selectedCourse === 'all' ? '3' : selectedCourse,
@@ -128,15 +129,14 @@ export default function DocumentsPage() {
       setDocuments(prev => [newDoc, ...prev]);
       setUploadingFiles(prev => [...prev, tempId]);
 
-      toast({ title: 'Đang tải lên', description: `"${file.name}" đang được tải lên và xử lý...` });
+      toast({ title: t('toast.uploading'), description: `"${file.name}" ${t('toast.beingProcessed')}...` });
 
-      // Simulate processing
       setTimeout(() => {
         setDocuments(prev => prev.map(d =>
           d.id === tempId ? { ...d, status: 'ready' as DocumentStatus, totalChunks: Math.floor(Math.random() * 60 + 20) } : d
         ));
         setUploadingFiles(prev => prev.filter(id => id !== tempId));
-        toast({ title: 'Đã xử lý xong', description: `"${file.name}" đã sẵn sàng sử dụng.` });
+        toast({ title: t('toast.processDone'), description: `"${file.name}" ${t('toast.readyToUse')}.` });
       }, 3000 + Math.random() * 2000);
     });
   };
@@ -156,18 +156,18 @@ export default function DocumentsPage() {
     <div className="p-6 lg:p-8 space-y-6 page-enter">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Tài liệu</h1>
-          <p className="text-muted-foreground mt-1">Quản lý tài liệu môn học cho hệ thống RAG</p>
+          <h1 className="text-3xl font-bold">{t('docs.title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('docs.subtitle')}</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4 stagger-children">
         {[
-          { label: 'Tổng tài liệu', value: stats.total, icon: FileText, color: 'text-primary', bg: 'bg-primary/10' },
-          { label: 'Đã xử lý', value: stats.ready, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
-          { label: 'Đang xử lý', value: stats.processing, icon: Loader2, color: 'text-warning', bg: 'bg-warning/10' },
-          { label: 'Tổng chunks', value: stats.totalChunks, icon: Database, color: 'text-info', bg: 'bg-info/10' },
+          { label: t('docs.total'), value: stats.total, icon: FileText, color: 'text-primary', bg: 'bg-primary/10' },
+          { label: t('docs.processed'), value: stats.ready, icon: CheckCircle2, color: 'text-accent', bg: 'bg-accent/10' },
+          { label: t('docs.processing'), value: stats.processing, icon: Loader2, color: 'text-warning', bg: 'bg-warning/10' },
+          { label: t('docs.totalChunks'), value: stats.totalChunks, icon: Database, color: 'text-info', bg: 'bg-info/10' },
         ].map((stat) => (
           <Card key={stat.label}>
             <CardHeader className="pb-2">
@@ -198,9 +198,9 @@ export default function DocumentsPage() {
           <div className={`h-14 w-14 rounded-2xl ${isDragging ? 'bg-primary/20 scale-110' : 'bg-primary/10'} flex items-center justify-center mb-4 transition-all`}>
             <Upload className={`h-7 w-7 ${isDragging ? 'text-primary animate-bounce' : 'text-primary'}`} />
           </div>
-          <h3 className="text-base font-semibold mb-1">Tải lên tài liệu</h3>
+          <h3 className="text-base font-semibold mb-1">{t('docs.upload')}</h3>
           <p className="text-muted-foreground text-sm mb-4">
-            Kéo thả file hoặc click để chọn • PDF, DOCX, TXT
+            {t('docs.uploadDesc')}
           </p>
           <input
             ref={fileInputRef}
@@ -212,7 +212,7 @@ export default function DocumentsPage() {
           />
           <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
             <Upload className="h-4 w-4" />
-            Chọn file
+            {t('docs.chooseFile')}
           </Button>
         </CardContent>
       </Card>
@@ -221,15 +221,15 @@ export default function DocumentsPage() {
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Tìm kiếm tài liệu..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+          <Input placeholder={t('docs.searchDocs')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
         <Select value={selectedCourse} onValueChange={setSelectedCourse}>
           <SelectTrigger className="w-64">
-            <SelectValue placeholder="Chọn môn học" />
+            <SelectValue placeholder={t('chat.selectCourse')} />
           </SelectTrigger>
           <SelectContent>
             {courses.map((course) => (
-              <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+              <SelectItem key={course.id} value={course.id}>{course.id === 'all' ? t('docs.allCourses') : course.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -240,12 +240,12 @@ export default function DocumentsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Tên file</TableHead>
-              <TableHead>Môn học</TableHead>
-              <TableHead>Kích thước</TableHead>
-              <TableHead>Chunks</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Ngày tải</TableHead>
+              <TableHead>{t('docs.filename')}</TableHead>
+              <TableHead>{t('docs.course')}</TableHead>
+              <TableHead>{t('docs.size')}</TableHead>
+              <TableHead>{t('docs.chunks')}</TableHead>
+              <TableHead>{t('docs.status')}</TableHead>
+              <TableHead>{t('docs.date')}</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
@@ -286,7 +286,7 @@ export default function DocumentsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {new Date(doc.createdAt).toLocaleDateString('vi-VN')}
+                    {new Date(doc.createdAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -297,14 +297,14 @@ export default function DocumentsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setPreviewTarget(doc)}>
-                          <Eye className="mr-2 h-4 w-4" />Xem trước
+                          <Eye className="mr-2 h-4 w-4" />{t('action.preview')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDownload(doc)}>
-                          <Download className="mr-2 h-4 w-4" />Tải xuống
+                          <Download className="mr-2 h-4 w-4" />{t('action.download')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive" onClick={() => setDeleteTarget(doc)}>
-                          <Trash2 className="mr-2 h-4 w-4" />Xóa
+                          <Trash2 className="mr-2 h-4 w-4" />{t('action.delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -321,16 +321,16 @@ export default function DocumentsPage() {
           <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
             <FileText className="h-8 w-8 text-muted-foreground/50" />
           </div>
-          <h3 className="text-lg font-medium">Không tìm thấy tài liệu</h3>
-          <p className="text-muted-foreground text-sm mt-1">Thử tìm kiếm với từ khóa khác hoặc chọn môn học khác</p>
+          <h3 className="text-lg font-medium">{t('docs.notFound')}</h3>
+          <p className="text-muted-foreground text-sm mt-1">{t('docs.notFoundDesc')}</p>
         </div>
       )}
 
       <ConfirmDeleteDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Xóa tài liệu"
-        description={`Bạn có chắc chắn muốn xóa "${deleteTarget?.filename}"? Tài liệu và tất cả chunks đã xử lý sẽ bị xóa vĩnh viễn.`}
+        title={t('confirm.deleteDoc')}
+        description={`${t('confirm.sure')} "${deleteTarget?.filename}"? ${t('confirm.irreversible')}`}
         onConfirm={handleDelete}
       />
 

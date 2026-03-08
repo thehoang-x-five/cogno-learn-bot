@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Save } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export interface EditField {
   key: string;
@@ -38,6 +39,8 @@ export default function EditDialog({
   fields,
   onSave,
 }: EditDialogProps) {
+  const { t } = useLanguage();
+  
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -83,11 +86,11 @@ export default function EditDialog({
           ))}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Hủy
+              {t('action.cancel')}
             </Button>
             <Button type="submit" className="gap-2">
               <Save className="h-4 w-4" />
-              Lưu thay đổi
+              {t('edit.saveChanges')}
             </Button>
           </DialogFooter>
         </form>

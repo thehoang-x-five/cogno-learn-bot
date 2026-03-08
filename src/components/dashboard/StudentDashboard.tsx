@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,38 +9,40 @@ import {
   Sparkles, Trophy, Target, Flame, Calendar, Clock, Play,
 } from 'lucide-react';
 
-const stats = [
-  { name: 'Môn học', value: '6', icon: BookOpen, color: 'text-primary' },
-  { name: 'Câu hỏi đã hỏi', value: '89', icon: MessageSquare, color: 'text-accent' },
-  { name: 'Quiz hoàn thành', value: '23', icon: ClipboardList, color: 'text-warning' },
-  { name: 'Điểm trung bình', value: '8.5', icon: Star, color: 'text-info' },
-];
-
-const courses = [
-  { id: '1', code: 'CS101', name: 'Nhập môn lập trình', progress: 75, nextQuiz: 'Quiz Chương 4' },
-  { id: '2', code: 'CS201', name: 'Cấu trúc dữ liệu', progress: 45, nextQuiz: 'Quiz Chương 3' },
-  { id: '3', code: 'CS301', name: 'Lập trình hướng đối tượng', progress: 90, nextQuiz: null },
-];
-
-const upcomingQuizzes = [
-  { title: 'Quiz Chương 4 - Hàm', course: 'CS101', dueDate: '28/02/2026', questions: 10 },
-  { title: 'Quiz Cây nhị phân', course: 'CS201', dueDate: '01/03/2026', questions: 8 },
-];
-
-const recentQuizResults = [
-  { title: 'Quiz Chương 3 - Vòng lặp', course: 'CS101', score: 9, total: 10, date: '22/02/2026' },
-  { title: 'Quiz Tính chất OOP', course: 'CS301', score: 8, total: 10, date: '20/02/2026' },
-  { title: 'Quiz Linked List', course: 'CS201', score: 6, total: 10, date: '18/02/2026' },
-];
-
-const studyStreak = { current: 7, best: 14 };
-
-const examSchedule = [
-  { course: 'CS101', type: 'Giữa kỳ', date: '15/03/2026', time: '08:00', room: 'A305', daysLeft: 19 },
-  { course: 'CS301', type: 'Giữa kỳ', date: '18/03/2026', time: '13:00', room: 'B201', daysLeft: 22 },
-];
-
 export default function StudentDashboard() {
+  const { t, language } = useLanguage();
+
+  const stats = [
+    { name: t('student.courses'), value: '6', icon: BookOpen, color: 'text-primary' },
+    { name: t('student.questionsAsked'), value: '89', icon: MessageSquare, color: 'text-accent' },
+    { name: t('student.quizCompleted'), value: '23', icon: ClipboardList, color: 'text-warning' },
+    { name: t('student.avgScore'), value: '8.5', icon: Star, color: 'text-info' },
+  ];
+
+  const courses = [
+    { id: '1', code: 'CS101', name: language === 'vi' ? 'Nhập môn lập trình' : 'Intro to Programming', progress: 75, nextQuiz: 'Quiz Chương 4' },
+    { id: '2', code: 'CS201', name: language === 'vi' ? 'Cấu trúc dữ liệu' : 'Data Structures', progress: 45, nextQuiz: 'Quiz Chương 3' },
+    { id: '3', code: 'CS301', name: language === 'vi' ? 'Lập trình hướng đối tượng' : 'OOP Programming', progress: 90, nextQuiz: null },
+  ];
+
+  const upcomingQuizzes = [
+    { title: language === 'vi' ? 'Quiz Chương 4 - Hàm' : 'Quiz Chapter 4 - Functions', course: 'CS101', dueDate: '28/02/2026', questions: 10 },
+    { title: language === 'vi' ? 'Quiz Cây nhị phân' : 'Binary Tree Quiz', course: 'CS201', dueDate: '01/03/2026', questions: 8 },
+  ];
+
+  const recentQuizResults = [
+    { title: language === 'vi' ? 'Quiz Chương 3 - Vòng lặp' : 'Quiz Chapter 3 - Loops', course: 'CS101', score: 9, total: 10, date: '22/02/2026' },
+    { title: language === 'vi' ? 'Quiz Tính chất OOP' : 'OOP Properties Quiz', course: 'CS301', score: 8, total: 10, date: '20/02/2026' },
+    { title: 'Quiz Linked List', course: 'CS201', score: 6, total: 10, date: '18/02/2026' },
+  ];
+
+  const studyStreak = { current: 7, best: 14 };
+
+  const examSchedule = [
+    { course: 'CS101', type: t('courseDetail.midterm'), date: '15/03/2026', time: '08:00', room: 'A305', daysLeft: 19 },
+    { course: 'CS301', type: t('courseDetail.midterm'), date: '18/03/2026', time: '13:00', room: 'B201', daysLeft: 22 },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Stats */}
@@ -65,8 +68,8 @@ export default function StudentDashboard() {
               <Flame className="h-7 w-7 text-warning" />
             </div>
             <div>
-              <p className="text-3xl font-bold">{studyStreak.current} ngày</p>
-              <p className="text-sm text-muted-foreground">Chuỗi học liên tiếp (kỷ lục: {studyStreak.best})</p>
+              <p className="text-3xl font-bold">{studyStreak.current} {t('student.days')}</p>
+              <p className="text-sm text-muted-foreground">{t('student.studyStreak')} ({t('student.streakRecord')}: {studyStreak.best})</p>
             </div>
           </CardContent>
         </Card>
@@ -74,13 +77,13 @@ export default function StudentDashboard() {
         <Card className="md:col-span-2 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 border-primary/20">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold">Hỏi AI ngay!</h3>
-              <p className="text-sm text-muted-foreground">Đặt câu hỏi về bất kỳ môn học nào</p>
+              <h3 className="text-lg font-semibold">{t('student.askAINow')}</h3>
+              <p className="text-sm text-muted-foreground">{t('student.askAIDesc')}</p>
             </div>
             <Link to="/chat">
               <Button variant="gradient" size="lg" className="gap-2">
                 <Sparkles className="h-5 w-5" />
-                Chat với AI
+                {t('student.chatWithAI')}
               </Button>
             </Link>
           </CardContent>
@@ -93,12 +96,12 @@ export default function StudentDashboard() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Tiến độ học tập</CardTitle>
-                <CardDescription>Các môn đang theo học</CardDescription>
+                <CardTitle>{t('student.progress')}</CardTitle>
+                <CardDescription>{t('student.progressDesc')}</CardDescription>
               </div>
               <Link to="/courses">
                 <Button variant="ghost" size="sm" className="gap-1">
-                  Xem tất cả <ArrowRight className="h-4 w-4" />
+                  {t('action.viewAll')} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -133,12 +136,12 @@ export default function StudentDashboard() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Kết quả Quiz gần đây</CardTitle>
-                <CardDescription>Lịch sử làm bài</CardDescription>
+                <CardTitle>{t('student.recentResults')}</CardTitle>
+                <CardDescription>{t('student.recentResultsDesc')}</CardDescription>
               </div>
               <Link to="/quizzes">
                 <Button variant="ghost" size="sm" className="gap-1">
-                  Tất cả <ArrowRight className="h-4 w-4" />
+                  {t('action.viewAll')} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -172,7 +175,7 @@ export default function StudentDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              Quiz sắp tới
+              {t('student.upcomingQuizzes')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -184,14 +187,14 @@ export default function StudentDashboard() {
                   </div>
                   <div>
                     <p className="font-medium text-sm">{quiz.title}</p>
-                    <p className="text-xs text-muted-foreground">{quiz.course} • {quiz.questions} câu</p>
+                    <p className="text-xs text-muted-foreground">{quiz.course} • {quiz.questions} {t('quiz.questions')}</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium">{quiz.dueDate}</p>
                   <Link to="/quizzes">
                     <Button size="sm" variant="ghost" className="gap-1 h-7 mt-1">
-                      <Play className="h-3 w-3" /> Làm bài
+                      <Play className="h-3 w-3" /> {t('student.takeQuiz')}
                     </Button>
                   </Link>
                 </div>
@@ -205,7 +208,7 @@ export default function StudentDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Lịch thi sắp tới
+              {t('student.examSchedule')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -214,13 +217,13 @@ export default function StudentDashboard() {
                 <div className="flex items-center justify-between">
                   <Badge variant="outline">{exam.course} - {exam.type}</Badge>
                   <Badge className="bg-destructive/10 text-destructive border-destructive/20">
-                    Còn {exam.daysLeft} ngày
+                    {t('student.daysLeft')} {exam.daysLeft} {t('student.daysLeftSuffix')}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{exam.date}</span>
                   <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{exam.time}</span>
-                  <span>Phòng {exam.room}</span>
+                  <span>{t('student.room')} {exam.room}</span>
                 </div>
               </div>
             ))}

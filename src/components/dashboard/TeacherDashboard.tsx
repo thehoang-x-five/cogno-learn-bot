@@ -1,39 +1,42 @@
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  BookOpen, Users, FileText, ClipboardList, TrendingUp,
-  ArrowRight, Upload, Clock, MessageSquare, Sparkles, AlertCircle,
+  BookOpen, Users, FileText, ClipboardList,
+  ArrowRight, Upload, Clock, MessageSquare, AlertCircle,
 } from 'lucide-react';
 
-const stats = [
-  { name: 'Môn học đang dạy', value: '5', icon: BookOpen, color: 'text-primary' },
-  { name: 'Tổng sinh viên', value: '234', icon: Users, color: 'text-accent' },
-  { name: 'Tài liệu đã upload', value: '45', icon: FileText, color: 'text-warning' },
-  { name: 'Quiz đã tạo', value: '12', icon: ClipboardList, color: 'text-info' },
-];
-
-const myCourses = [
-  { id: '3', code: 'CS301', name: 'Lập trình OOP', students: 88, docs: 18, pendingQuestions: 5 },
-  { id: '1', code: 'CS101', name: 'Nhập môn lập trình', students: 120, docs: 15, pendingQuestions: 12 },
-  { id: '2', code: 'CS201', name: 'Cấu trúc dữ liệu', students: 95, docs: 22, pendingQuestions: 3 },
-];
-
-const pendingDocuments = [
-  { name: 'giao_trinh_chuong5.pdf', course: 'CS301', status: 'processing' as const, progress: 67 },
-  { name: 'bai_tap_tuan8.docx', course: 'CS101', status: 'pending' as const, progress: 0 },
-];
-
-const lowPerformanceStudents = [
-  { name: 'Phạm Thị D', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d', course: 'CS301', avgScore: 35, quizzes: 2 },
-  { name: 'Võ Văn F', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=f', course: 'CS101', avgScore: 42, quizzes: 3 },
-  { name: 'Trần Văn G', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=g', course: 'CS201', avgScore: 48, quizzes: 1 },
-];
-
 export default function TeacherDashboard() {
+  const { t, language } = useLanguage();
+
+  const stats = [
+    { name: t('teacher.coursesTaught'), value: '5', icon: BookOpen, color: 'text-primary' },
+    { name: t('teacher.totalStudents'), value: '234', icon: Users, color: 'text-accent' },
+    { name: t('teacher.docsUploaded'), value: '45', icon: FileText, color: 'text-warning' },
+    { name: t('teacher.quizzesCreated'), value: '12', icon: ClipboardList, color: 'text-info' },
+  ];
+
+  const myCourses = [
+    { id: '3', code: 'CS301', name: language === 'vi' ? 'Lập trình OOP' : 'OOP Programming', students: 88, docs: 18, pendingQuestions: 5 },
+    { id: '1', code: 'CS101', name: language === 'vi' ? 'Nhập môn lập trình' : 'Intro to Programming', students: 120, docs: 15, pendingQuestions: 12 },
+    { id: '2', code: 'CS201', name: language === 'vi' ? 'Cấu trúc dữ liệu' : 'Data Structures', students: 95, docs: 22, pendingQuestions: 3 },
+  ];
+
+  const pendingDocuments = [
+    { name: 'giao_trinh_chuong5.pdf', course: 'CS301', status: 'processing' as const, progress: 67 },
+    { name: 'bai_tap_tuan8.docx', course: 'CS101', status: 'pending' as const, progress: 0 },
+  ];
+
+  const lowPerformanceStudents = [
+    { name: 'Phạm Thị D', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d', course: 'CS301', avgScore: 35, quizzes: 2 },
+    { name: 'Võ Văn F', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=f', course: 'CS101', avgScore: 42, quizzes: 3 },
+    { name: 'Trần Văn G', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=g', course: 'CS201', avgScore: 48, quizzes: 1 },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Stats */}
@@ -57,12 +60,12 @@ export default function TeacherDashboard() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Môn học của tôi</CardTitle>
-                <CardDescription>Tổng quan hoạt động các môn đang dạy</CardDescription>
+                <CardTitle>{t('teacher.myCourses')}</CardTitle>
+                <CardDescription>{t('teacher.myCoursesDesc')}</CardDescription>
               </div>
               <Link to="/courses">
                 <Button variant="ghost" size="sm" className="gap-1">
-                  Tất cả <ArrowRight className="h-4 w-4" />
+                  {t('action.viewAll')} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -84,13 +87,13 @@ export default function TeacherDashboard() {
                   </div>
                   <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1"><Users className="h-3 w-3" />{course.students} SV</span>
-                    <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.docs} tài liệu</span>
+                    <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.docs} {t('courses.docs')}</span>
                   </div>
                 </div>
                 {course.pendingQuestions > 0 && (
                   <Badge className="bg-primary/10 text-primary border-primary/20">
                     <MessageSquare className="h-3 w-3 mr-1" />
-                    {course.pendingQuestions} câu hỏi mới
+                    {course.pendingQuestions} {t('teacher.pendingQuestions')}
                   </Badge>
                 )}
               </Link>
@@ -103,7 +106,7 @@ export default function TeacherDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
-              Tài liệu đang xử lý
+              {t('teacher.pendingDocs')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -121,7 +124,7 @@ export default function TeacherDashboard() {
                 ) : (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
-                    Chờ xử lý
+                    {t('teacher.waitingProcess')}
                   </div>
                 )}
               </div>
@@ -129,7 +132,7 @@ export default function TeacherDashboard() {
             <Link to="/documents">
               <Button variant="outline" size="sm" className="w-full gap-2">
                 <Upload className="h-4 w-4" />
-                Upload tài liệu mới
+                {t('teacher.uploadNewDoc')}
               </Button>
             </Link>
           </CardContent>
@@ -141,9 +144,9 @@ export default function TeacherDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-warning" />
-            Sinh viên cần hỗ trợ
+            {t('teacher.lowPerformance')}
           </CardTitle>
-          <CardDescription>Sinh viên có điểm quiz dưới 50%</CardDescription>
+          <CardDescription>{t('teacher.lowPerformanceDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-3">
