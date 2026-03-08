@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Message, Conversation, AVAILABLE_MODELS } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -177,10 +178,16 @@ export default function ChatPage() {
 
   const currentCourse = courses.find((c) => c.id === selectedCourse);
 
+  const isMobile = useIsMobile();
+  const [showConversations, setShowConversations] = useState(!isMobile);
+
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <div className="w-72 border-r bg-card flex flex-col">
+    <div className="flex h-full">
+      {/* Sidebar - hidden on mobile unless toggled */}
+      <div className={cn(
+        'border-r bg-card flex flex-col transition-all duration-300',
+        isMobile ? (showConversations ? 'w-full absolute inset-0 z-20' : 'w-0 overflow-hidden') : 'w-72'
+      )}>
         <div className="p-4 border-b">
           <Button variant="gradient" className="w-full gap-2" onClick={handleNewConversation}>
             <Plus className="h-4 w-4" />
@@ -203,7 +210,7 @@ export default function ChatPage() {
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-1">
             {conversations.map((conv) => (
-              <button key={conv.id} onClick={() => setActiveConversation(conv.id)}
+              <button key={conv.id} onClick={() => { setActiveConversation(conv.id); if (isMobile) setShowConversations(false); }}
                 className={cn('w-full p-3 rounded-lg text-left transition-all duration-200 group',
                   activeConversation === conv.id ? 'bg-primary/10 text-primary border border-primary/20' : 'hover:bg-secondary text-foreground border border-transparent'
                 )}>
@@ -227,14 +234,19 @@ export default function ChatPage() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        <div className="h-14 border-b flex items-center justify-between px-6 bg-card/80 backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+      <div className={cn('flex-1 flex flex-col min-w-0', isMobile && showConversations && 'hidden')}>
+        <div className="h-14 border-b flex items-center justify-between px-3 sm:px-6 bg-card/80 backdrop-blur-sm">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {isMobile && (
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setShowConversations(true)}>
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            )}
+            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               <BookOpen className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <h2 className="font-semibold text-sm">{currentCourse?.name}</h2>
+            <div className="min-w-0">
+              <h2 className="font-semibold text-sm truncate">{currentCourse?.name}</h2>
               <p className="text-xs text-muted-foreground">{currentCourse?.code}</p>
             </div>
           </div>
@@ -344,7 +356,7 @@ export default function ChatPage() {
           </div>
         </ScrollArea>
 
-        <div className="border-t p-4 bg-card/80 backdrop-blur-sm">
+        <div className="border-t p-2 sm:p-4 bg-card/80 backdrop-blur-sm">
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center gap-2 p-2 rounded-xl bg-secondary/50 border focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/30 transition-all">
               <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => toast({ title: t('chat.attachFile'), description: t('chat.attachDesc') })}>
