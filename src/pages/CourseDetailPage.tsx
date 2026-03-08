@@ -146,7 +146,7 @@ export default function CourseDetailPage() {
 
   const handleEnrollStudent = () => {
     if (!enrollEmail.trim()) {
-      toast({ title: language === 'vi' ? 'Thiếu thông tin' : 'Missing info', description: language === 'vi' ? 'Vui lòng nhập email.' : 'Please enter an email.', variant: 'destructive' });
+      toast({ title: t('courseDetail.missingInfo'), description: t('courseDetail.enterEmail'), variant: 'destructive' });
       return;
     }
     const newStudent = {
@@ -156,7 +156,7 @@ export default function CourseDetailPage() {
     setStudents(prev => [...prev, newStudent]);
     setIsEnrollDialogOpen(false);
     setEnrollEmail('');
-    toast({ title: t('toast.added'), description: language === 'vi' ? 'Sinh viên đã được thêm vào môn học.' : 'Student has been added to the course.' });
+    toast({ title: t('toast.added'), description: t('courseDetail.studentAdded') });
   };
 
   return (
