@@ -1,9 +1,10 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,26 +13,28 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Search, Bell, Sun, Moon, ChevronRight, Settings, LogOut, User,
+  Search, Bell, Sun, Moon, ChevronRight, Settings, LogOut, User, Globe,
 } from 'lucide-react';
 import { useState } from 'react';
 
-const breadcrumbMap: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/courses': 'Môn học',
-  '/chat': 'Chat AI',
-  '/documents': 'Tài liệu',
-  '/quizzes': 'Quiz',
-  '/users': 'Người dùng',
-  '/settings': 'Cài đặt',
-  '/profile': 'Tài khoản',
-};
-
 export default function TopHeader() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
+
+  const breadcrumbMap: Record<string, string> = {
+    '/dashboard': t('breadcrumb.dashboard'),
+    '/courses': t('breadcrumb.courses'),
+    '/chat': t('breadcrumb.chat'),
+    '/documents': t('breadcrumb.documents'),
+    '/quizzes': t('breadcrumb.quizzes'),
+    '/users': t('breadcrumb.users'),
+    '/settings': t('breadcrumb.settings'),
+    '/profile': t('breadcrumb.profile'),
+  };
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const breadcrumbs = pathSegments.map((_, i) => {
@@ -54,13 +57,13 @@ export default function TopHeader() {
       </nav>
 
       {/* Right section */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {/* Search */}
         <div className={`transition-all duration-300 overflow-hidden ${searchOpen ? 'w-64' : 'w-0'}`}>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
-              placeholder="Tìm kiếm..."
+              placeholder={t('action.search')}
               className="h-8 pl-9 text-sm"
               onBlur={() => setSearchOpen(false)}
               autoFocus={searchOpen}
@@ -72,6 +75,28 @@ export default function TopHeader() {
             <Search className="h-4 w-4" />
           </Button>
         )}
+
+        {/* Language */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Globe className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={() => setLanguage('vi')} className={language === 'vi' ? 'bg-primary/10 text-primary' : ''}>
+              🇻🇳 Tiếng Việt
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLanguage('en')} className={language === 'en' ? 'bg-primary/10 text-primary' : ''}>
+              🇺🇸 English
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Theme toggle */}
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleTheme}>
+          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+        </Button>
 
         {/* Notifications */}
         <DropdownMenu>
@@ -85,12 +110,12 @@ export default function TopHeader() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
             <div className="px-3 py-2 border-b">
-              <p className="font-semibold text-sm">Thông báo</p>
+              <p className="font-semibold text-sm">{t('notif.title')}</p>
             </div>
             {[
-              { title: 'Quiz mới: Ôn tập Chương 3', desc: 'CS301 - Lập trình OOP', time: '5 phút trước', unread: true },
-              { title: 'Tài liệu đã xử lý xong', desc: 'slide_chuong3.pdf - Sẵn sàng', time: '1 giờ trước', unread: true },
-              { title: 'Điểm Quiz Chương 2', desc: 'Bạn đạt 8/10 - Tốt!', time: '3 giờ trước', unread: true },
+              { title: 'Quiz mới: Ôn tập Chương 3', desc: 'CS301 - Lập trình OOP', time: language === 'vi' ? '5 phút trước' : '5 min ago', unread: true },
+              { title: language === 'vi' ? 'Tài liệu đã xử lý xong' : 'Document processed', desc: 'slide_chuong3.pdf', time: language === 'vi' ? '1 giờ trước' : '1 hour ago', unread: true },
+              { title: language === 'vi' ? 'Điểm Quiz Chương 2' : 'Chapter 2 Quiz Score', desc: language === 'vi' ? 'Bạn đạt 8/10 - Tốt!' : 'You scored 8/10 - Good!', time: language === 'vi' ? '3 giờ trước' : '3 hours ago', unread: true },
             ].map((notif, i) => (
               <DropdownMenuItem key={i} className="flex-col items-start gap-0.5 py-3 cursor-pointer">
                 <div className="flex items-center gap-2 w-full">
@@ -103,7 +128,7 @@ export default function TopHeader() {
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="justify-center text-primary text-xs font-medium">
-              Xem tất cả thông báo
+              {t('notif.viewAll')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -124,16 +149,16 @@ export default function TopHeader() {
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => navigate('/profile')}>
               <User className="mr-2 h-4 w-4" />
-              Tài khoản
+              {t('nav.profile')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/settings')}>
               <Settings className="mr-2 h-4 w-4" />
-              Cài đặt
+              {t('nav.settings')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
-              Đăng xuất
+              {t('nav.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Document, DocumentStatus } from '@/types';
+import { useState, useRef } from 'react';
+import { Document, DocumentStatus, FileType as DocFileType } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -65,6 +65,8 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const [deleteTarget, setDeleteTarget] = useState<Document | null>(null);
@@ -91,11 +93,63 @@ export default function DocumentsPage() {
   };
 
   const handleDownload = (doc: Document) => {
-    // Simulate download
-    const link = document.createElement('a');
-    link.href = '#';
-    link.download = doc.filename;
     toast({ title: 'Đang tải xuống', description: `${doc.filename} (${formatFileSize(doc.fileSize)}) đang được tải xuống...` });
+  };
+
+  const processFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    const allowedExts = ['.pdf', '.docx', '.txt'];
+
+    Array.from(files).forEach((file) => {
+      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!allowedTypes.includes(file.type) && !allowedExts.includes(ext)) {
+        toast({ title: 'Định dạng không hỗ trợ', description: `"${file.name}" không phải PDF, DOCX hoặc TXT.`, variant: 'destructive' });
+        return;
+      }
+
+      const tempId = Date.now().toString() + Math.random().toString(36).slice(2);
+      const rawExt = ext.replace('.', '');
+      const fileType: DocFileType = (['pdf', 'docx', 'txt'].includes(rawExt) ? rawExt : 'txt') as DocFileType;
+
+      // Add as processing
+      const newDoc: Document = {
+        id: tempId,
+        courseId: selectedCourse === 'all' ? '3' : selectedCourse,
+        uploadedBy: '2',
+        filename: file.name,
+        filePath: `/docs/${tempId}`,
+        fileType,
+        fileSize: file.size,
+        status: 'processing',
+        totalChunks: 0,
+        createdAt: new Date().toISOString(),
+      };
+      setDocuments(prev => [newDoc, ...prev]);
+      setUploadingFiles(prev => [...prev, tempId]);
+
+      toast({ title: 'Đang tải lên', description: `"${file.name}" đang được tải lên và xử lý...` });
+
+      // Simulate processing
+      setTimeout(() => {
+        setDocuments(prev => prev.map(d =>
+          d.id === tempId ? { ...d, status: 'ready' as DocumentStatus, totalChunks: Math.floor(Math.random() * 60 + 20) } : d
+        ));
+        setUploadingFiles(prev => prev.filter(id => id !== tempId));
+        toast({ title: 'Đã xử lý xong', description: `"${file.name}" đã sẵn sàng sử dụng.` });
+      }, 3000 + Math.random() * 2000);
+    });
+  };
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    processFiles(e.dataTransfer.files);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    processFiles(e.target.files);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
@@ -138,7 +192,7 @@ export default function DocumentsPage() {
         }`}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setIsDragging(false); toast({ title: 'Đã nhận file', description: 'File đang được xử lý và thêm vào hệ thống.' }); }}
+        onDrop={handleFileDrop}
       >
         <CardContent className="flex flex-col items-center justify-center py-10">
           <div className={`h-14 w-14 rounded-2xl ${isDragging ? 'bg-primary/20 scale-110' : 'bg-primary/10'} flex items-center justify-center mb-4 transition-all`}>
@@ -148,7 +202,15 @@ export default function DocumentsPage() {
           <p className="text-muted-foreground text-sm mb-4">
             Kéo thả file hoặc click để chọn • PDF, DOCX, TXT
           </p>
-          <Button variant="outline" className="gap-2" onClick={() => toast({ title: 'Chọn file', description: 'Hãy kéo thả file vào vùng này để tải lên.' })}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.docx,.txt"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
             <Upload className="h-4 w-4" />
             Chọn file
           </Button>
