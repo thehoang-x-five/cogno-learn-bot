@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import TeacherDashboard from '@/components/dashboard/TeacherDashboard';
 import StudentDashboard from '@/components/dashboard/StudentDashboard';
@@ -6,29 +7,26 @@ import { Badge } from '@/components/ui/badge';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const greeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Chào buổi sáng';
-    if (hour < 18) return 'Chào buổi chiều';
-    return 'Chào buổi tối';
+    if (hour < 12) return t('dashboard.greeting.morning');
+    if (hour < 18) return t('dashboard.greeting.afternoon');
+    return t('dashboard.greeting.evening');
   };
 
-  const roleLabel = user?.role === 'admin' ? 'Quản trị viên' : user?.role === 'teacher' ? 'Giáo viên' : 'Sinh viên';
+  const roleLabel = user?.role === 'admin' ? t('role.admin') : user?.role === 'teacher' ? t('role.teacher') : t('role.student');
+  const subtitle = user?.role === 'admin' ? t('dashboard.admin.subtitle') : user?.role === 'teacher' ? t('dashboard.teacher.subtitle') : t('dashboard.student.subtitle');
 
   return (
     <div className="p-6 lg:p-8 space-y-8 page-enter">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             {greeting()}, {user?.fullName?.split(' ').pop()}! 👋
           </h1>
-          <p className="text-muted-foreground mt-1">
-            {user?.role === 'admin' ? 'Tổng quan hệ thống EduAssist' :
-             user?.role === 'teacher' ? 'Quản lý môn học và theo dõi sinh viên' :
-             'Tiếp tục hành trình học tập của bạn'}
-          </p>
+          <p className="text-muted-foreground mt-1">{subtitle}</p>
         </div>
         <Badge variant="outline" className="hidden sm:flex gap-1.5 px-3 py-1.5">
           <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
@@ -36,7 +34,6 @@ export default function DashboardPage() {
         </Badge>
       </div>
 
-      {/* Role-specific dashboard */}
       {user?.role === 'admin' && <AdminDashboard />}
       {user?.role === 'teacher' && <TeacherDashboard />}
       {user?.role === 'student' && <StudentDashboard />}

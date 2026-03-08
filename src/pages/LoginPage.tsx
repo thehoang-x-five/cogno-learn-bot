@@ -1,73 +1,56 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { GraduationCap, BookOpen, Brain, Users, Sparkles, Shield, Zap, Globe } from 'lucide-react';
+import { GraduationCap, BookOpen, Brain, Users, Sparkles, Shield, Zap } from 'lucide-react';
 import { useEffect } from 'react';
 
 export default function LoginPage() {
   const { login, isLoading, isAuthenticated, setMockUser } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
+    if (isAuthenticated) navigate('/dashboard');
   }, [isAuthenticated, navigate]);
 
-  const handleGoogleLogin = () => {
-    login();
-  };
-
   const features = [
-    { icon: Brain, title: 'Trợ lý AI thông minh', description: 'Hỏi đáp dựa trên tài liệu môn học thực tế với RAG' },
-    { icon: BookOpen, title: 'Quản lý tài liệu', description: 'Upload và tổ chức slide, giáo trình dễ dàng' },
-    { icon: Sparkles, title: 'Tạo Quiz tự động', description: 'AI tự động tạo câu hỏi ôn tập từ nội dung' },
-    { icon: Users, title: 'Theo dõi tiến độ', description: 'Giáo viên theo dõi học tập của sinh viên' },
+    { icon: Brain, title: t('login.feature1'), description: t('login.feature1Desc') },
+    { icon: BookOpen, title: t('login.feature2'), description: t('login.feature2Desc') },
+    { icon: Sparkles, title: t('login.feature3'), description: t('login.feature3Desc') },
+    { icon: Users, title: t('login.feature4'), description: t('login.feature4Desc') },
   ];
 
   const stats = [
-    { value: '1,200+', label: 'Sinh viên', icon: Users },
-    { value: '50+', label: 'Môn học', icon: BookOpen },
+    { value: '1,200+', label: t('role.student'), icon: Users },
+    { value: '50+', label: t('nav.courses'), icon: BookOpen },
     { value: '99.9%', label: 'Uptime', icon: Zap },
   ];
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Hero */}
       <div className="hidden lg:flex lg:w-[55%] bg-sidebar relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/10" />
-        
-        {/* Animated background orbs */}
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-subtle" />
         <div className="absolute -top-32 -left-32 w-72 h-72 bg-accent/10 rounded-full blur-3xl animate-pulse-subtle" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-info/5 rounded-full blur-3xl animate-pulse-subtle" style={{ animationDelay: '0.5s' }} />
-        
+
         <div className="relative z-10 flex flex-col justify-between p-12 text-sidebar-foreground w-full">
-          {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-primary/20 backdrop-blur-sm">
-              <GraduationCap className="h-8 w-8 text-primary" />
-            </div>
+            <div className="p-3 rounded-xl bg-primary/20 backdrop-blur-sm"><GraduationCap className="h-8 w-8 text-primary" /></div>
             <span className="text-2xl font-bold">EduAssist</span>
           </div>
-          
-          {/* Hero text */}
+
           <div>
             <h1 className="text-5xl font-bold mb-4 leading-tight">
-              Hệ thống Trợ lý<br />
-              <span className="gradient-text">Học tập AI</span>
+              {t('login.heroTitle1')}<br />
+              <span className="gradient-text">{t('login.heroTitle2')}</span>
             </h1>
-            <p className="text-lg text-sidebar-foreground/70 mb-10 max-w-md leading-relaxed">
-              Nền tảng AI-powered hỗ trợ sinh viên và giáo viên trong việc học tập, giảng dạy hiệu quả hơn với công nghệ RAG.
-            </p>
-
+            <p className="text-lg text-sidebar-foreground/70 mb-10 max-w-md leading-relaxed">{t('login.heroDesc')}</p>
             <div className="grid grid-cols-2 gap-4 mb-10">
               {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="p-4 rounded-xl bg-sidebar-accent/50 backdrop-blur-sm border border-sidebar-border/50 hover:bg-sidebar-accent/70 transition-all duration-300 hover:-translate-y-0.5"
-                >
+                <div key={feature.title} className="p-4 rounded-xl bg-sidebar-accent/50 backdrop-blur-sm border border-sidebar-border/50 hover:bg-sidebar-accent/70 transition-all duration-300 hover:-translate-y-0.5">
                   <feature.icon className="h-6 w-6 text-primary mb-2" />
                   <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
                   <p className="text-xs text-sidebar-foreground/60 leading-relaxed">{feature.description}</p>
@@ -76,53 +59,35 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Stats */}
           <div className="flex items-center gap-8">
             {stats.map((stat) => (
               <div key={stat.label} className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-sidebar-accent/50 flex items-center justify-center">
-                  <stat.icon className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-lg font-bold">{stat.value}</p>
-                  <p className="text-xs text-sidebar-foreground/60">{stat.label}</p>
-                </div>
+                <div className="h-10 w-10 rounded-lg bg-sidebar-accent/50 flex items-center justify-center"><stat.icon className="h-5 w-5 text-primary" /></div>
+                <div><p className="text-lg font-bold">{stat.value}</p><p className="text-xs text-sidebar-foreground/60">{stat.label}</p></div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Right side - Login */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="p-3 rounded-xl bg-primary/10">
-              <GraduationCap className="h-8 w-8 text-primary" />
-            </div>
+            <div className="p-3 rounded-xl bg-primary/10"><GraduationCap className="h-8 w-8 text-primary" /></div>
             <span className="text-2xl font-bold">EduAssist</span>
           </div>
 
           <Card className="border-0 shadow-2xl shadow-primary/5">
             <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl">Chào mừng trở lại</CardTitle>
-              <CardDescription>
-                Đăng nhập để tiếp tục hành trình học tập
-              </CardDescription>
+              <CardTitle className="text-2xl">{t('login.welcome')}</CardTitle>
+              <CardDescription>{t('login.subtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 pt-4">
-              <Button
-                variant="google"
-                size="lg"
-                className="w-full"
-                onClick={handleGoogleLogin}
-                disabled={isLoading}
-              >
+              <Button variant="google" size="lg" className="w-full" onClick={login} disabled={isLoading}>
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    Đang đăng nhập...
+                    {t('login.loading')}
                   </div>
                 ) : (
                   <>
@@ -132,32 +97,23 @@ export default function LoginPage() {
                       <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                       <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
-                    Đăng nhập với Google
+                    {t('login.google')}
                   </>
                 )}
               </Button>
 
               <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Demo nhanh</span>
-                </div>
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">{t('login.demoQuick')}</span></div>
               </div>
 
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { role: 'admin' as const, label: 'Admin', icon: Shield, desc: 'Quản trị' },
-                  { role: 'teacher' as const, label: 'Giáo viên', icon: BookOpen, desc: 'Giảng dạy' },
-                  { role: 'student' as const, label: 'Sinh viên', icon: GraduationCap, desc: 'Học tập' },
+                  { role: 'admin' as const, label: 'Admin', icon: Shield, desc: t('login.admin') },
+                  { role: 'teacher' as const, label: t('role.teacher'), icon: BookOpen, desc: t('login.teaching') },
+                  { role: 'student' as const, label: t('role.student'), icon: GraduationCap, desc: t('login.learning') },
                 ].map((item) => (
-                  <Button
-                    key={item.role}
-                    variant="outline"
-                    className="h-auto py-3 flex-col gap-1 hover:border-primary/50 hover:bg-primary/5 transition-all"
-                    onClick={() => setMockUser(item.role)}
-                  >
+                  <Button key={item.role} variant="outline" className="h-auto py-3 flex-col gap-1 hover:border-primary/50 hover:bg-primary/5 transition-all" onClick={() => setMockUser(item.role)}>
                     <item.icon className="h-5 w-5 text-primary" />
                     <span className="text-xs font-medium">{item.label}</span>
                     <span className="text-[10px] text-muted-foreground">{item.desc}</span>
@@ -166,9 +122,9 @@ export default function LoginPage() {
               </div>
 
               <p className="text-center text-xs text-muted-foreground">
-                Bằng việc đăng nhập, bạn đồng ý với{' '}
-                <a href="#" className="text-primary hover:underline">Điều khoản</a> và{' '}
-                <a href="#" className="text-primary hover:underline">Chính sách bảo mật</a>
+                {t('login.terms')}{' '}
+                <a href="#" className="text-primary hover:underline">{t('login.termsLink')}</a> {t('login.and')}{' '}
+                <a href="#" className="text-primary hover:underline">{t('login.privacyLink')}</a>
               </p>
             </CardContent>
           </Card>

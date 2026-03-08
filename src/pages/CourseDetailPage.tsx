@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Document, DocumentStatus } from '@/types';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Document, DocumentStatus, FileType as DocFileType } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import {
   ArrowLeft, FileText, Users, ClipboardList, Upload, Search, MoreVertical, Download, Trash2, Eye,
   CheckCircle2, Clock, AlertCircle, Loader2, File, FileType, UserPlus, GraduationCap, BookOpen, Play,
-  Calendar, TrendingUp, MessageSquare, Settings, Edit, Copy, Share2, BarChart3,
+  Calendar, TrendingUp, MessageSquare, Settings, Edit, Copy, Share2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ConfirmDeleteDialog from '@/components/shared/ConfirmDeleteDialog';
@@ -24,10 +25,9 @@ import EditDialog, { EditField } from '@/components/shared/EditDialog';
 import PreviewDialog from '@/components/shared/PreviewDialog';
 import StudentDetailDialog from '@/components/shared/StudentDetailDialog';
 
-// Mock data
 const initialCourse = {
   id: '1', code: 'CS101', name: 'Nhập môn lập trình',
-  description: 'Môn học cơ sở về lập trình cho sinh viên năm nhất. Giới thiệu các khái niệm cơ bản về lập trình, cấu trúc dữ liệu đơn giản và thuật toán.',
+  description: 'Môn học cơ sở về lập trình cho sinh viên năm nhất.',
   semester: 'HK1-2025', isActive: true, studentsCount: 45, documentsCount: 8, quizzesCount: 5,
 };
 
@@ -38,11 +38,11 @@ const initialDocuments: Document[] = [
 ];
 
 const initialStudents = [
-  { id: '1', fullName: 'Nguyễn Văn A', email: 'a.nguyen@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=a', progress: 85, quizzesTaken: 4, lastActive: '2 giờ trước' },
-  { id: '2', fullName: 'Trần Thị B', email: 'b.tran@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=b', progress: 72, quizzesTaken: 3, lastActive: '1 ngày trước' },
-  { id: '3', fullName: 'Lê Văn C', email: 'c.le@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=c', progress: 90, quizzesTaken: 5, lastActive: '30 phút trước' },
-  { id: '4', fullName: 'Phạm Thị D', email: 'd.pham@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d', progress: 45, quizzesTaken: 2, lastActive: '3 ngày trước' },
-  { id: '5', fullName: 'Hoàng Văn E', email: 'e.hoang@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=e', progress: 60, quizzesTaken: 3, lastActive: '5 giờ trước' },
+  { id: '1', fullName: 'Nguyễn Văn A', email: 'a.nguyen@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=a', progress: 85, quizzesTaken: 4, lastActive: '2h' },
+  { id: '2', fullName: 'Trần Thị B', email: 'b.tran@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=b', progress: 72, quizzesTaken: 3, lastActive: '1d' },
+  { id: '3', fullName: 'Lê Văn C', email: 'c.le@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=c', progress: 90, quizzesTaken: 5, lastActive: '30m' },
+  { id: '4', fullName: 'Phạm Thị D', email: 'd.pham@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=d', progress: 45, quizzesTaken: 2, lastActive: '3d' },
+  { id: '5', fullName: 'Hoàng Văn E', email: 'e.hoang@edu.vn', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=e', progress: 60, quizzesTaken: 3, lastActive: '5h' },
 ];
 
 const initialQuizzes = [
@@ -50,13 +50,6 @@ const initialQuizzes = [
   { id: '2', title: 'Quiz Chương 2: Biến và kiểu dữ liệu', questionsCount: 15, attempts: 35, avgScore: 68, createdAt: '2025-01-20' },
   { id: '3', title: 'Quiz Chương 3: Cấu trúc điều khiển', questionsCount: 12, attempts: 30, avgScore: 72, createdAt: '2025-01-25' },
 ];
-
-const statusConfig: Record<DocumentStatus, { label: string; icon: React.ElementType; className: string }> = {
-  ready: { label: 'Sẵn sàng', icon: CheckCircle2, className: 'status-ready' },
-  processing: { label: 'Đang xử lý', icon: Loader2, className: 'status-processing' },
-  pending: { label: 'Chờ xử lý', icon: Clock, className: 'status-pending' },
-  error: { label: 'Lỗi', icon: AlertCircle, className: 'status-error' },
-};
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return bytes + ' B';
@@ -76,6 +69,7 @@ export default function CourseDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const [course, setCourse] = useState(initialCourse);
   const [documents, setDocuments] = useState(initialDocuments);
@@ -85,8 +79,17 @@ export default function CourseDetailPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
+  const [enrollEmail, setEnrollEmail] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
+
+  const statusConfig: Record<DocumentStatus, { label: string; icon: React.ElementType; className: string }> = {
+    ready: { label: t('status.ready'), icon: CheckCircle2, className: 'status-ready' },
+    processing: { label: t('status.processing'), icon: Loader2, className: 'status-processing' },
+    pending: { label: t('status.pending'), icon: Clock, className: 'status-pending' },
+    error: { label: t('status.error'), icon: AlertCircle, className: 'status-error' },
+  };
 
   // Dialog states
   const [editCourseOpen, setEditCourseOpen] = useState(false);
@@ -99,15 +102,62 @@ export default function CourseDetailPage() {
   const [deleteCourseOpen, setDeleteCourseOpen] = useState(false);
 
   const courseEditFields: EditField[] = [
-    { key: 'code', label: 'Mã môn học', value: course.code },
-    { key: 'name', label: 'Tên môn học', value: course.name },
-    { key: 'description', label: 'Mô tả', value: course.description, type: 'textarea' },
-    { key: 'semester', label: 'Học kỳ', value: course.semester },
+    { key: 'code', label: language === 'vi' ? 'Mã môn học' : 'Course Code', value: course.code },
+    { key: 'name', label: language === 'vi' ? 'Tên môn học' : 'Course Name', value: course.name },
+    { key: 'description', label: language === 'vi' ? 'Mô tả' : 'Description', value: course.description, type: 'textarea' },
+    { key: 'semester', label: language === 'vi' ? 'Học kỳ' : 'Semester', value: course.semester },
   ];
 
   const quizEditFields: EditField[] = editQuizTarget ? [
-    { key: 'title', label: 'Tên quiz', value: editQuizTarget.title },
+    { key: 'title', label: language === 'vi' ? 'Tên quiz' : 'Quiz Name', value: editQuizTarget.title },
   ] : [];
+
+  // File upload handlers
+  const processFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    Array.from(files).forEach((file) => {
+      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+      const allowedExts = ['.pdf', '.docx', '.txt'];
+      if (!allowedExts.includes(ext)) {
+        toast({ title: language === 'vi' ? 'Định dạng không hỗ trợ' : 'Unsupported format', description: `"${file.name}"`, variant: 'destructive' });
+        return;
+      }
+      const tempId = Date.now().toString() + Math.random().toString(36).slice(2);
+      const rawExt = ext.replace('.', '');
+      const fileType: DocFileType = (['pdf', 'docx', 'txt'].includes(rawExt) ? rawExt : 'txt') as DocFileType;
+      const newDoc: Document = {
+        id: tempId, courseId: course.id, uploadedBy: '2', filename: file.name,
+        filePath: `/docs/${tempId}`, fileType, fileSize: file.size,
+        status: 'processing', totalChunks: 0, createdAt: new Date().toISOString(),
+      };
+      setDocuments(prev => [newDoc, ...prev]);
+      toast({ title: t('toast.uploading'), description: `"${file.name}"...` });
+      setTimeout(() => {
+        setDocuments(prev => prev.map(d =>
+          d.id === tempId ? { ...d, status: 'ready' as DocumentStatus, totalChunks: Math.floor(Math.random() * 60 + 20) } : d
+        ));
+        toast({ title: t('toast.processDone'), description: `"${file.name}"` });
+      }, 3000);
+    });
+  };
+
+  const handleFileDrop = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(false); processFiles(e.dataTransfer.files); };
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => { processFiles(e.target.files); if (fileInputRef.current) fileInputRef.current.value = ''; };
+
+  const handleEnrollStudent = () => {
+    if (!enrollEmail.trim()) {
+      toast({ title: language === 'vi' ? 'Thiếu thông tin' : 'Missing info', description: language === 'vi' ? 'Vui lòng nhập email.' : 'Please enter an email.', variant: 'destructive' });
+      return;
+    }
+    const newStudent = {
+      id: Date.now().toString(), fullName: enrollEmail.split('@')[0].replace('.', ' '), email: enrollEmail,
+      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${enrollEmail}`, progress: 0, quizzesTaken: 0, lastActive: 'now',
+    };
+    setStudents(prev => [...prev, newStudent]);
+    setIsEnrollDialogOpen(false);
+    setEnrollEmail('');
+    toast({ title: t('toast.added'), description: language === 'vi' ? 'Sinh viên đã được thêm vào môn học.' : 'Student has been added to the course.' });
+  };
 
   return (
     <div className="p-8 space-y-6">
@@ -120,26 +170,26 @@ export default function CourseDetailPage() {
           <div className="flex items-center gap-3">
             <Badge variant="outline" className="text-base font-mono">{course.code}</Badge>
             <h1 className="text-3xl font-bold">{course.name}</h1>
-            {course.isActive && <Badge className="bg-success/10 text-success border-success/20">Đang hoạt động</Badge>}
+            {course.isActive && <Badge className="bg-success/10 text-success border-success/20">{t('courseDetail.operating')}</Badge>}
           </div>
           <p className="text-muted-foreground mt-1">{course.semester} • {course.description}</p>
         </div>
         {isTeacher && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2"><Settings className="h-4 w-4" />Cài đặt</Button>
+              <Button variant="outline" className="gap-2"><Settings className="h-4 w-4" />{t('courseDetail.settings')}</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => setEditCourseOpen(true)}><Edit className="mr-2 h-4 w-4" />Chỉnh sửa thông tin</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: 'Đã sao chép', description: `Mã môn: ${course.code}` }); }}>
-                <Copy className="mr-2 h-4 w-4" />Sao chép mã môn
+              <DropdownMenuItem onClick={() => setEditCourseOpen(true)}><Edit className="mr-2 h-4 w-4" />{t('courseDetail.editInfo')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: t('toast.copied'), description: `${language === 'vi' ? 'Mã môn' : 'Code'}: ${course.code}` }); }}>
+                <Copy className="mr-2 h-4 w-4" />{t('courseDetail.copyCode')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/courses/${id}`); toast({ title: 'Đã sao chép link', description: 'Link môn học đã được sao chép.' }); }}>
-                <Share2 className="mr-2 h-4 w-4" />Chia sẻ liên kết
+              <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/courses/${id}`); toast({ title: t('toast.linkCopied') }); }}>
+                <Share2 className="mr-2 h-4 w-4" />{t('courseDetail.shareLink')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive" onClick={() => setDeleteCourseOpen(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />Xóa môn học
+                <Trash2 className="mr-2 h-4 w-4" />{t('courseDetail.deleteCourse')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -149,10 +199,10 @@ export default function CourseDetailPage() {
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
         {[
-          { icon: Users, label: 'Sinh viên', value: course.studentsCount },
-          { icon: FileText, label: 'Tài liệu', value: course.documentsCount },
-          { icon: ClipboardList, label: 'Quiz', value: course.quizzesCount },
-          { icon: TrendingUp, label: 'Điểm TB', value: '72%', isSuccess: true },
+          { icon: Users, label: t('courseDetail.students'), value: course.studentsCount },
+          { icon: FileText, label: t('courseDetail.documents'), value: course.documentsCount },
+          { icon: ClipboardList, label: t('courseDetail.quiz'), value: course.quizzesCount },
+          { icon: TrendingUp, label: t('courseDetail.avgScore'), value: '72%', isSuccess: true },
         ].map((s) => (
           <Card key={s.label}>
             <CardHeader className="pb-2"><CardDescription className="flex items-center gap-2"><s.icon className="h-4 w-4" />{s.label}</CardDescription></CardHeader>
@@ -164,23 +214,23 @@ export default function CourseDetailPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
-          <TabsTrigger value="overview" className="gap-2"><BookOpen className="h-4 w-4" />Tổng quan</TabsTrigger>
-          <TabsTrigger value="documents" className="gap-2"><FileText className="h-4 w-4" />Tài liệu</TabsTrigger>
-          <TabsTrigger value="quizzes" className="gap-2"><ClipboardList className="h-4 w-4" />Quiz</TabsTrigger>
-          {isTeacher && <TabsTrigger value="students" className="gap-2"><Users className="h-4 w-4" />Sinh viên</TabsTrigger>}
+          <TabsTrigger value="overview" className="gap-2"><BookOpen className="h-4 w-4" />{t('courseDetail.overview')}</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-2"><FileText className="h-4 w-4" />{t('courseDetail.documents')}</TabsTrigger>
+          <TabsTrigger value="quizzes" className="gap-2"><ClipboardList className="h-4 w-4" />{t('courseDetail.quiz')}</TabsTrigger>
+          {isTeacher && <TabsTrigger value="students" className="gap-2"><Users className="h-4 w-4" />{t('courseDetail.students')}</TabsTrigger>}
         </TabsList>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
-              <CardHeader><CardTitle>Hoạt động gần đây</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t('courseDetail.recentActivity')}</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 {[
-                  { icon: FileText, text: 'Đã tải lên slide_chuong3.pdf', time: '2 giờ trước' },
-                  { icon: ClipboardList, text: 'Quiz Chương 2 đã hoàn thành bởi 5 SV', time: '5 giờ trước' },
-                  { icon: MessageSquare, text: '12 câu hỏi mới từ sinh viên', time: '1 ngày trước' },
-                  { icon: Users, text: '3 sinh viên mới đăng ký', time: '2 ngày trước' },
+                  { icon: FileText, text: language === 'vi' ? 'Đã tải lên slide_chuong3.pdf' : 'Uploaded slide_chuong3.pdf', time: `2 ${t('time.hourAgo')}` },
+                  { icon: ClipboardList, text: language === 'vi' ? 'Quiz Chương 2 đã hoàn thành bởi 5 SV' : 'Chapter 2 Quiz completed by 5 students', time: `5 ${t('time.hourAgo')}` },
+                  { icon: MessageSquare, text: language === 'vi' ? '12 câu hỏi mới từ sinh viên' : '12 new questions from students', time: `1 ${t('time.dayAgo')}` },
+                  { icon: Users, text: language === 'vi' ? '3 sinh viên mới đăng ký' : '3 new students enrolled', time: `2 ${t('time.dayAgo')}` },
                 ].map((activity, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -196,11 +246,11 @@ export default function CourseDetailPage() {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Lịch thi</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t('courseDetail.examSchedule')}</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 {[
-                  { type: 'Giữa kỳ', date: '15/03/2025', time: '08:00 - 10:00', room: 'A305' },
-                  { type: 'Cuối kỳ', date: '20/05/2025', time: '13:00 - 15:00', room: 'A201' },
+                  { type: t('courseDetail.midterm'), date: '15/03/2025', time: '08:00 - 10:00', room: 'A305' },
+                  { type: t('courseDetail.final'), date: '20/05/2025', time: '13:00 - 15:00', room: 'A201' },
                 ].map((exam, index) => (
                   <div key={index} className="p-4 rounded-lg bg-muted/50 space-y-2">
                     <div className="flex items-center justify-between">
@@ -220,20 +270,20 @@ export default function CourseDetailPage() {
           </div>
 
           <Card>
-            <CardHeader><CardTitle>Truy cập nhanh</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t('courseDetail.quickAccess')}</CardTitle></CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-3">
                 <Button variant="outline" className="h-auto py-6 flex-col gap-2" onClick={() => navigate('/chat')}>
-                  <MessageSquare className="h-8 w-8 text-primary" /><span className="font-medium">Chat AI</span>
-                  <span className="text-xs text-muted-foreground">Hỏi đáp với trợ lý AI</span>
+                  <MessageSquare className="h-8 w-8 text-primary" /><span className="font-medium">{t('courseDetail.chatAI')}</span>
+                  <span className="text-xs text-muted-foreground">{t('courseDetail.chatAIDesc')}</span>
                 </Button>
                 <Button variant="outline" className="h-auto py-6 flex-col gap-2" onClick={() => setActiveTab('quizzes')}>
-                  <Play className="h-8 w-8 text-success" /><span className="font-medium">Làm Quiz</span>
-                  <span className="text-xs text-muted-foreground">{quizzes.length} quiz có sẵn</span>
+                  <Play className="h-8 w-8 text-success" /><span className="font-medium">{t('courseDetail.takeQuiz')}</span>
+                  <span className="text-xs text-muted-foreground">{quizzes.length} {t('courseDetail.quizAvailable')}</span>
                 </Button>
                 <Button variant="outline" className="h-auto py-6 flex-col gap-2" onClick={() => setActiveTab('documents')}>
-                  <FileText className="h-8 w-8 text-warning" /><span className="font-medium">Xem tài liệu</span>
-                  <span className="text-xs text-muted-foreground">{documents.length} tài liệu</span>
+                  <FileText className="h-8 w-8 text-warning" /><span className="font-medium">{t('courseDetail.viewDocs')}</span>
+                  <span className="text-xs text-muted-foreground">{documents.length} {t('courseDetail.documents').toLowerCase()}</span>
                 </Button>
               </div>
             </CardContent>
@@ -246,12 +296,13 @@ export default function CourseDetailPage() {
             <Card className={`border-2 border-dashed transition-colors ${isDragging ? 'border-primary bg-primary/5' : 'border-border'}`}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
-              onDrop={(e) => { e.preventDefault(); setIsDragging(false); toast({ title: 'Đã nhận file', description: 'File đang được xử lý.' }); }}>
+              onDrop={handleFileDrop}>
               <CardContent className="flex flex-col items-center justify-center py-8">
                 <Upload className="h-10 w-10 text-muted-foreground mb-3" />
-                <p className="font-medium mb-1">Tải lên tài liệu</p>
-                <p className="text-sm text-muted-foreground mb-3">Kéo thả file hoặc click để chọn</p>
-                <Button variant="outline" size="sm">Chọn file</Button>
+                <p className="font-medium mb-1">{t('courseDetail.uploadDoc')}</p>
+                <p className="text-sm text-muted-foreground mb-3">{t('courseDetail.uploadDocDesc')}</p>
+                <input ref={fileInputRef} type="file" accept=".pdf,.docx,.txt" multiple className="hidden" onChange={handleFileSelect} />
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>{t('courseDetail.chooseFile')}</Button>
               </CardContent>
             </Card>
           )}
@@ -260,11 +311,11 @@ export default function CourseDetailPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tên file</TableHead>
-                  <TableHead>Kích thước</TableHead>
-                  <TableHead>Chunks</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày tải</TableHead>
+                  <TableHead>{t('courseDetail.filename')}</TableHead>
+                  <TableHead>{t('courseDetail.size')}</TableHead>
+                  <TableHead>{t('courseDetail.chunks')}</TableHead>
+                  <TableHead>{t('courseDetail.status')}</TableHead>
+                  <TableHead>{t('courseDetail.uploadDate')}</TableHead>
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -286,17 +337,17 @@ export default function CourseDetailPage() {
                           <StatusIcon className={`h-3 w-3 ${doc.status === 'processing' ? 'animate-spin' : ''}`} />{status.label}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{new Date(doc.createdAt).toLocaleDateString('vi-VN')}</TableCell>
+                      <TableCell className="text-muted-foreground">{new Date(doc.createdAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setPreviewDocTarget(doc)}><Eye className="mr-2 h-4 w-4" />Xem trước</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast({ title: 'Đang tải xuống', description: `${doc.filename} đang được tải...` })}><Download className="mr-2 h-4 w-4" />Tải xuống</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setPreviewDocTarget(doc)}><Eye className="mr-2 h-4 w-4" />{t('action.preview')}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast({ title: t('toast.downloading'), description: doc.filename })}><Download className="mr-2 h-4 w-4" />{t('action.download')}</DropdownMenuItem>
                             {isTeacher && (
                               <>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive" onClick={() => setDeleteDocTarget(doc)}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" onClick={() => setDeleteDocTarget(doc)}><Trash2 className="mr-2 h-4 w-4" />{t('action.delete')}</DropdownMenuItem>
                               </>
                             )}
                           </DropdownMenuContent>
@@ -315,31 +366,31 @@ export default function CourseDetailPage() {
           <div className="flex items-center justify-between">
             <div className="relative max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Tìm kiếm quiz..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+              <Input placeholder={t('courseDetail.searchQuiz')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
-            {isTeacher && <Button className="gap-2"><ClipboardList className="h-4 w-4" />Tạo Quiz mới</Button>}
+            {isTeacher && <Button className="gap-2" onClick={() => navigate('/quizzes')}><ClipboardList className="h-4 w-4" />{t('courseDetail.createQuiz')}</Button>}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {quizzes.map((quiz) => (
+            {quizzes.filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase())).map((quiz) => (
               <Card key={quiz.id} className="hover:shadow-md transition-shadow group">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-lg">{quiz.title}</CardTitle>
-                      <CardDescription>{quiz.questionsCount} câu hỏi • Tạo ngày {quiz.createdAt}</CardDescription>
+                      <CardDescription>{quiz.questionsCount} {t('courseDetail.questions')} • {t('courseDetail.createdOn')} {quiz.createdAt}</CardDescription>
                     </div>
                     {isTeacher && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate('/quizzes')}><Eye className="mr-2 h-4 w-4" />Xem trước</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setEditQuizTarget(quiz)}><Edit className="mr-2 h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { const newQ = { ...quiz, id: Date.now().toString(), title: `${quiz.title} (bản sao)` }; setQuizzes(prev => [...prev, newQ]); toast({ title: 'Đã nhân bản', description: `Quiz "${quiz.title}" đã được nhân bản.` }); }}>
-                            <Copy className="mr-2 h-4 w-4" />Nhân bản
+                          <DropdownMenuItem onClick={() => navigate('/quizzes')}><Eye className="mr-2 h-4 w-4" />{t('action.preview')}</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setEditQuizTarget(quiz)}><Edit className="mr-2 h-4 w-4" />{t('action.edit')}</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { const newQ = { ...quiz, id: Date.now().toString(), title: `${quiz.title} (${language === 'vi' ? 'bản sao' : 'copy'})` }; setQuizzes(prev => [...prev, newQ]); toast({ title: t('toast.duplicated') }); }}>
+                            <Copy className="mr-2 h-4 w-4" />{t('action.duplicate')}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive" onClick={() => setDeleteQuizTarget(quiz)}><Trash2 className="mr-2 h-4 w-4" />Xóa</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => setDeleteQuizTarget(quiz)}><Trash2 className="mr-2 h-4 w-4" />{t('action.delete')}</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     )}
@@ -347,11 +398,11 @@ export default function CourseDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="text-center"><p className="text-2xl font-bold">{quiz.attempts}</p><p className="text-xs text-muted-foreground">Lượt làm</p></div>
-                    <div className="text-center"><p className="text-2xl font-bold text-success">{quiz.avgScore}%</p><p className="text-xs text-muted-foreground">Điểm TB</p></div>
+                    <div className="text-center"><p className="text-2xl font-bold">{quiz.attempts}</p><p className="text-xs text-muted-foreground">{t('courseDetail.attempts')}</p></div>
+                    <div className="text-center"><p className="text-2xl font-bold text-success">{quiz.avgScore}%</p><p className="text-xs text-muted-foreground">{t('courseDetail.avgScore')}</p></div>
                   </div>
                   <Button className="w-full gap-2" onClick={() => navigate('/quizzes')}>
-                    <Play className="h-4 w-4" />{isTeacher ? 'Xem kết quả' : 'Làm bài'}
+                    <Play className="h-4 w-4" />{isTeacher ? t('courseDetail.viewResults') : t('courseDetail.takeExam')}
                   </Button>
                 </CardContent>
               </Card>
@@ -365,24 +416,24 @@ export default function CourseDetailPage() {
             <div className="flex items-center justify-between">
               <div className="relative max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Tìm kiếm sinh viên..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+                <Input placeholder={t('courseDetail.searchStudent')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
               </div>
               <Dialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
-                <DialogTrigger asChild><Button className="gap-2"><UserPlus className="h-4 w-4" />Thêm sinh viên</Button></DialogTrigger>
+                <DialogTrigger asChild><Button className="gap-2"><UserPlus className="h-4 w-4" />{t('courseDetail.addStudent')}</Button></DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Thêm sinh viên vào môn học</DialogTitle>
-                    <DialogDescription>Nhập email sinh viên để thêm vào môn {course.name}</DialogDescription>
+                    <DialogTitle>{t('courseDetail.addStudentTitle')}</DialogTitle>
+                    <DialogDescription>{t('courseDetail.addStudentDesc')} {course.name}</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label>Email sinh viên</Label>
-                      <Input placeholder="email@edu.vn" />
+                      <Label>{t('courseDetail.studentEmail')}</Label>
+                      <Input placeholder="email@edu.vn" value={enrollEmail} onChange={(e) => setEnrollEmail(e.target.value)} />
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsEnrollDialogOpen(false)}>Hủy</Button>
-                    <Button onClick={() => { setIsEnrollDialogOpen(false); toast({ title: 'Đã thêm', description: 'Sinh viên đã được thêm vào môn học.' }); }}>Thêm</Button>
+                    <Button variant="outline" onClick={() => setIsEnrollDialogOpen(false)}>{t('action.cancel')}</Button>
+                    <Button onClick={handleEnrollStudent}>{t('action.add')}</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -392,15 +443,15 @@ export default function CourseDetailPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Sinh viên</TableHead>
-                    <TableHead>Tiến độ</TableHead>
-                    <TableHead>Quiz đã làm</TableHead>
-                    <TableHead>Hoạt động cuối</TableHead>
+                    <TableHead>{t('courseDetail.students')}</TableHead>
+                    <TableHead>{t('courseDetail.progress')}</TableHead>
+                    <TableHead>{t('courseDetail.quizDone')}</TableHead>
+                    <TableHead>{t('courseDetail.lastActive')}</TableHead>
                     <TableHead className="w-12"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((student) => (
+                  {students.filter(s => s.fullName.toLowerCase().includes(searchQuery.toLowerCase())).map((student) => (
                     <TableRow key={student.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -417,10 +468,10 @@ export default function CourseDetailPage() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setViewStudentTarget(student)}><Eye className="mr-2 h-4 w-4" />Xem chi tiết</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate('/chat')}><MessageSquare className="mr-2 h-4 w-4" />Gửi tin nhắn</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setViewStudentTarget(student)}><Eye className="mr-2 h-4 w-4" />{t('action.viewDetail')}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => navigate('/chat')}><MessageSquare className="mr-2 h-4 w-4" />{t('action.sendMessage')}</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteStudentTarget(student)}><Trash2 className="mr-2 h-4 w-4" />Xóa khỏi môn</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteStudentTarget(student)}><Trash2 className="mr-2 h-4 w-4" />{t('action.removeFromCourse')}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -434,72 +485,50 @@ export default function CourseDetailPage() {
       </Tabs>
 
       {/* All Dialogs */}
-      <EditDialog
-        open={editCourseOpen}
-        onOpenChange={setEditCourseOpen}
-        title="Chỉnh sửa môn học"
-        description="Cập nhật thông tin môn học"
+      <EditDialog open={editCourseOpen} onOpenChange={setEditCourseOpen}
+        title={language === 'vi' ? 'Chỉnh sửa môn học' : 'Edit Course'}
+        description={language === 'vi' ? 'Cập nhật thông tin môn học' : 'Update course information'}
         fields={courseEditFields}
         onSave={(values) => {
-          setCourse((prev) => ({ ...prev, code: values.code, name: values.name, description: values.description, semester: values.semester }));
-          toast({ title: 'Đã cập nhật', description: 'Thông tin môn học đã được lưu.' });
+          setCourse(prev => ({ ...prev, code: values.code, name: values.name, description: values.description, semester: values.semester }));
+          toast({ title: t('toast.updated') });
         }}
       />
 
-      <ConfirmDeleteDialog
-        open={deleteCourseOpen}
-        onOpenChange={setDeleteCourseOpen}
-        title="Xóa môn học"
-        description={`Bạn có chắc chắn muốn xóa "${course.name}"? Tất cả dữ liệu liên quan sẽ bị mất.`}
-        onConfirm={() => { toast({ title: 'Đã xóa', description: 'Môn học đã được xóa.' }); navigate('/courses'); }}
+      <ConfirmDeleteDialog open={deleteCourseOpen} onOpenChange={setDeleteCourseOpen}
+        title={t('confirm.deleteCourse')}
+        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to delete'} "${course.name}"? ${t('confirm.irreversible')}`}
+        onConfirm={() => { toast({ title: t('toast.deleted') }); navigate('/courses'); }}
       />
 
-      <ConfirmDeleteDialog
-        open={!!deleteDocTarget}
-        onOpenChange={(open) => !open && setDeleteDocTarget(null)}
-        title="Xóa tài liệu"
-        description={`Bạn có chắc chắn muốn xóa "${deleteDocTarget?.filename}"?`}
-        onConfirm={() => { setDocuments((prev) => prev.filter((d) => d.id !== deleteDocTarget?.id)); toast({ title: 'Đã xóa', description: 'Tài liệu đã được xóa.' }); setDeleteDocTarget(null); }}
+      <ConfirmDeleteDialog open={!!deleteDocTarget} onOpenChange={(open) => !open && setDeleteDocTarget(null)}
+        title={t('confirm.deleteDoc')}
+        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to delete'} "${deleteDocTarget?.filename}"?`}
+        onConfirm={() => { setDocuments(prev => prev.filter(d => d.id !== deleteDocTarget?.id)); toast({ title: t('toast.deleted') }); setDeleteDocTarget(null); }}
       />
 
-      <PreviewDialog
-        open={!!previewDocTarget}
-        onOpenChange={(open) => !open && setPreviewDocTarget(null)}
-        filename={previewDocTarget?.filename || ''}
-        fileType={previewDocTarget?.fileType || ''}
-        fileSize={previewDocTarget ? formatFileSize(previewDocTarget.fileSize) : ''}
+      <PreviewDialog open={!!previewDocTarget} onOpenChange={(open) => !open && setPreviewDocTarget(null)}
+        filename={previewDocTarget?.filename || ''} fileType={previewDocTarget?.fileType || ''} fileSize={previewDocTarget ? formatFileSize(previewDocTarget.fileSize) : ''} />
+
+      <ConfirmDeleteDialog open={!!deleteQuizTarget} onOpenChange={(open) => !open && setDeleteQuizTarget(null)}
+        title={t('confirm.deleteQuiz')}
+        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to delete'} "${deleteQuizTarget?.title}"?`}
+        onConfirm={() => { setQuizzes(prev => prev.filter(q => q.id !== deleteQuizTarget?.id)); toast({ title: t('toast.deleted') }); setDeleteQuizTarget(null); }}
       />
 
-      <ConfirmDeleteDialog
-        open={!!deleteQuizTarget}
-        onOpenChange={(open) => !open && setDeleteQuizTarget(null)}
-        title="Xóa quiz"
-        description={`Bạn có chắc chắn muốn xóa "${deleteQuizTarget?.title}"?`}
-        onConfirm={() => { setQuizzes((prev) => prev.filter((q) => q.id !== deleteQuizTarget?.id)); toast({ title: 'Đã xóa', description: 'Quiz đã được xóa.' }); setDeleteQuizTarget(null); }}
+      <EditDialog open={!!editQuizTarget} onOpenChange={(open) => !open && setEditQuizTarget(null)}
+        title={language === 'vi' ? 'Chỉnh sửa quiz' : 'Edit Quiz'} fields={quizEditFields}
+        onSave={(values) => { setQuizzes(prev => prev.map(q => q.id === editQuizTarget?.id ? { ...q, title: values.title } : q)); toast({ title: t('toast.updated') }); setEditQuizTarget(null); }}
       />
 
-      <EditDialog
-        open={!!editQuizTarget}
-        onOpenChange={(open) => !open && setEditQuizTarget(null)}
-        title="Chỉnh sửa quiz"
-        fields={quizEditFields}
-        onSave={(values) => { setQuizzes((prev) => prev.map((q) => q.id === editQuizTarget?.id ? { ...q, title: values.title } : q)); toast({ title: 'Đã cập nhật', description: 'Quiz đã được cập nhật.' }); setEditQuizTarget(null); }}
+      <ConfirmDeleteDialog open={!!deleteStudentTarget} onOpenChange={(open) => !open && setDeleteStudentTarget(null)}
+        title={t('confirm.deleteStudent')}
+        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to remove'} "${deleteStudentTarget?.fullName}"?`}
+        onConfirm={() => { setStudents(prev => prev.filter(s => s.id !== deleteStudentTarget?.id)); toast({ title: t('toast.deleted') }); setDeleteStudentTarget(null); }}
       />
 
-      <ConfirmDeleteDialog
-        open={!!deleteStudentTarget}
-        onOpenChange={(open) => !open && setDeleteStudentTarget(null)}
-        title="Xóa sinh viên khỏi môn"
-        description={`Bạn có chắc chắn muốn xóa "${deleteStudentTarget?.fullName}" khỏi môn ${course.name}?`}
-        onConfirm={() => { setStudents((prev) => prev.filter((s) => s.id !== deleteStudentTarget?.id)); toast({ title: 'Đã xóa', description: 'Sinh viên đã được xóa khỏi môn học.' }); setDeleteStudentTarget(null); }}
-      />
-
-      <StudentDetailDialog
-        open={!!viewStudentTarget}
-        onOpenChange={(open) => !open && setViewStudentTarget(null)}
-        student={viewStudentTarget}
-        totalQuizzes={quizzes.length}
-      />
+      <StudentDetailDialog open={!!viewStudentTarget} onOpenChange={(open) => !open && setViewStudentTarget(null)}
+        student={viewStudentTarget} totalQuizzes={quizzes.length} />
     </div>
   );
 }
