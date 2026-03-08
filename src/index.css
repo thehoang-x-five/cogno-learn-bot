@@ -131,7 +131,11 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border/60;
+  }
+
+  .dark * {
+    @apply border-border/40;
   }
 
   body {
