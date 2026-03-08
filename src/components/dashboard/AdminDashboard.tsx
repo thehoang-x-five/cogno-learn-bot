@@ -1,9 +1,9 @@
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
   Users, BookOpen, FileText, MessageSquare, TrendingUp,
-  AlertCircle, CheckCircle2,
   Activity, BarChart3, Bot,
 } from 'lucide-react';
 import {
@@ -12,59 +12,61 @@ import {
   AreaChart, Area,
 } from 'recharts';
 
-const systemStats = [
-  { name: 'Tổng người dùng', value: '1,234', icon: Users, change: '+12%', color: 'text-primary', bg: 'bg-primary/10' },
-  { name: 'Môn học hoạt động', value: '48', icon: BookOpen, change: '+3', color: 'text-accent', bg: 'bg-accent/10' },
-  { name: 'Tài liệu đã xử lý', value: '856', icon: FileText, change: '+24', color: 'text-warning', bg: 'bg-warning/10' },
-  { name: 'Cuộc hội thoại', value: '5,678', icon: MessageSquare, change: '+156', color: 'text-info', bg: 'bg-info/10' },
-];
-
-const recentRegistrations = [
-  { name: 'Nguyễn Văn H', email: 'h.nguyen@edu.vn', role: 'student' as const, time: '10 phút trước' },
-  { name: 'Trần Thị K', email: 'k.tran@edu.vn', role: 'student' as const, time: '30 phút trước' },
-  { name: 'Lê Văn M', email: 'm.le@edu.vn', role: 'teacher' as const, time: '2 giờ trước' },
-  { name: 'Phạm Thị N', email: 'n.pham@edu.vn', role: 'student' as const, time: '5 giờ trước' },
-];
-
-const systemHealth = [
-  { name: 'API Server', status: 'online' as const, uptime: '99.9%', latency: '45ms' },
-  { name: 'PostgreSQL', status: 'online' as const, uptime: '99.8%', latency: '12ms' },
-  { name: 'Vector DB (pgvector)', status: 'online' as const, uptime: '99.7%', latency: '28ms' },
-  { name: 'Celery Workers', status: 'online' as const, uptime: '99.5%', latency: '—' },
-  { name: 'LLM API (OpenAI)', status: 'warning' as const, uptime: '98.2%', latency: '890ms' },
-];
-
-const usageByDay = [
-  { day: 'T2', chats: 120, quizzes: 45 },
-  { day: 'T3', chats: 145, quizzes: 52 },
-  { day: 'T4', chats: 198, quizzes: 67 },
-  { day: 'T5', chats: 167, quizzes: 58 },
-  { day: 'T6', chats: 210, quizzes: 73 },
-  { day: 'T7', chats: 89, quizzes: 30 },
-  { day: 'CN', chats: 56, quizzes: 18 },
-];
-
-const userDistribution = [
-  { name: 'Sinh viên', value: 1050, color: 'hsl(160, 84%, 39%)' },
-  { name: 'Giáo viên', value: 150, color: 'hsl(234, 89%, 58%)' },
-  { name: 'Admin', value: 34, color: 'hsl(0, 84%, 60%)' },
-];
-
-const trafficData = [
-  { time: '00:00', users: 12 }, { time: '04:00', users: 5 },
-  { time: '08:00', users: 89 }, { time: '10:00', users: 234 },
-  { time: '12:00', users: 156 }, { time: '14:00', users: 278 },
-  { time: '16:00', users: 312 }, { time: '18:00', users: 198 },
-  { time: '20:00', users: 145 }, { time: '22:00', users: 67 },
-];
-
-const roleLabels: Record<string, string> = {
-  admin: 'Quản trị viên',
-  teacher: 'Giáo viên',
-  student: 'Sinh viên',
-};
-
 export default function AdminDashboard() {
+  const { t, language } = useLanguage();
+
+  const systemStats = [
+    { name: t('admin.totalUsers'), value: '1,234', icon: Users, change: '+12%', color: 'text-primary', bg: 'bg-primary/10' },
+    { name: t('admin.activeCourses'), value: '48', icon: BookOpen, change: '+3', color: 'text-accent', bg: 'bg-accent/10' },
+    { name: t('admin.processedDocs'), value: '856', icon: FileText, change: '+24', color: 'text-warning', bg: 'bg-warning/10' },
+    { name: t('admin.conversations'), value: '5,678', icon: MessageSquare, change: '+156', color: 'text-info', bg: 'bg-info/10' },
+  ];
+
+  const recentRegistrations = [
+    { name: 'Nguyễn Văn H', email: 'h.nguyen@edu.vn', role: 'student' as const, time: language === 'vi' ? '10 phút trước' : '10 min ago' },
+    { name: 'Trần Thị K', email: 'k.tran@edu.vn', role: 'student' as const, time: language === 'vi' ? '30 phút trước' : '30 min ago' },
+    { name: 'Lê Văn M', email: 'm.le@edu.vn', role: 'teacher' as const, time: language === 'vi' ? '2 giờ trước' : '2 hours ago' },
+    { name: 'Phạm Thị N', email: 'n.pham@edu.vn', role: 'student' as const, time: language === 'vi' ? '5 giờ trước' : '5 hours ago' },
+  ];
+
+  const systemHealth = [
+    { name: 'API Server', status: 'online' as const, uptime: '99.9%', latency: '45ms' },
+    { name: 'PostgreSQL', status: 'online' as const, uptime: '99.8%', latency: '12ms' },
+    { name: 'Vector DB (pgvector)', status: 'online' as const, uptime: '99.7%', latency: '28ms' },
+    { name: 'Celery Workers', status: 'online' as const, uptime: '99.5%', latency: '—' },
+    { name: 'LLM API (OpenAI)', status: 'warning' as const, uptime: '98.2%', latency: '890ms' },
+  ];
+
+  const usageByDay = [
+    { day: language === 'vi' ? 'T2' : 'Mon', chats: 120, quizzes: 45 },
+    { day: language === 'vi' ? 'T3' : 'Tue', chats: 145, quizzes: 52 },
+    { day: language === 'vi' ? 'T4' : 'Wed', chats: 198, quizzes: 67 },
+    { day: language === 'vi' ? 'T5' : 'Thu', chats: 167, quizzes: 58 },
+    { day: language === 'vi' ? 'T6' : 'Fri', chats: 210, quizzes: 73 },
+    { day: language === 'vi' ? 'T7' : 'Sat', chats: 89, quizzes: 30 },
+    { day: language === 'vi' ? 'CN' : 'Sun', chats: 56, quizzes: 18 },
+  ];
+
+  const userDistribution = [
+    { name: t('role.student'), value: 1050, color: 'hsl(160, 84%, 39%)' },
+    { name: t('role.teacher'), value: 150, color: 'hsl(234, 89%, 58%)' },
+    { name: t('role.admin'), value: 34, color: 'hsl(0, 84%, 60%)' },
+  ];
+
+  const trafficData = [
+    { time: '00:00', users: 12 }, { time: '04:00', users: 5 },
+    { time: '08:00', users: 89 }, { time: '10:00', users: 234 },
+    { time: '12:00', users: 156 }, { time: '14:00', users: 278 },
+    { time: '16:00', users: 312 }, { time: '18:00', users: 198 },
+    { time: '20:00', users: 145 }, { time: '22:00', users: 67 },
+  ];
+
+  const roleLabels: Record<string, string> = {
+    admin: t('role.admin'),
+    teacher: t('role.teacher'),
+    student: t('role.student'),
+  };
+
   return (
     <div className="space-y-6">
       {/* Stats */}
@@ -81,7 +83,7 @@ export default function AdminDashboard() {
               <div className="text-3xl font-bold">{stat.value}</div>
               <p className="text-xs text-accent flex items-center gap-1 mt-1">
                 <TrendingUp className="h-3 w-3" />
-                {stat.change} so với tháng trước
+                {stat.change} {t('admin.comparedLastMonth')}
               </p>
             </CardContent>
           </Card>
@@ -94,9 +96,9 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />
-              Hoạt động theo ngày
+              {t('admin.usageByDay')}
             </CardTitle>
-            <CardDescription>Số lượng chat & quiz trong tuần</CardDescription>
+            <CardDescription>{t('admin.usageByDayDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
@@ -122,7 +124,7 @@ export default function AdminDashboard() {
         {/* User Distribution */}
         <Card>
           <CardHeader>
-            <CardTitle>Phân bổ người dùng</CardTitle>
+            <CardTitle>{t('admin.userDistribution')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
@@ -166,7 +168,7 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              Lưu lượng truy cập hôm nay
+              {t('admin.traffic')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -189,7 +191,7 @@ export default function AdminDashboard() {
                     fontSize: '12px',
                   }}
                 />
-                <Area type="monotone" dataKey="users" name="Người dùng" stroke="hsl(234, 89%, 58%)" fill="url(#colorUsers)" strokeWidth={2} />
+                <Area type="monotone" dataKey="users" name={t('users.user')} stroke="hsl(234, 89%, 58%)" fill="url(#colorUsers)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -200,9 +202,9 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              Sức khỏe hệ thống
+              {t('admin.systemHealth')}
             </CardTitle>
-            <CardDescription>Trạng thái các dịch vụ</CardDescription>
+            <CardDescription>{t('admin.serviceStatus')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {systemHealth.map((service) => (
@@ -225,7 +227,7 @@ export default function AdminDashboard() {
                   <span>{service.uptime}</span>
                   <span className="w-12 text-right">{service.latency}</span>
                   <Badge variant="outline" className={`text-[10px] ${service.status === 'online' ? 'status-ready' : 'status-processing'}`}>
-                    {service.status === 'online' ? 'Online' : 'Chậm'}
+                    {service.status === 'online' ? t('admin.online') : t('admin.degraded')}
                   </Badge>
                 </div>
               </div>
@@ -238,8 +240,8 @@ export default function AdminDashboard() {
         {/* Recent Registrations */}
         <Card>
           <CardHeader>
-            <CardTitle>Đăng ký gần đây</CardTitle>
-            <CardDescription>Người dùng mới tham gia hệ thống</CardDescription>
+            <CardTitle>{t('admin.recentRegistrations')}</CardTitle>
+            <CardDescription>{t('admin.newUsersJoined')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {recentRegistrations.map((user, i) => (
@@ -269,9 +271,9 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bot className="h-5 w-5" />
-              Sử dụng Token AI
+              {t('admin.aiUsage')}
             </CardTitle>
-            <CardDescription>Thống kê token tháng này</CardDescription>
+            <CardDescription>{t('admin.aiUsageDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
@@ -296,7 +298,7 @@ export default function AdminDashboard() {
               <Progress value={24} className="h-2" />
             </div>
             <div className="pt-2 border-t flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Chi phí ước tính</span>
+              <span className="text-muted-foreground">{t('admin.estimatedCost')}</span>
               <span className="font-semibold text-primary">$48.50</span>
             </div>
           </CardContent>
