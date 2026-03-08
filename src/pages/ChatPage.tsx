@@ -234,8 +234,8 @@ export default function ChatPage() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        <div className="h-14 border-b flex items-center justify-between px-6 bg-card/80 backdrop-blur-sm">
+      <div className={cn('flex-1 flex flex-col min-w-0', isMobile && showConversations && 'hidden')}>
+        <div className="h-14 border-b flex items-center justify-between px-3 sm:px-6 bg-card/80 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
               <BookOpen className="h-5 w-5 text-primary" />
