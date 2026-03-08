@@ -191,7 +191,7 @@ export default function DocumentsPage() {
         }`}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setIsDragging(false); toast({ title: 'Đã nhận file', description: 'File đang được xử lý và thêm vào hệ thống.' }); }}
+        onDrop={handleFileDrop}
       >
         <CardContent className="flex flex-col items-center justify-center py-10">
           <div className={`h-14 w-14 rounded-2xl ${isDragging ? 'bg-primary/20 scale-110' : 'bg-primary/10'} flex items-center justify-center mb-4 transition-all`}>
@@ -201,7 +201,15 @@ export default function DocumentsPage() {
           <p className="text-muted-foreground text-sm mb-4">
             Kéo thả file hoặc click để chọn • PDF, DOCX, TXT
           </p>
-          <Button variant="outline" className="gap-2" onClick={() => toast({ title: 'Chọn file', description: 'Hãy kéo thả file vào vùng này để tải lên.' })}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.docx,.txt"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
             <Upload className="h-4 w-4" />
             Chọn file
           </Button>
