@@ -81,6 +81,24 @@ const translations: Record<string, Record<Language, string>> = {
   'admin.comparedLastMonth': { vi: 'so với tháng trước', en: 'compared to last month' },
   'admin.estimatedCost': { vi: 'Chi phí ước tính', en: 'Estimated Cost' },
 
+  // Admin time labels
+  'admin.time.10m': { vi: '10 phút trước', en: '10 min ago' },
+  'admin.time.30m': { vi: '30 phút trước', en: '30 min ago' },
+  'admin.time.2h': { vi: '2 giờ trước', en: '2 hours ago' },
+  'admin.time.5h': { vi: '5 giờ trước', en: '5 hours ago' },
+  'admin.day.mon': { vi: 'T2', en: 'Mon' },
+  'admin.day.tue': { vi: 'T3', en: 'Tue' },
+  'admin.day.wed': { vi: 'T4', en: 'Wed' },
+  'admin.day.thu': { vi: 'T5', en: 'Thu' },
+  'admin.day.fri': { vi: 'T6', en: 'Fri' },
+  'admin.day.sat': { vi: 'T7', en: 'Sat' },
+  'admin.day.sun': { vi: 'CN', en: 'Sun' },
+
+  // Settings time suffixes
+  'settings.timeAgo': { vi: 'trước', en: 'ago' },
+  'settings.dayAgo': { vi: 'ngày trước', en: 'day ago' },
+  'settings.siteDescDefault': { vi: 'Hệ thống Trợ lý Học tập AI', en: 'AI Learning Assistant System' },
+
   // Teacher Dashboard
   'teacher.coursesTaught': { vi: 'Môn học đang dạy', en: 'Courses Teaching' },
   'teacher.totalStudents': { vi: 'Tổng sinh viên', en: 'Total Students' },
@@ -491,6 +509,12 @@ const translations: Record<string, Record<Language, string>> = {
 
   // Time ago
   'time.minAgo': { vi: 'phút trước', en: 'min ago' },
+
+  // Profile activity items
+  'profile.act.login': { vi: 'Đăng nhập hệ thống', en: 'System login' },
+  'profile.act.chatOOP': { vi: 'Chat AI - Hỏi về OOP', en: 'AI Chat - Asked about OOP' },
+  'profile.act.quizDone': { vi: 'Hoàn thành Quiz Chương 2', en: 'Completed Chapter 2 Quiz' },
+  'profile.act.viewDoc': { vi: 'Xem tài liệu slide_chuong3.pdf', en: 'Viewed slide_chuong3.pdf' },
   'time.hourAgo': { vi: 'giờ trước', en: 'hours ago' },
   'time.dayAgo': { vi: 'ngày trước', en: 'days ago' },
 
@@ -541,6 +565,45 @@ const translations: Record<string, Record<Language, string>> = {
   // Not Found
   'notFound.title': { vi: 'Trang không tồn tại', en: 'Page Not Found' },
   'notFound.desc': { vi: 'Trang bạn đang tìm kiếm có thể đã bị di chuyển hoặc không tồn tại trong hệ thống EduAssist.', en: 'The page you are looking for may have been moved or does not exist in EduAssist.' },
+
+  // Loading
+  'loading.text': { vi: 'Đang tải...', en: 'Loading...' },
+
+  // Notifications (TopHeader)
+  'notif.newQuiz': { vi: 'Quiz mới: Ôn tập Chương 3', en: 'New Quiz: Chapter 3 Review' },
+  'notif.docProcessed': { vi: 'Tài liệu đã xử lý xong', en: 'Document processed' },
+  'notif.quizScore': { vi: 'Điểm Quiz Chương 2', en: 'Chapter 2 Quiz Score' },
+  'notif.quizScoreDesc': { vi: 'Bạn đạt 8/10 - Tốt!', en: 'You scored 8/10 - Good!' },
+  'notif.timeAgo5m': { vi: '5 phút trước', en: '5 min ago' },
+  'notif.timeAgo1h': { vi: '1 giờ trước', en: '1 hour ago' },
+  'notif.timeAgo3h': { vi: '3 giờ trước', en: '3 hours ago' },
+
+  // Chat suggestions
+  'chat.suggestion1': { vi: 'OOP là gì?', en: 'What is OOP?' },
+  'chat.suggestion2': { vi: 'Giải thích tính kế thừa', en: 'Explain inheritance' },
+  'chat.suggestion3': { vi: 'Cho ví dụ đa hình', en: 'Give polymorphism example' },
+  'chat.suggestion4': { vi: 'Tạo 5 câu quiz', en: 'Generate 5 quiz questions' },
+
+  // CourseDetail additional
+  'courseDetail.editCourse': { vi: 'Chỉnh sửa môn học', en: 'Edit Course' },
+  'courseDetail.updateInfo': { vi: 'Cập nhật thông tin môn học', en: 'Update course information' },
+  'courseDetail.editQuiz': { vi: 'Chỉnh sửa quiz', en: 'Edit Quiz' },
+  'courseDetail.copyLabel': { vi: 'Mã môn', en: 'Code' },
+  'courseDetail.missingInfo': { vi: 'Thiếu thông tin', en: 'Missing info' },
+  'courseDetail.enterEmail': { vi: 'Vui lòng nhập email.', en: 'Please enter an email.' },
+  'courseDetail.studentAdded': { vi: 'Sinh viên đã được thêm vào môn học.', en: 'Student has been added to the course.' },
+  'courseDetail.unsupported': { vi: 'Định dạng không hỗ trợ', en: 'Unsupported format' },
+  'courseDetail.confirmDeleteCourse': { vi: 'Bạn có chắc chắn muốn xóa', en: 'Are you sure you want to delete' },
+  'courseDetail.confirmDeleteDoc': { vi: 'Bạn có chắc chắn muốn xóa', en: 'Are you sure you want to delete' },
+  'courseDetail.confirmDeleteQuiz': { vi: 'Bạn có chắc chắn muốn xóa', en: 'Are you sure you want to delete' },
+  'courseDetail.confirmRemoveStudent': { vi: 'Bạn có chắc chắn muốn xóa', en: 'Are you sure you want to remove' },
+  'courseDetail.copySuffix': { vi: 'bản sao', en: 'copy' },
+
+  // Course Detail - Activity
+  'courseDetail.activity.uploaded': { vi: 'Đã tải lên slide_chuong3.pdf', en: 'Uploaded slide_chuong3.pdf' },
+  'courseDetail.activity.quizCompleted': { vi: 'Quiz Chương 2 đã hoàn thành bởi 5 SV', en: 'Chapter 2 Quiz completed by 5 students' },
+  'courseDetail.activity.newQuestions': { vi: '12 câu hỏi mới từ sinh viên', en: '12 new questions from students' },
+  'courseDetail.activity.newStudents': { vi: '3 sinh viên mới đăng ký', en: '3 new students enrolled' },
 };
 
 interface LanguageContextType {

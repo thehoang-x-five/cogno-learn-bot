@@ -102,14 +102,14 @@ export default function CourseDetailPage() {
   const [deleteCourseOpen, setDeleteCourseOpen] = useState(false);
 
   const courseEditFields: EditField[] = [
-    { key: 'code', label: language === 'vi' ? 'Mã môn học' : 'Course Code', value: course.code },
-    { key: 'name', label: language === 'vi' ? 'Tên môn học' : 'Course Name', value: course.name },
-    { key: 'description', label: language === 'vi' ? 'Mô tả' : 'Description', value: course.description, type: 'textarea' },
-    { key: 'semester', label: language === 'vi' ? 'Học kỳ' : 'Semester', value: course.semester },
+    { key: 'code', label: t('courses.code'), value: course.code },
+    { key: 'name', label: t('courses.name'), value: course.name },
+    { key: 'description', label: t('courses.description'), value: course.description, type: 'textarea' },
+    { key: 'semester', label: t('courses.semester'), value: course.semester },
   ];
 
   const quizEditFields: EditField[] = editQuizTarget ? [
-    { key: 'title', label: language === 'vi' ? 'Tên quiz' : 'Quiz Name', value: editQuizTarget.title },
+    { key: 'title', label: t('quiz.quizName'), value: editQuizTarget.title },
   ] : [];
 
   // File upload handlers
@@ -119,7 +119,7 @@ export default function CourseDetailPage() {
       const ext = '.' + file.name.split('.').pop()?.toLowerCase();
       const allowedExts = ['.pdf', '.docx', '.txt'];
       if (!allowedExts.includes(ext)) {
-        toast({ title: language === 'vi' ? 'Định dạng không hỗ trợ' : 'Unsupported format', description: `"${file.name}"`, variant: 'destructive' });
+        toast({ title: t('courseDetail.unsupported'), description: `"${file.name}"`, variant: 'destructive' });
         return;
       }
       const tempId = Date.now().toString() + Math.random().toString(36).slice(2);
@@ -146,7 +146,7 @@ export default function CourseDetailPage() {
 
   const handleEnrollStudent = () => {
     if (!enrollEmail.trim()) {
-      toast({ title: language === 'vi' ? 'Thiếu thông tin' : 'Missing info', description: language === 'vi' ? 'Vui lòng nhập email.' : 'Please enter an email.', variant: 'destructive' });
+      toast({ title: t('courseDetail.missingInfo'), description: t('courseDetail.enterEmail'), variant: 'destructive' });
       return;
     }
     const newStudent = {
@@ -156,7 +156,7 @@ export default function CourseDetailPage() {
     setStudents(prev => [...prev, newStudent]);
     setIsEnrollDialogOpen(false);
     setEnrollEmail('');
-    toast({ title: t('toast.added'), description: language === 'vi' ? 'Sinh viên đã được thêm vào môn học.' : 'Student has been added to the course.' });
+    toast({ title: t('toast.added'), description: t('courseDetail.studentAdded') });
   };
 
   return (
@@ -181,7 +181,7 @@ export default function CourseDetailPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => setEditCourseOpen(true)}><Edit className="mr-2 h-4 w-4" />{t('courseDetail.editInfo')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: t('toast.copied'), description: `${language === 'vi' ? 'Mã môn' : 'Code'}: ${course.code}` }); }}>
+              <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(course.code); toast({ title: t('toast.copied'), description: `${t('courseDetail.copyLabel')}: ${course.code}` }); }}>
                 <Copy className="mr-2 h-4 w-4" />{t('courseDetail.copyCode')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/courses/${id}`); toast({ title: t('toast.linkCopied') }); }}>
@@ -227,10 +227,10 @@ export default function CourseDetailPage() {
               <CardHeader><CardTitle>{t('courseDetail.recentActivity')}</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 {[
-                  { icon: FileText, text: language === 'vi' ? 'Đã tải lên slide_chuong3.pdf' : 'Uploaded slide_chuong3.pdf', time: `2 ${t('time.hourAgo')}` },
-                  { icon: ClipboardList, text: language === 'vi' ? 'Quiz Chương 2 đã hoàn thành bởi 5 SV' : 'Chapter 2 Quiz completed by 5 students', time: `5 ${t('time.hourAgo')}` },
-                  { icon: MessageSquare, text: language === 'vi' ? '12 câu hỏi mới từ sinh viên' : '12 new questions from students', time: `1 ${t('time.dayAgo')}` },
-                  { icon: Users, text: language === 'vi' ? '3 sinh viên mới đăng ký' : '3 new students enrolled', time: `2 ${t('time.dayAgo')}` },
+                  { icon: FileText, text: t('courseDetail.activity.uploaded'), time: `2 ${t('time.hourAgo')}` },
+                  { icon: ClipboardList, text: t('courseDetail.activity.quizCompleted'), time: `5 ${t('time.hourAgo')}` },
+                  { icon: MessageSquare, text: t('courseDetail.activity.newQuestions'), time: `1 ${t('time.dayAgo')}` },
+                  { icon: Users, text: t('courseDetail.activity.newStudents'), time: `2 ${t('time.dayAgo')}` },
                 ].map((activity, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -386,7 +386,7 @@ export default function CourseDetailPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => navigate('/quizzes')}><Eye className="mr-2 h-4 w-4" />{t('action.preview')}</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setEditQuizTarget(quiz)}><Edit className="mr-2 h-4 w-4" />{t('action.edit')}</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { const newQ = { ...quiz, id: Date.now().toString(), title: `${quiz.title} (${language === 'vi' ? 'bản sao' : 'copy'})` }; setQuizzes(prev => [...prev, newQ]); toast({ title: t('toast.duplicated') }); }}>
+                          <DropdownMenuItem onClick={() => { const newQ = { ...quiz, id: Date.now().toString(), title: `${quiz.title} (${t('courseDetail.copySuffix')})` }; setQuizzes(prev => [...prev, newQ]); toast({ title: t('toast.duplicated') }); }}>
                             <Copy className="mr-2 h-4 w-4" />{t('action.duplicate')}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -486,8 +486,8 @@ export default function CourseDetailPage() {
 
       {/* All Dialogs */}
       <EditDialog open={editCourseOpen} onOpenChange={setEditCourseOpen}
-        title={language === 'vi' ? 'Chỉnh sửa môn học' : 'Edit Course'}
-        description={language === 'vi' ? 'Cập nhật thông tin môn học' : 'Update course information'}
+        title={t('courseDetail.editCourse')}
+        description={t('courseDetail.updateInfo')}
         fields={courseEditFields}
         onSave={(values) => {
           setCourse(prev => ({ ...prev, code: values.code, name: values.name, description: values.description, semester: values.semester }));
@@ -497,13 +497,13 @@ export default function CourseDetailPage() {
 
       <ConfirmDeleteDialog open={deleteCourseOpen} onOpenChange={setDeleteCourseOpen}
         title={t('confirm.deleteCourse')}
-        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to delete'} "${course.name}"? ${t('confirm.irreversible')}`}
+        description={`${t('courseDetail.confirmDeleteCourse')} "${course.name}"? ${t('confirm.irreversible')}`}
         onConfirm={() => { toast({ title: t('toast.deleted') }); navigate('/courses'); }}
       />
 
       <ConfirmDeleteDialog open={!!deleteDocTarget} onOpenChange={(open) => !open && setDeleteDocTarget(null)}
         title={t('confirm.deleteDoc')}
-        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to delete'} "${deleteDocTarget?.filename}"?`}
+        description={`${t('courseDetail.confirmDeleteDoc')} "${deleteDocTarget?.filename}"?`}
         onConfirm={() => { setDocuments(prev => prev.filter(d => d.id !== deleteDocTarget?.id)); toast({ title: t('toast.deleted') }); setDeleteDocTarget(null); }}
       />
 
@@ -512,18 +512,18 @@ export default function CourseDetailPage() {
 
       <ConfirmDeleteDialog open={!!deleteQuizTarget} onOpenChange={(open) => !open && setDeleteQuizTarget(null)}
         title={t('confirm.deleteQuiz')}
-        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to delete'} "${deleteQuizTarget?.title}"?`}
+        description={`${t('courseDetail.confirmDeleteQuiz')} "${deleteQuizTarget?.title}"?`}
         onConfirm={() => { setQuizzes(prev => prev.filter(q => q.id !== deleteQuizTarget?.id)); toast({ title: t('toast.deleted') }); setDeleteQuizTarget(null); }}
       />
 
       <EditDialog open={!!editQuizTarget} onOpenChange={(open) => !open && setEditQuizTarget(null)}
-        title={language === 'vi' ? 'Chỉnh sửa quiz' : 'Edit Quiz'} fields={quizEditFields}
+        title={t('courseDetail.editQuiz')} fields={quizEditFields}
         onSave={(values) => { setQuizzes(prev => prev.map(q => q.id === editQuizTarget?.id ? { ...q, title: values.title } : q)); toast({ title: t('toast.updated') }); setEditQuizTarget(null); }}
       />
 
       <ConfirmDeleteDialog open={!!deleteStudentTarget} onOpenChange={(open) => !open && setDeleteStudentTarget(null)}
         title={t('confirm.deleteStudent')}
-        description={`${language === 'vi' ? 'Bạn có chắc chắn muốn xóa' : 'Are you sure you want to remove'} "${deleteStudentTarget?.fullName}"?`}
+        description={`${t('courseDetail.confirmRemoveStudent')} "${deleteStudentTarget?.fullName}"?`}
         onConfirm={() => { setStudents(prev => prev.filter(s => s.id !== deleteStudentTarget?.id)); toast({ title: t('toast.deleted') }); setDeleteStudentTarget(null); }}
       />
 

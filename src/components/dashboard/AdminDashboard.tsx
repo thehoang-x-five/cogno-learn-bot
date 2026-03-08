@@ -23,10 +23,10 @@ export default function AdminDashboard() {
   ];
 
   const recentRegistrations = [
-    { name: 'Nguyễn Văn H', email: 'h.nguyen@edu.vn', role: 'student' as const, time: language === 'vi' ? '10 phút trước' : '10 min ago' },
-    { name: 'Trần Thị K', email: 'k.tran@edu.vn', role: 'student' as const, time: language === 'vi' ? '30 phút trước' : '30 min ago' },
-    { name: 'Lê Văn M', email: 'm.le@edu.vn', role: 'teacher' as const, time: language === 'vi' ? '2 giờ trước' : '2 hours ago' },
-    { name: 'Phạm Thị N', email: 'n.pham@edu.vn', role: 'student' as const, time: language === 'vi' ? '5 giờ trước' : '5 hours ago' },
+    { name: 'Nguyễn Văn H', email: 'h.nguyen@edu.vn', role: 'student' as const, time: t('admin.time.10m') },
+    { name: 'Trần Thị K', email: 'k.tran@edu.vn', role: 'student' as const, time: t('admin.time.30m') },
+    { name: 'Lê Văn M', email: 'm.le@edu.vn', role: 'teacher' as const, time: t('admin.time.2h') },
+    { name: 'Phạm Thị N', email: 'n.pham@edu.vn', role: 'student' as const, time: t('admin.time.5h') },
   ];
 
   const systemHealth = [
@@ -38,13 +38,13 @@ export default function AdminDashboard() {
   ];
 
   const usageByDay = [
-    { day: language === 'vi' ? 'T2' : 'Mon', chats: 120, quizzes: 45 },
-    { day: language === 'vi' ? 'T3' : 'Tue', chats: 145, quizzes: 52 },
-    { day: language === 'vi' ? 'T4' : 'Wed', chats: 198, quizzes: 67 },
-    { day: language === 'vi' ? 'T5' : 'Thu', chats: 167, quizzes: 58 },
-    { day: language === 'vi' ? 'T6' : 'Fri', chats: 210, quizzes: 73 },
-    { day: language === 'vi' ? 'T7' : 'Sat', chats: 89, quizzes: 30 },
-    { day: language === 'vi' ? 'CN' : 'Sun', chats: 56, quizzes: 18 },
+    { day: t('admin.day.mon'), chats: 120, quizzes: 45 },
+    { day: t('admin.day.tue'), chats: 145, quizzes: 52 },
+    { day: t('admin.day.wed'), chats: 198, quizzes: 67 },
+    { day: t('admin.day.thu'), chats: 167, quizzes: 58 },
+    { day: t('admin.day.fri'), chats: 210, quizzes: 73 },
+    { day: t('admin.day.sat'), chats: 89, quizzes: 30 },
+    { day: t('admin.day.sun'), chats: 56, quizzes: 18 },
   ];
 
   const userDistribution = [
