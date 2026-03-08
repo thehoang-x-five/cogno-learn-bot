@@ -32,7 +32,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
   
   const [siteName, setSiteName] = useState('EduAssist');
-  const [siteDescription, setSiteDescription] = useState(language === 'vi' ? 'Hệ thống Trợ lý Học tập AI' : 'AI Learning Assistant System');
+  const [siteDescription, setSiteDescription] = useState(t('settings.siteDescDefault'));
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   
   const [selectedProvider, setSelectedProvider] = useState('openai');
