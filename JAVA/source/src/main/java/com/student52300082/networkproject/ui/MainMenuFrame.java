@@ -4,6 +4,7 @@ import com.student52300082.networkproject.chat.tcp.TcpChatClientFrame;
 import com.student52300082.networkproject.chat.tcp.TcpChatServerFrame;
 import com.student52300082.networkproject.chat.udp.UdpChatClientFrame;
 import com.student52300082.networkproject.chat.udp.UdpChatServerFrame;
+import com.student52300082.networkproject.common.AppConfig;
 import com.student52300082.networkproject.common.UiTheme;
 import com.student52300082.networkproject.extension.quiz.QuizClientFrame;
 import com.student52300082.networkproject.extension.quiz.QuizServerFrame;
