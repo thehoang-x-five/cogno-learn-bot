@@ -156,6 +156,11 @@ public class RealtimeCommServerFrame extends JFrame {
         );
     }
 
+    public void startServerForDemo(int port) {
+        txtPort.setText(String.valueOf(port));
+        startServer();
+    }
+
     private JList<String> createInfoList(DefaultListModel<String> model) {
         JList<String> list = new JList<String>(model);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -433,8 +438,16 @@ public class RealtimeCommServerFrame extends JFrame {
     }
 
     private void startPrivateCall(ClientConnection caller, String targetName) {
+        startPrivateCall(caller, targetName, RealtimeProtocol.CALL_MODE_PRIVATE, "Private call");
+    }
+
+    private void startPrivateVideoCall(ClientConnection caller, String targetName) {
+        startPrivateCall(caller, targetName, RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO, "Video call");
+    }
+
+    private void startPrivateCall(ClientConnection caller, String targetName, String mode, String labelPrefix) {
         if (targetName == null || targetName.trim().isEmpty()) {
-            caller.sendError("Select a user before starting a private call.");
+            caller.sendError("Select a user before starting " + labelPrefix.toLowerCase() + ".");
             return;
         }
         ClientConnection target = clients.get(targetName.trim());
@@ -456,17 +469,17 @@ public class RealtimeCommServerFrame extends JFrame {
                 caller.sendError(target.userName + " is already busy in another call.");
                 return;
             }
-            caller.callMode = RealtimeProtocol.CALL_MODE_PRIVATE;
+            caller.callMode = mode;
             caller.callPeer = target.userName;
             caller.callRoom = null;
-            target.callMode = RealtimeProtocol.CALL_MODE_PRIVATE;
+            target.callMode = mode;
             target.callPeer = caller.userName;
             target.callRoom = null;
         }
 
-        caller.sendCallStarted(RealtimeProtocol.CALL_MODE_PRIVATE, "Private call with " + target.userName);
-        target.sendCallStarted(RealtimeProtocol.CALL_MODE_PRIVATE, "Private call with " + caller.userName);
-        appendLog("Private call started between " + caller.userName + " and " + target.userName);
+        caller.sendCallStarted(mode, labelPrefix + " with " + target.userName);
+        target.sendCallStarted(mode, labelPrefix + " with " + caller.userName);
+        appendLog(labelPrefix + " started between " + caller.userName + " and " + target.userName);
     }
 
     private void startGroupCall(ClientConnection initiator) {
@@ -533,7 +546,8 @@ public class RealtimeCommServerFrame extends JFrame {
 
         LinkedHashSet<ClientConnection> affected = new LinkedHashSet<ClientConnection>();
         synchronized (stateLock) {
-            if (RealtimeProtocol.CALL_MODE_PRIVATE.equals(requester.callMode)) {
+            if (RealtimeProtocol.CALL_MODE_PRIVATE.equals(requester.callMode)
+                || RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(requester.callMode)) {
                 ClientConnection peer = clients.get(requester.callPeer);
                 clearCallState(requester);
                 affected.add(requester);
@@ -569,7 +583,8 @@ public class RealtimeCommServerFrame extends JFrame {
             return;
         }
 
-        if (RealtimeProtocol.CALL_MODE_PRIVATE.equals(sender.callMode)) {
+        if (RealtimeProtocol.CALL_MODE_PRIVATE.equals(sender.callMode)
+            || RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(sender.callMode)) {
             ClientConnection peer = clients.get(sender.callPeer);
             if (peer != null && peer.isInPrivateCallWith(sender.userName)) {
                 peer.sendAudioFrame(sender.userName, audio);
@@ -598,6 +613,18 @@ public class RealtimeCommServerFrame extends JFrame {
         connection.callMode = RealtimeProtocol.CALL_MODE_NONE;
         connection.callPeer = null;
         connection.callRoom = null;
+    }
+
+    private void routeVideoFrame(ClientConnection sender, byte[] payload) {
+        if (!RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(sender.callMode)
+            || payload == null
+            || payload.length == 0) {
+            return;
+        }
+        ClientConnection peer = clients.get(sender.callPeer);
+        if (peer != null && peer.isInPrivateCallWith(sender.userName)) {
+            peer.sendVideoFrame(sender.userName, payload);
+        }
     }
 
     private void broadcastSystemMessage(String message, String excludeUser) {
@@ -689,6 +716,8 @@ public class RealtimeCommServerFrame extends JFrame {
                         handleRoomMessage(this, inputStream.readUTF());
                     } else if (RealtimeProtocol.PRIVATE_CALL_START.equals(messageType)) {
                         startPrivateCall(this, inputStream.readUTF());
+                    } else if (RealtimeProtocol.PRIVATE_VIDEO_CALL_START.equals(messageType)) {
+                        startPrivateVideoCall(this, inputStream.readUTF());
                     } else if (RealtimeProtocol.GROUP_CALL_START.equals(messageType)) {
                         startGroupCall(this);
                     } else if (RealtimeProtocol.CALL_END.equals(messageType)) {
@@ -699,6 +728,13 @@ public class RealtimeCommServerFrame extends JFrame {
                             byte[] audio = new byte[length];
                             inputStream.readFully(audio);
                             routeAudioFrame(this, audio);
+                        }
+                    } else if (RealtimeProtocol.VIDEO_FRAME.equals(messageType)) {
+                        int length = inputStream.readInt();
+                        if (length > 0 && length <= RealtimeProtocol.VIDEO_MAX_FRAME_BYTES) {
+                            byte[] payload = new byte[length];
+                            inputStream.readFully(payload);
+                            routeVideoFrame(this, payload);
                         }
                     } else {
                         sendError("Unsupported command: " + messageType);
@@ -719,7 +755,10 @@ public class RealtimeCommServerFrame extends JFrame {
         }
 
         private boolean isInPrivateCallWith(String otherUser) {
-            return RealtimeProtocol.CALL_MODE_PRIVATE.equals(callMode) && otherUser != null && otherUser.equals(callPeer);
+            return (RealtimeProtocol.CALL_MODE_PRIVATE.equals(callMode)
+                || RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(callMode))
+                && otherUser != null
+                && otherUser.equals(callPeer);
         }
 
         private boolean isInGroupCall(String room) {
@@ -820,6 +859,15 @@ public class RealtimeCommServerFrame extends JFrame {
                 output.writeUTF(fromUser);
                 output.writeInt(audio.length);
                 output.write(audio);
+            });
+        }
+
+        private void sendVideoFrame(final String fromUser, final byte[] payload) {
+            sendPacket(output -> {
+                output.writeUTF(RealtimeProtocol.VIDEO_FRAME);
+                output.writeUTF(fromUser);
+                output.writeInt(payload.length);
+                output.write(payload);
             });
         }
 

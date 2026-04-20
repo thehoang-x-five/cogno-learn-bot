@@ -6,18 +6,28 @@ import com.student52300082.networkproject.common.UiTheme;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
@@ -35,6 +45,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -48,6 +59,8 @@ public class RealtimeCommClientFrame extends JFrame {
     private final JTextField txtRoomName = new JTextField("mobile-team", 12);
     private final JTextField txtRoomMessage = new JTextField(24);
     private final JTextArea logArea = UiTheme.logArea();
+    private final JTextArea directInboxArea = UiTheme.logArea();
+    private final JTextArea roomInboxArea = UiTheme.logArea();
     private final DefaultListModel<String> onlineUsersModel = new DefaultListModel<String>();
     private final DefaultListModel<String> roomListModel = new DefaultListModel<String>();
     private final DefaultComboBoxModel<String> directTargetModel = new DefaultComboBoxModel<String>();
@@ -71,6 +84,8 @@ public class RealtimeCommClientFrame extends JFrame {
     private TargetDataLine microphoneLine;
     private SourceDataLine speakerLine;
     private Thread audioCaptureThread;
+    private Thread videoCaptureThread;
+    private volatile boolean videoStreaming;
 
     private JButton btnConnect;
     private JButton btnDisconnect;
@@ -79,9 +94,12 @@ public class RealtimeCommClientFrame extends JFrame {
     private JButton btnSendDirect;
     private JButton btnSendRoom;
     private JButton btnPrivateCall;
+    private JButton btnVideoCall;
     private JButton btnGroupCall;
     private JButton btnEndCall;
     private JButton btnMute;
+    private JLabel lblLocalVideo;
+    private JLabel lblRemoteVideo;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new RealtimeCommClientFrame().setVisible(true));
@@ -154,8 +172,13 @@ public class RealtimeCommClientFrame extends JFrame {
         sidePanel.add(roomsCard);
 
         JPanel logCard = UiTheme.card();
-        logCard.add(UiTheme.title("Activity Log"), BorderLayout.NORTH);
-        logCard.add(UiTheme.scroll(logArea), BorderLayout.CENTER);
+        logCard.add(UiTheme.title("Message Monitor"), BorderLayout.NORTH);
+        JTabbedPane monitorTabs = new JTabbedPane();
+        monitorTabs.setFont(UiTheme.BODY_FONT);
+        monitorTabs.addTab("Activity", UiTheme.scroll(logArea));
+        monitorTabs.addTab("Direct Inbox", UiTheme.scroll(directInboxArea));
+        monitorTabs.addTab("Room Inbox", UiTheme.scroll(roomInboxArea));
+        logCard.add(monitorTabs, BorderLayout.CENTER);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidePanel, logCard);
         splitPane.setResizeWeight(0.28);
@@ -174,6 +197,7 @@ public class RealtimeCommClientFrame extends JFrame {
         dmGc.anchor = GridBagConstraints.WEST;
         btnSendDirect = UiTheme.primaryButton("Send DM");
         btnPrivateCall = UiTheme.secondaryButton("Start Call");
+        btnVideoCall = UiTheme.secondaryButton("Video Call");
         directChatRow.add(new JLabel("Target"), dmGc);
         dmGc.gridx = 1;
         directChatRow.add(cboDirectTarget, dmGc);
@@ -191,6 +215,8 @@ public class RealtimeCommClientFrame extends JFrame {
         directChatRow.add(btnSendDirect, dmGc);
         dmGc.gridx = 3;
         directChatRow.add(btnPrivateCall, dmGc);
+        dmGc.gridx = 4;
+        directChatRow.add(btnVideoCall, dmGc);
         directChatCard.add(directChatRow, BorderLayout.CENTER);
 
         JPanel groupChatCard = UiTheme.card();
@@ -230,15 +256,23 @@ public class RealtimeCommClientFrame extends JFrame {
         groupChatCard.add(groupChatRow, BorderLayout.CENTER);
 
         JPanel callCard = UiTheme.card();
-        callCard.add(UiTheme.title("Voice Call Controls"), BorderLayout.NORTH);
+        callCard.add(UiTheme.title("Call Controls"), BorderLayout.NORTH);
         JPanel callRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         callRow.setBackground(UiTheme.SURFACE);
         btnMute = UiTheme.secondaryButton("Mute Mic");
         btnEndCall = UiTheme.accentButton("End Call");
-        callRow.add(UiTheme.subtitle("PCM 16 kHz mono stream relayed through the server."));
+        callRow.add(UiTheme.subtitle("Audio call + video call demo (screen-frame relay via server)."));
         callRow.add(btnMute);
         callRow.add(btnEndCall);
-        callCard.add(callRow, BorderLayout.CENTER);
+        callCard.add(callRow, BorderLayout.NORTH);
+
+        JPanel videoPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        videoPanel.setBackground(UiTheme.SURFACE);
+        lblLocalVideo = createVideoLabel("Local Preview");
+        lblRemoteVideo = createVideoLabel("Remote Preview");
+        videoPanel.add(wrapVideoCard("Local", lblLocalVideo));
+        videoPanel.add(wrapVideoCard("Remote", lblRemoteVideo));
+        callCard.add(videoPanel, BorderLayout.CENTER);
 
         JPanel actionPanel = new JPanel(new GridLayout(3, 1, 10, 10));
         actionPanel.setBackground(UiTheme.BACKGROUND);
@@ -262,6 +296,7 @@ public class RealtimeCommClientFrame extends JFrame {
         btnSendDirect.addActionListener(e -> sendDirectMessage());
         btnSendRoom.addActionListener(e -> sendRoomMessage());
         btnPrivateCall.addActionListener(e -> startPrivateCall());
+        btnVideoCall.addActionListener(e -> startVideoCall());
         btnGroupCall.addActionListener(e -> startGroupCall());
         btnEndCall.addActionListener(e -> endCall());
         btnMute.addActionListener(e -> toggleMute());
@@ -316,7 +351,45 @@ public class RealtimeCommClientFrame extends JFrame {
             + "[Audio] Receiving voice from Linh" + System.lineSeparator()
             + "[Audio] Receiving voice from Minh"
         );
+        directInboxArea.setText(
+            "[DM from Linh] Audio packets are arriving correctly." + System.lineSeparator()
+            + "[DM from Minh] Da xac nhan call ben client em."
+        );
+        roomInboxArea.setText(
+            "[mobile-team][Minh] Ready for the group demo." + System.lineSeparator()
+            + "[mobile-team][Linh] Group call status: stable."
+        );
+        lblLocalVideo.setText("Local Preview");
+        lblRemoteVideo.setText("Remote Preview");
+        lblLocalVideo.setIcon(null);
+        lblRemoteVideo.setIcon(null);
         updateControlState();
+    }
+
+    public void connectForDemo(String host, int port, String userName, int x, int y) {
+        txtHost.setText(host);
+        txtPort.setText(String.valueOf(port));
+        txtUserName.setText(userName);
+        setLocation(x, y);
+        connectToServer();
+    }
+
+    private JLabel createVideoLabel(String text) {
+        JLabel label = new JLabel(text, JLabel.CENTER);
+        label.setOpaque(true);
+        label.setBackground(UiTheme.CONSOLE);
+        label.setForeground(UiTheme.CONSOLE_TEXT);
+        label.setFont(UiTheme.BODY_FONT);
+        label.setPreferredSize(new Dimension(220, 150));
+        label.setBorder(BorderFactory.createLineBorder(UiTheme.LINE));
+        return label;
+    }
+
+    private JPanel wrapVideoCard(String title, JLabel videoLabel) {
+        JPanel panel = UiTheme.card();
+        panel.add(UiTheme.subtitle(title), BorderLayout.NORTH);
+        panel.add(videoLabel, BorderLayout.CENTER);
+        return panel;
     }
 
     private JList<String> createInfoList(DefaultListModel<String> model) {
@@ -422,11 +495,13 @@ public class RealtimeCommClientFrame extends JFrame {
                     String fromUser = inputStream.readUTF();
                     String message = inputStream.readUTF();
                     appendLog("[DM from " + fromUser + "] " + message);
+                    appendDirectInbox("[DM from " + fromUser + "] " + message);
                 } else if (RealtimeProtocol.ROOM_MESSAGE.equals(messageType)) {
                     String roomName = inputStream.readUTF();
                     String fromUser = inputStream.readUTF();
                     String message = inputStream.readUTF();
                     appendLog("[" + roomName + "][" + fromUser + "] " + message);
+                    appendRoomInbox("[" + roomName + "][" + fromUser + "] " + message);
                 } else if (RealtimeProtocol.CALL_STARTED.equals(messageType)) {
                     startCallSession(inputStream.readUTF(), inputStream.readUTF());
                 } else if (RealtimeProtocol.CALL_ENDED.equals(messageType)) {
@@ -438,6 +513,14 @@ public class RealtimeCommClientFrame extends JFrame {
                         byte[] audio = new byte[length];
                         inputStream.readFully(audio);
                         playIncomingAudio(fromUser, audio);
+                    }
+                } else if (RealtimeProtocol.VIDEO_FRAME.equals(messageType)) {
+                    String fromUser = inputStream.readUTF();
+                    int length = inputStream.readInt();
+                    if (length > 0 && length <= RealtimeProtocol.VIDEO_MAX_FRAME_BYTES) {
+                        byte[] payload = new byte[length];
+                        inputStream.readFully(payload);
+                        playIncomingVideoFrame(fromUser, payload);
                     }
                 }
             }
@@ -507,6 +590,7 @@ public class RealtimeCommClientFrame extends JFrame {
                 output.writeUTF(message);
             });
             appendLog("[DM to " + targetObject + "] " + message);
+            appendDirectInbox("[DM to " + targetObject + "] " + message);
             txtDirectMessage.setText("");
         } catch (IOException ex) {
             disconnectFromServer("Send failed: " + ex.getMessage());
@@ -567,6 +651,7 @@ public class RealtimeCommClientFrame extends JFrame {
                 output.writeUTF(message);
             });
             appendLog("[" + currentRoomName + "][Me] " + message);
+            appendRoomInbox("[" + currentRoomName + "][Me] " + message);
             txtRoomMessage.setText("");
         } catch (IOException ex) {
             disconnectFromServer("Group message failed: " + ex.getMessage());
@@ -590,6 +675,26 @@ public class RealtimeCommClientFrame extends JFrame {
             });
         } catch (IOException ex) {
             disconnectFromServer("Start call failed: " + ex.getMessage());
+        }
+    }
+
+    private void startVideoCall() {
+        if (!running) {
+            appendLog("[System] Connect before starting a video call.");
+            return;
+        }
+        Object targetObject = cboDirectTarget.getSelectedItem();
+        if (targetObject == null) {
+            appendLog("[System] Choose a target user first.");
+            return;
+        }
+        try {
+            sendPacket(output -> {
+                output.writeUTF(RealtimeProtocol.PRIVATE_VIDEO_CALL_START);
+                output.writeUTF(targetObject.toString());
+            });
+        } catch (IOException ex) {
+            disconnectFromServer("Start video call failed: " + ex.getMessage());
         }
     }
 
@@ -641,15 +746,22 @@ public class RealtimeCommClientFrame extends JFrame {
         tryOpenSpeaker();
         tryOpenMicrophone();
         startAudioCaptureThread();
+        if (RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(newCallMode)) {
+            startVideoCaptureThread();
+        } else {
+            clearVideoPreviews();
+        }
     }
 
     private void finishCallSession(String reason) {
         stopAudioResources();
+        stopVideoCaptureThread();
         callMode = RealtimeProtocol.CALL_MODE_NONE;
         microphoneMuted = false;
         lblCallValue.setText("No active call");
         btnMute.setText("Mute Mic");
         appendLog("[System] " + reason);
+        clearVideoPreviews();
         updateControlState();
     }
 
@@ -773,6 +885,97 @@ public class RealtimeCommClientFrame extends JFrame {
         }
     }
 
+    private void startVideoCaptureThread() {
+        if (videoCaptureThread != null && videoCaptureThread.isAlive()) {
+            return;
+        }
+        videoStreaming = true;
+        videoCaptureThread = new Thread(() -> {
+            try {
+                Robot robot = new Robot();
+                Rectangle captureArea = new Rectangle(360, 240);
+                while (running && videoStreaming && RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(callMode)) {
+                    BufferedImage image = robot.createScreenCapture(captureArea);
+                    updateLocalPreview(image);
+                    byte[] payload = encodeVideoFrame(image);
+                    if (payload.length > 0) {
+                        sendPacket(output -> {
+                            output.writeUTF(RealtimeProtocol.VIDEO_FRAME);
+                            output.writeInt(payload.length);
+                            output.write(payload);
+                        });
+                    }
+                    Thread.sleep(RealtimeProtocol.VIDEO_FRAME_INTERVAL_MS);
+                }
+            } catch (Exception ex) {
+                if (running && RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(callMode)) {
+                    appendLog("[Video] Video stream stopped: " + ex.getMessage());
+                }
+            }
+        }, "realtime-video-capture");
+        videoCaptureThread.setDaemon(true);
+        videoCaptureThread.start();
+        appendLog("[Video] Video call demo stream started.");
+    }
+
+    private void stopVideoCaptureThread() {
+        videoStreaming = false;
+        Thread captureThread = videoCaptureThread;
+        videoCaptureThread = null;
+        if (captureThread != null) {
+            captureThread.interrupt();
+        }
+    }
+
+    private byte[] encodeVideoFrame(BufferedImage image) {
+        try {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            ImageIO.write(image, "jpg", output);
+            byte[] payload = output.toByteArray();
+            if (payload.length > RealtimeProtocol.VIDEO_MAX_FRAME_BYTES) {
+                return new byte[0];
+            }
+            return payload;
+        } catch (IOException ex) {
+            return new byte[0];
+        }
+    }
+
+    private void playIncomingVideoFrame(String fromUser, byte[] payload) {
+        try {
+            BufferedImage image = ImageIO.read(new ByteArrayInputStream(payload));
+            if (image == null) {
+                return;
+            }
+            SwingUtilities.invokeLater(() -> {
+                lblRemoteVideo.setText("Remote: " + fromUser);
+                lblRemoteVideo.setIcon(new ImageIcon(scaleVideoPreview(image)));
+            });
+        } catch (IOException ex) {
+            appendLog("[Video] Cannot decode remote frame: " + ex.getMessage());
+        }
+    }
+
+    private void updateLocalPreview(BufferedImage image) {
+        SwingUtilities.invokeLater(() -> {
+            lblLocalVideo.setText("Local Preview");
+            lblLocalVideo.setIcon(new ImageIcon(scaleVideoPreview(image)));
+        });
+    }
+
+    private Image scaleVideoPreview(BufferedImage image) {
+        return image.getScaledInstance(220, 150, Image.SCALE_SMOOTH);
+    }
+
+    private void clearVideoPreviews() {
+        SwingUtilities.invokeLater(() -> {
+            lblLocalVideo.setIcon(null);
+            lblRemoteVideo.setIcon(null);
+            lblLocalVideo.setText("Local Preview");
+            lblRemoteVideo.setText("Remote Preview");
+        });
+    }
+
     private AudioFormat createAudioFormat() {
         return new AudioFormat(
             RealtimeProtocol.AUDIO_SAMPLE_RATE,
@@ -787,6 +990,7 @@ public class RealtimeCommClientFrame extends JFrame {
         boolean wasConnected = running || socket != null;
         running = false;
         stopAudioResources();
+        stopVideoCaptureThread();
         callMode = RealtimeProtocol.CALL_MODE_NONE;
         currentRoomName = null;
         lastAudioLogAt = 0L;
@@ -820,6 +1024,9 @@ public class RealtimeCommClientFrame extends JFrame {
         onlineUsersModel.clear();
         roomListModel.clear();
         directTargetModel.removeAllElements();
+        directInboxArea.setText("");
+        roomInboxArea.setText("");
+        clearVideoPreviews();
         updateControlState();
 
         if (wasConnected && message != null && !message.trim().isEmpty()) {
@@ -847,6 +1054,7 @@ public class RealtimeCommClientFrame extends JFrame {
         btnSendDirect.setEnabled(connected && hasDirectTarget);
         btnSendRoom.setEnabled(connected && inRoom);
         btnPrivateCall.setEnabled(connected && hasDirectTarget && !inCall);
+        btnVideoCall.setEnabled(connected && hasDirectTarget && !inCall);
         btnGroupCall.setEnabled(connected && inRoom && !inCall);
         btnMute.setEnabled(connected && inCall && microphoneLine != null && microphoneLine.isOpen());
         btnEndCall.setEnabled(connected && inCall);
@@ -857,6 +1065,20 @@ public class RealtimeCommClientFrame extends JFrame {
         SwingUtilities.invokeLater(() -> {
             logArea.append(line + System.lineSeparator());
             logArea.setCaretPosition(logArea.getDocument().getLength());
+        });
+    }
+
+    private void appendDirectInbox(String line) {
+        SwingUtilities.invokeLater(() -> {
+            directInboxArea.append(line + System.lineSeparator());
+            directInboxArea.setCaretPosition(directInboxArea.getDocument().getLength());
+        });
+    }
+
+    private void appendRoomInbox(String line) {
+        SwingUtilities.invokeLater(() -> {
+            roomInboxArea.append(line + System.lineSeparator());
+            roomInboxArea.setCaretPosition(roomInboxArea.getDocument().getLength());
         });
     }
 
