@@ -2,7 +2,6 @@ package com.student52300082.networkproject.realtime;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.student52300082.networkproject.common.AppConfig;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
