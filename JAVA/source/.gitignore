@@ -1,0 +1,15 @@
+﻿*.class
+*.log
+*.tmp
+
+/artifacts/
+/target/
+/out/
+
+/.idea/
+/.vscode/
+*.iml
+
+/.settings/
+/.classpath
+/.project
