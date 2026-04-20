@@ -1,0 +1,362 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* EduAssist Design System - AI Learning Platform */
+
+@layer base {
+  :root {
+    /* Core backgrounds */
+    --background: 220 20% 98%;
+    --foreground: 222 47% 11%;
+
+    /* Cards & Surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary - Deep Indigo (Knowledge, Trust) */
+    --primary: 234 89% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Soft Slate */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    /* Muted */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    /* Accent - Emerald (Growth, Learning) */
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & Inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 234 89% 58%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 234 89% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 18%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 222 47% 18%;
+    --sidebar-ring: 234 89% 58%;
+
+    /* Custom tokens */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    /* Chat specific */
+    --chat-user: 234 89% 58%;
+    --chat-user-foreground: 0 0% 100%;
+    --chat-assistant: 220 14% 96%;
+    --chat-assistant-foreground: 222 47% 11%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(234 89% 58%), hsl(260 84% 60%));
+    --gradient-accent: linear-gradient(135deg, hsl(160 84% 39%), hsl(172 66% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(234 89% 58%) 0%, hsl(260 84% 60%) 50%, hsl(160 84% 39%) 100%);
+  }
+
+  .dark {
+    /* Softer, muted backgrounds */
+    --background: 228 12% 9%;
+    --foreground: 220 10% 88%;
+
+    --card: 228 10% 12%;
+    --card-foreground: 220 10% 88%;
+
+    --popover: 228 10% 12%;
+    --popover-foreground: 220 10% 88%;
+
+    --primary: 234 65% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 228 8% 15%;
+    --secondary-foreground: 220 10% 80%;
+
+    --muted: 228 8% 15%;
+    --muted-foreground: 220 6% 45%;
+
+    --accent: 160 55% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 50% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Near-invisible borders — blend with card */
+    --border: 228 6% 15%;
+    --input: 228 6% 17%;
+    --ring: 234 50% 55%;
+
+    --sidebar-background: 228 12% 8%;
+    --sidebar-foreground: 220 10% 80%;
+    --sidebar-primary: 234 65% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 228 8% 13%;
+    --sidebar-accent-foreground: 220 10% 80%;
+    --sidebar-border: 228 6% 13%;
+    --sidebar-ring: 234 50% 55%;
+
+    --success: 160 55% 40%;
+    --warning: 38 60% 52%;
+    --info: 199 60% 50%;
+
+    --chat-user: 234 65% 65%;
+    --chat-assistant: 228 8% 15%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(234 60% 55%), hsl(260 50% 55%));
+    --gradient-accent: linear-gradient(135deg, hsl(160 55% 40%), hsl(172 45% 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(234 60% 55%) 0%, hsl(260 50% 55%) 50%, hsl(160 55% 40%) 100%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border/60;
+  }
+
+  .dark * {
+    @apply border-border/40;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+}
+
+@layer components {
+  /* Glass effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-xl border border-border/50;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Gradient border */
+  .gradient-border {
+    position: relative;
+    background: hsl(var(--card));
+    border-radius: var(--radius);
+  }
+
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    background: var(--gradient-primary);
+    border-radius: calc(var(--radius) + 1px);
+    z-index: -1;
+    opacity: 0.5;
+  }
+
+  /* Gradient background utility */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  /* Chat message animations */
+  .message-appear {
+    animation: messageAppear 0.3s ease-out;
+  }
+
+  @keyframes messageAppear {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Typing indicator */
+  .typing-dot {
+    animation: typingBounce 1.4s infinite ease-in-out both;
+  }
+
+  .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+  .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+  .typing-dot:nth-child(3) { animation-delay: 0s; }
+
+  @keyframes typingBounce {
+    0%, 80%, 100% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    40% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Pulse glow for AI elements */
+  .ai-glow {
+    animation: aiGlow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes aiGlow {
+    from {
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.2);
+    }
+    to {
+      box-shadow: 0 0 30px hsl(var(--primary) / 0.4);
+    }
+  }
+
+  /* Subtle pulse for background elements */
+  .animate-pulse-subtle {
+    animation: pulseSub 4s ease-in-out infinite;
+  }
+
+  @keyframes pulseSub {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+  }
+
+  /* Fade in */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    @apply transition-all duration-300;
+  }
+
+  .hover-lift:hover {
+    @apply -translate-y-1;
+    box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.15);
+  }
+
+  /* Status badges */
+  .status-ready {
+    @apply bg-success/10 text-success border-success/20;
+  }
+
+  .status-processing {
+    @apply bg-warning/10 text-warning border-warning/20;
+  }
+
+  .status-error {
+    @apply bg-destructive/10 text-destructive border-destructive/20;
+  }
+
+  .status-pending {
+    @apply bg-muted text-muted-foreground border-border;
+  }
+
+  /* Page enter animation */
+  .page-enter {
+    animation: pageEnter 0.4s ease-out;
+  }
+
+  @keyframes pageEnter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Staggered children animation */
+  .stagger-children > * {
+    animation: staggerFadeIn 0.3s ease-out backwards;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+
+  @keyframes staggerFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Floating animation */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
