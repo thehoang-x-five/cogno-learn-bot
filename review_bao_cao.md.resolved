@@ -1,0 +1,187 @@
+# 📋 Review Báo cáo Đồ án — `finalfullstack1.docx`
+
+## Tổng quan nhanh
+
+Báo cáo **~87 trang**, bao phủ 6 chương từ tổng quan đến kết luận, có đầy đủ use case chi tiết (UC01–UC43), API specs (74 endpoints), kiến trúc, kiểm thử. Cấu trúc tổng thể **khá tốt và chuyên nghiệp**, nhưng còn **nhiều lỗi chi tiết** cần sửa trước khi nộp.
+
+---
+
+## 🔴 LỖI NGHIÊM TRỌNG — Sửa ngay
+
+### 1. Trang bìa: thiếu dấu cách trong tiêu đề
+> `XÂY DỰNG ỨNG DỤNG WEB FULL-STACK TÍCH HỢP AI**HỖ** TRỢ SINH VIÊN HỌC TẬP DỰA TRÊN RAG`
+
+Sửa → `TÍCH HỢP AI HỖ TRỢ` (thiếu khoảng trắng giữa "AI" và "HỖ")
+
+### 2. Trang cam đoan: sai tên giáo viên hướng dẫn
+> **Dòng 59**: "được sự hướng dẫn của cô **Nguyễn Thị Hường**"
+
+Nhưng bìa ghi: **ThS. Vũ Đình Hồng**. Phải thống nhất — giáo viên hướng dẫn là **ThS. Vũ Đình Hồng**, không phải cô Nguyễn Thị Hường.
+
+### 3. Trang ký tên: thiếu dấu cách giữa các tên
+> `TRƯƠNG DƯƠNG HƯNG**HOÀNG CÔNG TÀI THẾ**` (dòng 57, 67)
+
+Các tên bị dính liền nhau. Cần phải tách ra bằng tab hoặc dấu cách, ví dụ mỗi tên trên 1 dòng riêng.
+
+### 4. Kiến trúc: ghi "Next.js" nhưng thực tế là "Vite + React"
+
+| Vị trí trong báo cáo | Viết sai | Thực tế (theo mã nguồn) |
+|---|---|---|
+| Dòng 1256 (Tầng giao diện) | "Next.js/React" | React + Vite (không có Next.js) |
+| Dòng 1269 (Bảng 3.1) | "Next.js (Vite), React" | "Vite, React" |
+
+Thực tế: `FE/package.json` dùng **Vite**, không có Next.js. Cần sửa lại tất cả chỗ nhắc "Next.js" thành "Vite".
+
+### 5. Bảng API trùng lặp
+Bảng 3.2 (dòng 1284–1305) và Bảng 3.4 (dòng 1335–1356) có **nội dung gần như y hệt**. Trông như copy-paste lặp vô tình. Cần gộp hoặc xóa 1 bảng.
+
+---
+
+## 🟡 LỖI NỘI DUNG — Cần bổ sung / sửa
+
+### 6. Thiếu mục "DANH MỤC HÌNH ẢNH" và "DANH MỤC BẢNG BIỂU"
+Báo cáo có 6+ hình (4.10.1–4.10.6) và 5+ bảng (1.1, 2.1, 3.1, 3.2, 4.1, 5.1) nhưng **không có** trang danh mục hình / danh mục bảng sau Mục lục. Đây là yêu cầu bắt buộc ở hầu hết trường đại học.
+
+### 7. Sơ đồ use case, sequence, ERD — chỉ có placeholder trống
+> Dòng 469–475: chỉ có dòng trắng, không có hình ảnh trong text.
+
+Hình có thể đã chèn trong docx dưới dạng ảnh (không trích xuất được bằng text parser), nhưng cần **kiểm tra lại** xem ảnh có thực sự nằm trong file Word hay chưa. Nếu chưa thì **thiếu nghiêm trọng**.
+
+### 8. Chương 5 — Kiểm thử: thiếu kết quả thực tế
+
+Mục 5.3 chỉ có **bảng kịch bản** (input → expected output) nhưng **không có cột "Kết quả thực tế"** và **"Đạt/Không đạt"**. Bổ sung thêm 2 cột:
+
+| STT | Kịch bản | Kết quả mong đợi | **Kết quả thực tế** | **Đạt** |
+|---|---|---|---|---|
+| 1 | Đăng nhập Google | Có token, role đúng | Có token, role đúng trên UI | ✅ |
+
+### 9. Mục 5.6 — Kiểm thử tự động: đề cập file test không tồn tại
+
+Báo cáo ghi:
+> `BE/tests/ — ví dụ test_pdf_citation_pipeline.py, test_quiz_generator.py, test_agent_function_calling.py`
+
+Thực tế: thư mục `BE/tests/` có thể không tồn tại hoặc các file test ở tên khác. Cần kiểm tra và sửa cho **khớp mã nguồn thật**.
+
+### 10. Thiếu mục "Phân công công việc"
+Báo cáo nhóm 3 người nhưng **không có mục phân công** ai làm gì. Nên bổ sung bảng phân công ở cuối Chương 1 hoặc trước Kết luận:
+
+| Thành viên | MSSV | Phân công |
+|---|---|---|
+| Trương Dương Hưng | 52300028 | Frontend, UI/UX |
+| Nguyễn Thế An | 52300003 | Backend, RAG pipeline |
+| Hoàng Công Tài Thế | 52300065 | Database, Docker, kiểm thử |
+
+### 11. Mục "Sản phẩm bàn giao" (1.5) — liệt kê chưa rõ ràng
+Viết gộp "docs/ (luồng chat, API, ERD, module)" vào 1 dòng. Nên tách thành danh sách bullet rõ ràng.
+
+---
+
+## 🟢 GỢI Ý CẢI THIỆN LỜI VĂN
+
+### 12. LỜI CẢM ƠN — viết lại gắn với đồ án Full-stack hơn
+
+Bản hiện tại khá generic. Đề xuất viết lại:
+
+---
+
+> **LỜI CẢM ƠN**
+>
+> Em xin gửi lời cảm ơn chân thành đến toàn thể quý thầy cô Khoa Công nghệ Thông tin, Trường Đại học Tôn Đức Thắng đã tạo điều kiện thuận lợi cho em trong suốt quá trình học tập và thực hiện đồ án này.
+>
+> Đặc biệt, em xin bày tỏ lòng biết ơn sâu sắc đến **ThS. Vũ Đình Hồng** — giảng viên hướng dẫn học phần Phát triển ứng dụng Full-stack. Thầy không chỉ truyền đạt kiến thức nền tảng về kiến trúc phần mềm, tích hợp API và triển khai container mà còn định hướng cho nhóm em tiếp cận các kỹ thuật hiện đại như Retrieval-Augmented Generation (RAG), streaming SSE và hybrid search — những nội dung vượt ra ngoài khuôn khổ giáo trình truyền thống nhưng lại rất thiết thực cho nghề nghiệp tương lai.
+>
+> Nhờ những kiến thức từ học phần Full-stack, em đã có cơ hội áp dụng đồng thời React, FastAPI, Docker Compose cùng nhiều dịch vụ dữ liệu (MySQL, ChromaDB, Redis) vào một hệ thống hoàn chỉnh, qua đó hiểu sâu hơn về cách các thành phần frontend, backend, cơ sở dữ liệu và pipeline AI phối hợp trong thực tế.
+>
+> Trong quá trình thực hiện, do kiến thức và kinh nghiệm thực tiễn còn hạn chế nên kết quả không tránh khỏi thiếu sót. Em kính mong nhận được ý kiến đóng góp của thầy cô để hoàn thiện kỹ năng và rút kinh nghiệm cho các dự án sau.
+>
+> Kính chúc quý thầy cô dồi dào sức khỏe, đạt nhiều thành tựu trong công tác giảng dạy và nghiên cứu!
+
+---
+
+### 13. KẾT LUẬN (Chương 6) — viết lại tự nhiên và có chiều sâu hơn
+
+Bản hiện tại liệt kê dạng bullet khô khan. Đề xuất viết lại:
+
+---
+
+> **CHƯƠNG 6 — KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN**
+>
+> **6.1 Kết quả đạt được**
+>
+> Qua quá trình thực hiện đồ án, nhóm em đã xây dựng thành công hệ thống web trợ lý học tập tích hợp AI, đáp ứng đầy đủ bốn cấp độ yêu cầu của đề bài môn Phát triển ứng dụng Full-stack.
+>
+> Ở tầng nền tảng, hệ thống cung cấp xác thực Google OAuth kết hợp JWT và phân quyền ba vai trò (Admin, Giáo viên, Sinh viên), quản lý khóa học với import Excel hàng loạt, cùng giao diện React/Vite hiện đại và responsive.
+>
+> Ở tầng RAG, em đã hiện thực pipeline truy xuất lai (hybrid search) kết hợp vector similarity và BM25, hợp nhất bằng Reciprocal Rank Fusion, tinh chỉnh qua cross-encoder reranking, và sinh câu trả lời streaming kèm trích dẫn nguồn tài liệu — giúp sinh viên kiểm chứng thông tin trực tiếp thay vì phụ thuộc hoàn toàn vào mô hình ngôn ngữ.
+>
+> Ở tầng trải nghiệm, chat hỗ trợ SSE streaming cho phản hồi dần, bộ nhớ cuộn (rolling summary) duy trì ngữ cảnh hội thoại dài, và cấu hình model linh hoạt qua giao diện quản trị.
+>
+> Ở tầng nâng cao, agent orchestrator với intent detection cho phép chatbot gọi tool tra cứu lịch thi từ cơ sở dữ liệu, quiz AI tự sinh đề từ nội dung tài liệu đã upload, và ingestion bất đồng bộ qua Celery xử lý tài liệu nặng mà không chặn API.
+>
+> Toàn bộ hệ thống được đóng gói Docker Compose (MySQL, ChromaDB, Redis, backend, worker, frontend) và có thể demo end-to-end trên một máy duy nhất chỉ với một lệnh `docker compose up`.
+>
+> **6.2 Hạn chế còn tồn tại**
+>
+> Chất lượng câu trả lời RAG phụ thuộc trực tiếp vào corpus đầu vào: tài liệu PDF scan chất lượng thấp, slide chứa nhiều hình ảnh mà ít text, hoặc cấu hình chunk/embedding chưa tối ưu đều ảnh hưởng đến độ chính xác của truy xuất. Với các truy vấn mơ hồ, hệ thống vẫn có thể trả kết quả không ổn định.
+>
+> Chi phí và giới hạn tốc độ của Gemini API ảnh hưởng trải nghiệm khi nhiều người dùng đồng thời hoặc prompt quá dài. Kiểm thử tự động mới bao phủ một số API chính, chưa có E2E test giao diện và chưa mô phỏng được kịch bản đa người dùng tải cao.
+>
+> Khía cạnh bảo mật cho triển khai thực tế (rate limiting, WAF, xoay secret định kỳ) mới dừng ở mức nhận diện trong báo cáo, chưa được triển khai đầy đủ trong phạm vi đồ án.
+>
+> **6.3 Hướng phát triển**
+>
+> Về RAG và đánh giá: xây dựng bộ benchmark offline với các metric như hit@k, MRR để đo lường chất lượng truy xuất một cách định lượng; bổ sung logging trace cho từng bước retrieval/rerank nhằm phát hiện điểm yếu; và thử nghiệm A/B giữa các chiến lược prompt khác nhau.
+>
+> Về sản phẩm: tích hợp E2E testing bằng Playwright để tự động hóa kiểm thử giao diện; hỗ trợ đa ngôn ngữ (i18n); tối ưu bundle frontend và giám sát lỗi runtime qua Sentry hoặc OpenTelemetry.
+>
+> Về hạ tầng: thiết lập pipeline CI/CD, sao lưu MySQL và ChromaDB định kỳ, mở rộng ngang (horizontal scale) cho Celery worker khi lượng tài liệu tăng.
+>
+> Về nghiệp vụ giáo dục: phát triển module ôn tập cá nhân hóa (adaptive review), tích hợp với hệ thống LMS hiện có, và phân tích hành vi học tập của sinh viên (tuân thủ quy định bảo vệ dữ liệu cá nhân).
+
+---
+
+## 📝 DANH SÁCH LỖI NHỎ KHÁC
+
+| # | Vị trí | Vấn đề | Gợi ý sửa |
+|---|---|---|---|
+| 14 | Dòng 218 | Liệt kê đối tượng dính liền nhau, không ngắt dòng | Tách mỗi đối tượng thành bullet riêng |
+| 15 | Dòng 221 | "Sản phẩm bàn giao" gộp nhiều thứ vào 1 câu | Tách thành danh sách có đánh số |
+| 16 | Dòng 225 | "Node 20+" — nên viết rõ "Node.js 20+" | Sửa thành "Node.js phiên bản 20 trở lên" |
+| 17 | Bảng DVVT | "Vector DB" → giải thích "Lưu embedding trong ChromaDB" | Nên giải thích chung hơn: "CSDL lưu trữ vector embedding" (vì Vector DB không chỉ có ChromaDB) |
+| 18 | Trang bìa lặp | Trang bìa xuất hiện **2 lần** (dòng 1–23 và 24–44) | Xóa 1 bản trùng |
+| 19 | Chương 3.2 | "Tầng giao diện" ghi "state client" — không rõ nghĩa | Sửa: "quản lý trạng thái ứng dụng (React state, context)" |
+| 20 | Mục TÓM TẮT | Quá dài (~4 dòng liền). Ở TDT thường yêu cầu ~150–300 từ | Nên ngắn gọn hơn hoặc tách đoạn rõ ràng |
+| 21 | Tài liệu tham khảo | Thiếu số thứ tự [1], [2]... và format không đồng nhất | Đánh số và dùng format APA hoặc IEEE nhất quán |
+| 22 | TLTK tiếng Việt | Một số tham chiếu (moet.gov.vn, chinhphu.vn, thuvienphapluat.vn) rất chung, không liên quan trực tiếp đến nội dung kỹ thuật | Cân nhắc bỏ hoặc thay bằng tài liệu liên quan hơn |
+
+---
+
+## ✅ NHỮNG ĐIỂM LÀM TỐT
+
+- ✅ **43 use case đặc tả đầy đủ** — rất chi tiết, có luồng chính, tiên quyết, hậu điều kiện
+- ✅ **74 endpoint API** với input/output — cực kỳ chi tiết, ít báo cáo sinh viên nào làm được
+- ✅ **Kiến trúc nhiều tầng** trình bày rõ ràng (Presentation → API → Application → Data → Async/AI)
+- ✅ **Bảng đối chiếu yêu cầu** 4 cấp đề bài (Bảng 2.1) — rất tốt cho giáo viên đánh giá
+- ✅ **Cấu trúc chương** đúng chuẩn đồ án TDT
+- ✅ Có mô tả cả **services thực tế** khớp với code: `chat_service.py`, `rag_service.py`, `agent_orchestrator.py`...
+
+---
+
+## 📌 TÓM TẮT ƯU TIÊN SỬA
+
+| Mức độ | Việc cần làm | Ước tính thời gian |
+|---|---|---|
+| 🔴 Khẩn cấp | Sửa tên GVHD ở trang cam đoan | 1 phút |
+| 🔴 Khẩn cấp | Sửa tiêu đề thiếu dấu cách | 1 phút |
+| 🔴 Khẩn cấp | Sửa "Next.js" → "Vite" | 5 phút |
+| 🔴 Khẩn cấp | Xóa bảng API trùng lặp | 2 phút |
+| 🔴 Khẩn cấp | Tách tên thành viên bị dính liền | 1 phút |
+| 🔴 Khẩn cấp | Xóa trang bìa bị lặp | 1 phút |
+| 🟡 Quan trọng | Thêm DMHA, DMBB | 15 phút |
+| 🟡 Quan trọng | Thêm cột kết quả thực tế bảng 5.1 | 10 phút |
+| 🟡 Quan trọng | Thêm bảng phân công công việc | 10 phút |
+| 🟡 Quan trọng | Kiểm tra/sửa tên file test ở 5.6 | 5 phút |
+| 🟡 Quan trọng | Đánh số tài liệu tham khảo | 10 phút |
+| 🟢 Nâng cấp | Viết lại Lời cảm ơn (dùng bản gợi ý ở trên) | 5 phút |
+| 🟢 Nâng cấp | Viết lại Kết luận (dùng bản gợi ý ở trên) | 10 phút |
+| 🟢 Nâng cấp | Kiểm tra hình ảnh sơ đồ đã chèn chưa | 5 phút |
