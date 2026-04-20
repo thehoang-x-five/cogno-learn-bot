@@ -1,0 +1,55 @@
+@startuml chatbot_agent_workflow
+!theme plain
+title Chatbot - Agent Workflow
+skinparam backgroundColor #FFFFFF
+
+|ChatService|
+start
+:Intent đã được detect là\nSCHEDULE_QUERY hoặc QUIZ_REQUEST;
+
+|AgentOrchestrator|
+:Nhận intent, query, course_id, user_id;
+:Khai báo tool schema cho Gemini;
+:Gọi LLMService.call_with_tools(...);
+
+if (Gemini trả function call?) then (yes)
+  if (Tool = schedule_lookup?) then (yes)
+    |ScheduleLookup|
+    :Resolve exam_type từ args hoặc query;
+    :Query bảng exam_schedules theo course_id;
+    :Format lịch thi bằng tiếng Việt;
+    |AgentOrchestrator|
+    :Gắn metadata tool_selection;
+  else (quiz_generator)
+    |QuizGenerator|
+    :Retrieve source chunks;
+    note right
+    Chiến lược thực tế:
+    - hybrid_rrf nếu có cả vector và BM25
+    - vector_search nếu chỉ có vector
+    - bm25_fallback nếu vector lỗi/rỗng
+    - recent_chunks_fallback nếu không còn gì khác
+    end note
+    :Gọi Gemini để sinh câu hỏi;
+    :Validate / normalize câu hỏi;
+    :Lưu GeneratedQuiz vào MySQL;
+    |AgentOrchestrator|
+    :Gắn metadata quiz + tool_selection;
+  endif
+else (no)
+  :Fallback theo intent cũ;
+endif
+
+|ChatService|
+:Stream response word-by-word;
+:Lưu assistant message + agent_metadata;
+:Emit metadata(tool_used, tool_selection_mode);
+
+stop
+
+note bottom
+Source hiện tại dùng Gemini function calling.
+Không còn là intent-router thuần if/else như phiên bản tài liệu cũ.
+end note
+
+@enduml

@@ -1,0 +1,51 @@
+@startuml chatbot_sequence_document
+!theme plain
+title Chatbot - Document Ingestion Sequence
+autonumber
+
+actor Teacher
+participant Frontend
+participant "Documents Router" as Router
+participant DocumentService
+collections "uploads/" as Uploads
+database MySQL
+queue "Celery / Redis" as Queue
+participant "Celery Worker" as Worker
+participant AdvancedParser
+participant ChunkingService as Chunker
+participant EmbeddingModel as Embed
+database ChromaDB as Chroma
+
+Teacher -> Frontend: Upload file
+Frontend -> Router: POST /api/documents/upload
+Router -> DocumentService: upload_document(...)
+DocumentService -> Uploads: save file
+DocumentService -> MySQL: insert documents(status=PENDING)
+DocumentService -> Queue: send process_document(document_id)
+DocumentService --> Router: document info
+Router --> Frontend: 201 Created
+
+loop Polling status
+  Frontend -> Router: GET /api/documents/{id}/status
+  Router -> MySQL: read status/progress
+  MySQL --> Router: status
+  Router --> Frontend: status/progress
+end
+
+Queue -> Worker: process_document(document_id)
+Worker -> MySQL: update status=PROCESSING
+Worker -> Uploads: read file
+Worker -> AdvancedParser: parse(file)
+AdvancedParser --> Worker: raw text + metadata
+Worker -> MySQL: update metadata_json
+Worker -> Chunker: chunk_text(...)
+Chunker --> Worker: chunks with page_number
+Worker -> MySQL: insert document_chunks
+Worker -> Embed: encode(chunk texts)
+Embed --> Worker: embeddings
+Worker -> Chroma: add_chunks(ids, embeddings, metadatas)
+Worker -> MySQL: update READY / total_chunks / processing_time
+Worker -> Queue: create_notifications(enrolled student IDs)
+Worker --> Queue: success
+
+@enduml

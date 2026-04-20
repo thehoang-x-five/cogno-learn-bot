@@ -1,0 +1,87 @@
+@startuml chatbot_usecase
+!theme plain
+title Chatbot - Use Case Diagram
+left to right direction
+
+actor "Student" as Student
+actor "Teacher" as Teacher
+actor "Admin" as Admin
+actor "Google OAuth" as Google
+actor "Gemini API" as Gemini
+
+rectangle "AI Learning Chatbot" {
+  usecase "Đăng nhập Google" as UC_Login
+  usecase "Làm mới token / đăng xuất" as UC_Session
+  usecase "Xem dashboard cá nhân" as UC_Dashboard
+  usecase "Xem môn học đã enroll" as UC_MyCourses
+  usecase "Xem danh sách tài liệu" as UC_ViewDocs
+  usecase "Upload tài liệu" as UC_UploadDocs
+  usecase "Chat theo môn học" as UC_Chat
+  usecase "Xem lịch sử chat" as UC_History
+  usecase "Xem citation / nguồn tham khảo" as UC_Citations
+  usecase "Tra cứu lịch thi" as UC_Schedule
+  usecase "Tạo quiz bằng AI" as UC_AIQuiz
+  usecase "Tạo quiz thủ công" as UC_ManualQuiz
+  usecase "Làm quiz" as UC_DoQuiz
+  usecase "Xem kết quả / attempts" as UC_Attempts
+  usecase "Xem thống kê quiz theo môn" as UC_QuizStats
+  usecase "Quản lý users" as UC_Users
+  usecase "Quản lý courses" as UC_Courses
+  usecase "Quản lý enrollments" as UC_Enrollments
+  usecase "Import users / courses / enrollments" as UC_Import
+  usecase "Cấu hình LLM / RAG" as UC_Settings
+  usecase "Xem thông báo" as UC_Notifications
+}
+
+Student --> UC_Login
+Student --> UC_Session
+Student --> UC_Dashboard
+Student --> UC_MyCourses
+Student --> UC_ViewDocs
+Student --> UC_Chat
+Student --> UC_History
+Student --> UC_Citations
+Student --> UC_Schedule
+Student --> UC_AIQuiz
+Student --> UC_DoQuiz
+Student --> UC_Attempts
+Student --> UC_Notifications
+
+Teacher --> UC_Login
+Teacher --> UC_Session
+Teacher --> UC_Dashboard
+Teacher --> UC_MyCourses
+Teacher --> UC_ViewDocs
+Teacher --> UC_UploadDocs
+Teacher --> UC_Chat
+Teacher --> UC_History
+Teacher --> UC_Citations
+Teacher --> UC_ManualQuiz
+Teacher --> UC_AIQuiz
+Teacher --> UC_QuizStats
+Teacher --> UC_Attempts
+Teacher --> UC_Notifications
+
+Admin --> UC_Login
+Admin --> UC_Session
+Admin --> UC_Dashboard
+Admin --> UC_MyCourses
+Admin --> UC_ViewDocs
+Admin --> UC_UploadDocs
+Admin --> UC_Chat
+Admin --> UC_Notifications
+Admin --> UC_Users
+Admin --> UC_Courses
+Admin --> UC_Enrollments
+Admin --> UC_Import
+Admin --> UC_Settings
+
+Google --> UC_Login
+Gemini --> UC_Chat
+Gemini --> UC_AIQuiz
+
+UC_Chat ..> UC_Citations : <<include>>
+UC_AIQuiz ..> UC_DoQuiz : <<extend>>
+UC_UploadDocs ..> UC_ViewDocs : <<extend>>
+
+@enduml

@@ -1,0 +1,85 @@
+@startuml chatbot_auth_workflow
+!theme plain
+title Chatbot - Authentication Workflow
+skinparam backgroundColor #FFFFFF
+
+|Frontend|
+start
+:User clicks "Đăng nhập Google";
+:Open GET /api/auth/google/login;
+
+|Google OAuth|
+:Hiển thị màn hình đăng nhập Google;
+:User chọn tài khoản và cấp quyền;
+
+if (Google login thành công?) then (no)
+  |Frontend|
+  :Hiển thị lỗi đăng nhập;
+  stop
+endif
+
+:Redirect về /api/auth/google/callback?code=...;
+
+|FastAPI Auth Router|
+:Nhận authorization code;
+:Đổi code lấy Google userinfo;
+:Kiểm tra email_verified;
+
+|AuthService|
+:Tìm user theo google_id;
+if (Đã liên kết Google?) then (yes)
+  :Dùng user hiện có;
+else (no)
+  :Tìm user theo email;
+  if (Email có trong DB?) then (no)
+    |FastAPI Auth Router|
+    :Return 403\n(email chưa được admin đăng ký);
+    stop
+  endif
+  :Liên kết google_id lần đầu;
+endif
+
+:Tạo access token JWT;
+:Tạo refresh token ngẫu nhiên;
+:Lưu refresh token vào bảng refresh_tokens;
+
+|FastAPI Auth Router|
+:Redirect frontend\n/auth/callback?access_token=...&refresh_token=...&role=...;
+
+|Frontend|
+:Lưu access_token vào localStorage;
+:Lưu refresh_token vào localStorage;
+:Gọi GET /api/auth/me để lấy profile;
+:Điều hướng theo role;
+
+partition "Refresh Flow" {
+  :Frontend gọi API kèm Bearer token;
+  if (Access token hết hạn?) then (yes)
+    :POST /api/auth/refresh;
+    |AuthService|
+    :Kiểm tra refresh token trong DB;
+    :Revoke token cũ;
+    :Tạo access token + refresh token mới;
+    |Frontend|
+    :Cập nhật localStorage;
+  endif
+}
+
+partition "Logout Flow" {
+  :POST /api/auth/logout hoặc /logout/all;
+  |AuthService|
+  :Revoke refresh token trong DB;
+  |Frontend|
+  :Xóa token khỏi localStorage;
+}
+
+stop
+
+note right
+Điểm quan trọng theo source:
+- Chỉ email đã có sẵn trong DB mới đăng nhập được
+- Refresh token lưu DB, không dùng HttpOnly cookie
+- Frontend nhận token qua query string ở trang /auth/callback
+end note
+
+@enduml
