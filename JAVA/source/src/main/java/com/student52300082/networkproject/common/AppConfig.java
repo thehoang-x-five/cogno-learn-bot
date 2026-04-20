@@ -9,6 +9,8 @@ public final class AppConfig {
     public static final int DEFAULT_UDP_FILE_PORT = 2029;
     public static final int DEFAULT_QUIZ_PORT = 2030;
     public static final int DEFAULT_REALTIME_PORT = 2031;
+    public static final int DEFAULT_WEBRTC_HTTP_PORT = 2032;
+    public static final int DEFAULT_WEBRTC_WS_PORT = 2033;
     public static final int FILE_BUFFER_SIZE = 4096;
     public static final int UDP_FILE_CHUNK_SIZE = 4096;
     public static final int UDP_TIMEOUT_MILLIS = 1500;

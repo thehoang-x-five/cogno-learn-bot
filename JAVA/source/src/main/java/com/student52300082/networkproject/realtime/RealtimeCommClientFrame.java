@@ -4,6 +4,7 @@ import com.student52300082.networkproject.common.AppConfig;
 import com.student52300082.networkproject.common.UiTheme;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
@@ -24,6 +25,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URI;
 import java.util.Arrays;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -83,6 +85,7 @@ public class RealtimeCommClientFrame extends JFrame {
 
     private TargetDataLine microphoneLine;
     private SourceDataLine speakerLine;
+    private AudioFormat activeAudioFormat;
     private Thread audioCaptureThread;
     private Thread videoCaptureThread;
     private volatile boolean videoStreaming;
@@ -98,6 +101,7 @@ public class RealtimeCommClientFrame extends JFrame {
     private JButton btnGroupCall;
     private JButton btnEndCall;
     private JButton btnMute;
+    private JButton btnOpenWebRtc;
     private JLabel lblLocalVideo;
     private JLabel lblRemoteVideo;
 
@@ -261,9 +265,11 @@ public class RealtimeCommClientFrame extends JFrame {
         callRow.setBackground(UiTheme.SURFACE);
         btnMute = UiTheme.secondaryButton("Mute Mic");
         btnEndCall = UiTheme.accentButton("End Call");
+        btnOpenWebRtc = UiTheme.primaryButton("Open WebRTC");
         callRow.add(UiTheme.subtitle("Audio call + video call demo (screen-frame relay via server)."));
         callRow.add(btnMute);
         callRow.add(btnEndCall);
+        callRow.add(btnOpenWebRtc);
         callCard.add(callRow, BorderLayout.NORTH);
 
         JPanel videoPanel = new JPanel(new GridLayout(1, 2, 10, 0));
@@ -274,17 +280,17 @@ public class RealtimeCommClientFrame extends JFrame {
         videoPanel.add(wrapVideoCard("Remote", lblRemoteVideo));
         callCard.add(videoPanel, BorderLayout.CENTER);
 
-        JPanel actionPanel = new JPanel(new GridLayout(3, 1, 10, 10));
-        actionPanel.setBackground(UiTheme.BACKGROUND);
-        actionPanel.add(directChatCard);
-        actionPanel.add(groupChatCard);
-        actionPanel.add(callCard);
+        JTabbedPane actionTabs = new JTabbedPane();
+        actionTabs.setFont(UiTheme.BODY_FONT);
+        actionTabs.addTab("Direct Chat", directChatCard);
+        actionTabs.addTab("Group Chat", groupChatCard);
+        actionTabs.addTab("Call", callCard);
 
         JPanel body = new JPanel(new BorderLayout(12, 12));
         body.setBackground(UiTheme.BACKGROUND);
         body.add(topPanel, BorderLayout.NORTH);
         body.add(splitPane, BorderLayout.CENTER);
-        body.add(actionPanel, BorderLayout.SOUTH);
+        body.add(actionTabs, BorderLayout.SOUTH);
 
         page.add(body, BorderLayout.CENTER);
         setContentPane(page);
@@ -300,6 +306,7 @@ public class RealtimeCommClientFrame extends JFrame {
         btnGroupCall.addActionListener(e -> startGroupCall());
         btnEndCall.addActionListener(e -> endCall());
         btnMute.addActionListener(e -> toggleMute());
+        btnOpenWebRtc.addActionListener(e -> openWebRtcWindow());
         txtDirectMessage.addActionListener(e -> sendDirectMessage());
         txtRoomMessage.addActionListener(e -> sendRoomMessage());
 
@@ -475,7 +482,11 @@ public class RealtimeCommClientFrame extends JFrame {
             while (running && socket != null && !socket.isClosed()) {
                 String messageType = inputStream.readUTF();
                 if (RealtimeProtocol.SYSTEM_MESSAGE.equals(messageType)) {
-                    appendLog("[System] " + inputStream.readUTF());
+                    String systemMessage = inputStream.readUTF();
+                    appendLog("[System] " + systemMessage);
+                    if (systemMessage.contains("Direct message delivered")) {
+                        appendDirectInbox("[System] " + systemMessage);
+                    }
                 } else if (RealtimeProtocol.ERROR.equals(messageType)) {
                     appendLog("[Error] " + inputStream.readUTF());
                 } else if (RealtimeProtocol.USER_LIST.equals(messageType)) {
@@ -538,6 +549,7 @@ public class RealtimeCommClientFrame extends JFrame {
             users[i] = inputStream.readUTF();
         }
         SwingUtilities.invokeLater(() -> {
+            Object previousSelection = cboDirectTarget.getSelectedItem();
             onlineUsersModel.clear();
             directTargetModel.removeAllElements();
             for (String user : users) {
@@ -547,8 +559,20 @@ public class RealtimeCommClientFrame extends JFrame {
                 onlineUsersModel.addElement(user);
                 directTargetModel.addElement(user);
             }
-            if (directTargetModel.getSize() > 0 && cboDirectTarget.getSelectedItem() == null) {
-                cboDirectTarget.setSelectedIndex(0);
+            if (directTargetModel.getSize() > 0) {
+                boolean restored = false;
+                if (previousSelection != null) {
+                    for (int i = 0; i < directTargetModel.getSize(); i++) {
+                        if (previousSelection.toString().equals(directTargetModel.getElementAt(i))) {
+                            cboDirectTarget.setSelectedItem(previousSelection.toString());
+                            restored = true;
+                            break;
+                        }
+                    }
+                }
+                if (!restored) {
+                    cboDirectTarget.setSelectedIndex(0);
+                }
             }
             updateControlState();
         });
@@ -726,6 +750,28 @@ public class RealtimeCommClientFrame extends JFrame {
         }
     }
 
+    private void openWebRtcWindow() {
+        if (!running) {
+            appendLog("[System] Connect before opening WebRTC.");
+            return;
+        }
+        String user = currentUserName == null ? txtUserName.getText().trim() : currentUserName;
+        String room = (currentRoomName == null || currentRoomName.trim().isEmpty()) ? "default" : currentRoomName;
+        String host = txtHost.getText().trim().isEmpty() ? AppConfig.DEFAULT_HOST : txtHost.getText().trim();
+        String url = "http://" + host + ":" + AppConfig.DEFAULT_WEBRTC_HTTP_PORT
+            + "/?user=" + urlEncode(user) + "&room=" + urlEncode(room);
+        try {
+            Desktop.getDesktop().browse(new URI(url));
+            appendLog("[WebRTC] Opened browser: " + url);
+        } catch (Exception ex) {
+            appendLog("[WebRTC] Cannot open browser: " + ex.getMessage());
+        }
+    }
+
+    private String urlEncode(String value) {
+        return value == null ? "" : value.replace(" ", "%20");
+    }
+
     private void toggleMute() {
         if (RealtimeProtocol.CALL_MODE_NONE.equals(callMode)) {
             appendLog("[System] Start a call before toggling microphone state.");
@@ -769,40 +815,57 @@ public class RealtimeCommClientFrame extends JFrame {
         if (microphoneLine != null && microphoneLine.isOpen()) {
             return;
         }
-        try {
-            AudioFormat format = createAudioFormat();
-            DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-            if (!AudioSystem.isLineSupported(info)) {
-                appendLog("[Audio] Microphone line is not supported on this device.");
+        String lastError = null;
+        for (AudioFormat candidate : createAudioFormatCandidates()) {
+            try {
+                DataLine.Info info = new DataLine.Info(TargetDataLine.class, candidate);
+                if (!AudioSystem.isLineSupported(info)) {
+                    continue;
+                }
+                microphoneLine = (TargetDataLine) AudioSystem.getLine(info);
+                microphoneLine.open(candidate);
+                microphoneLine.start();
+                activeAudioFormat = candidate;
+                appendLog("[Audio] Microphone ready (" + (int) candidate.getSampleRate() + " Hz).");
                 return;
+            } catch (LineUnavailableException ex) {
+                lastError = ex.getMessage();
             }
-            microphoneLine = (TargetDataLine) AudioSystem.getLine(info);
-            microphoneLine.open(format);
-            microphoneLine.start();
-            appendLog("[Audio] Microphone ready.");
-        } catch (LineUnavailableException ex) {
-            appendLog("[Audio] Cannot open microphone: " + ex.getMessage());
         }
+        appendLog("[Audio] Cannot open microphone with supported formats."
+            + (lastError == null ? "" : " Reason: " + lastError));
     }
 
     private void tryOpenSpeaker() {
         if (speakerLine != null && speakerLine.isOpen()) {
             return;
         }
-        try {
-            AudioFormat format = createAudioFormat();
-            DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-            if (!AudioSystem.isLineSupported(info)) {
-                appendLog("[Audio] Speaker line is not supported on this device.");
-                return;
-            }
-            speakerLine = (SourceDataLine) AudioSystem.getLine(info);
-            speakerLine.open(format);
-            speakerLine.start();
-            appendLog("[Audio] Speaker ready.");
-        } catch (LineUnavailableException ex) {
-            appendLog("[Audio] Cannot open speaker: " + ex.getMessage());
+        AudioFormat[] candidates = createAudioFormatCandidates();
+        AudioFormat preferred = activeAudioFormat;
+        if (preferred != null) {
+            candidates = new AudioFormat[] { preferred, candidates[0], candidates[1], candidates[2] };
         }
+        String lastError = null;
+        for (AudioFormat candidate : candidates) {
+            try {
+                DataLine.Info info = new DataLine.Info(SourceDataLine.class, candidate);
+                if (!AudioSystem.isLineSupported(info)) {
+                    continue;
+                }
+                speakerLine = (SourceDataLine) AudioSystem.getLine(info);
+                speakerLine.open(candidate);
+                speakerLine.start();
+                if (activeAudioFormat == null) {
+                    activeAudioFormat = candidate;
+                }
+                appendLog("[Audio] Speaker ready (" + (int) candidate.getSampleRate() + " Hz).");
+                return;
+            } catch (LineUnavailableException ex) {
+                lastError = ex.getMessage();
+            }
+        }
+        appendLog("[Audio] Cannot open speaker with supported formats."
+            + (lastError == null ? "" : " Reason: " + lastError));
     }
 
     private void startAudioCaptureThread() {
@@ -909,7 +972,15 @@ public class RealtimeCommClientFrame extends JFrame {
                 }
             } catch (Exception ex) {
                 if (running && RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(callMode)) {
-                    appendLog("[Video] Video stream stopped: " + ex.getMessage());
+                    String help = (ex.getMessage() == null ? "" : ex.getMessage());
+                    if (help.toLowerCase().contains("screen")
+                        || help.toLowerCase().contains("permission")
+                        || help.toLowerCase().contains("denied")) {
+                        appendLog("[Video] Video stream stopped: " + help
+                            + " | Please allow Screen Recording permission for Java/IDE in macOS Settings.");
+                    } else {
+                        appendLog("[Video] Video stream stopped: " + help);
+                    }
                 }
             }
         }, "realtime-video-capture");
@@ -976,14 +1047,12 @@ public class RealtimeCommClientFrame extends JFrame {
         });
     }
 
-    private AudioFormat createAudioFormat() {
-        return new AudioFormat(
-            RealtimeProtocol.AUDIO_SAMPLE_RATE,
-            RealtimeProtocol.AUDIO_SAMPLE_SIZE_BITS,
-            RealtimeProtocol.AUDIO_CHANNELS,
-            true,
-            false
-        );
+    private AudioFormat[] createAudioFormatCandidates() {
+        return new AudioFormat[] {
+            new AudioFormat(RealtimeProtocol.AUDIO_SAMPLE_RATE, RealtimeProtocol.AUDIO_SAMPLE_SIZE_BITS, RealtimeProtocol.AUDIO_CHANNELS, true, false),
+            new AudioFormat(22050.0f, RealtimeProtocol.AUDIO_SAMPLE_SIZE_BITS, RealtimeProtocol.AUDIO_CHANNELS, true, false),
+            new AudioFormat(44100.0f, RealtimeProtocol.AUDIO_SAMPLE_SIZE_BITS, RealtimeProtocol.AUDIO_CHANNELS, true, false)
+        };
     }
 
     private void disconnectFromServer(String message) {
@@ -992,6 +1061,7 @@ public class RealtimeCommClientFrame extends JFrame {
         stopAudioResources();
         stopVideoCaptureThread();
         callMode = RealtimeProtocol.CALL_MODE_NONE;
+        activeAudioFormat = null;
         currentRoomName = null;
         lastAudioLogAt = 0L;
 
@@ -1058,6 +1128,7 @@ public class RealtimeCommClientFrame extends JFrame {
         btnGroupCall.setEnabled(connected && inRoom && !inCall);
         btnMute.setEnabled(connected && inCall && microphoneLine != null && microphoneLine.isOpen());
         btnEndCall.setEnabled(connected && inCall);
+        btnOpenWebRtc.setEnabled(connected);
         refreshStatusLabels();
     }
 

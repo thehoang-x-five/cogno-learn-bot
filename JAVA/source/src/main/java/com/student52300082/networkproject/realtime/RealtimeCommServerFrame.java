@@ -52,6 +52,7 @@ public class RealtimeCommServerFrame extends JFrame {
 
     private volatile boolean running;
     private ServerSocket serverSocket;
+    private WebRtcSignalingGateway webRtcGateway;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new RealtimeCommServerFrame().setVisible(true));
@@ -195,11 +196,18 @@ public class RealtimeCommServerFrame extends JFrame {
 
         try {
             serverSocket = new ServerSocket(port);
+            webRtcGateway = new WebRtcSignalingGateway(AppConfig.DEFAULT_WEBRTC_HTTP_PORT, AppConfig.DEFAULT_WEBRTC_WS_PORT);
+            webRtcGateway.start();
             running = true;
             lblStatus.setText("Listening on port " + port);
             appendLog("Realtime server started on port " + port);
+            appendLog("WebRTC signaling ready at http://localhost:" + AppConfig.DEFAULT_WEBRTC_HTTP_PORT);
             new Thread(this::acceptLoop, "realtime-server-accept").start();
         } catch (IOException ex) {
+            if (webRtcGateway != null) {
+                webRtcGateway.stop();
+                webRtcGateway = null;
+            }
             JOptionPane.showMessageDialog(this, "Cannot start server: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -240,9 +248,20 @@ public class RealtimeCommServerFrame extends JFrame {
             }
         } catch (IOException ignored) {
         }
+        if (webRtcGateway != null) {
+            webRtcGateway.stop();
+            webRtcGateway = null;
+        }
 
         lblStatus.setText("Server stopped");
         appendLog("Realtime server stopped.");
+    }
+
+    public String getWebRtcUrl(String host, String user, String room) {
+        if (webRtcGateway == null) {
+            return null;
+        }
+        return webRtcGateway.getClientUrl(host, user, room);
     }
 
     private void registerClient(ClientConnection connection, String requestedName) {

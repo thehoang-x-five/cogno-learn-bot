@@ -4,7 +4,6 @@ import com.student52300082.networkproject.chat.tcp.TcpChatClientFrame;
 import com.student52300082.networkproject.chat.tcp.TcpChatServerFrame;
 import com.student52300082.networkproject.chat.udp.UdpChatClientFrame;
 import com.student52300082.networkproject.chat.udp.UdpChatServerFrame;
-import com.student52300082.networkproject.common.AppConfig;
 import com.student52300082.networkproject.common.UiTheme;
 import com.student52300082.networkproject.extension.quiz.QuizClientFrame;
 import com.student52300082.networkproject.extension.quiz.QuizServerFrame;
@@ -18,7 +17,6 @@ import com.student52300082.networkproject.realtime.RealtimeCommServerFrame;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -39,7 +37,7 @@ public class MainMenuFrame extends JFrame {
             "TCP, UDP, file transfer, quiz assessment and realtime communication demos"
         ), BorderLayout.NORTH);
 
-        JPanel grid = new JPanel(new GridLayout(4, 2, 16, 16));
+        JPanel grid = new JPanel(new GridLayout(3, 2, 16, 16));
         grid.setBackground(UiTheme.BACKGROUND);
         grid.add(moduleCard(
             "TCP Chat",
@@ -89,20 +87,6 @@ public class MainMenuFrame extends JFrame {
             () -> new RealtimeCommServerFrame().setVisible(true),
             () -> new RealtimeCommClientFrame().setVisible(true)
         ));
-
-        JPanel noteCard = UiTheme.card();
-        noteCard.add(UiTheme.title("Usage order"), BorderLayout.NORTH);
-        JLabel note = UiTheme.subtitle("<html>1. Open server or receiver first.<br>2. Open client or sender.<br>3. Keep default ports unless a port is busy.<br>4. Join a room before using group chat or group call.<br>5. Store result images and report files in the report folder.</html>");
-        note.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
-        noteCard.add(note, BorderLayout.CENTER);
-        grid.add(noteCard);
-
-        JPanel highlightCard = UiTheme.card();
-        highlightCard.add(UiTheme.title("New module"), BorderLayout.NORTH);
-        JLabel highlight = UiTheme.subtitle("<html>Realtime Communication listens on port " + AppConfig.DEFAULT_REALTIME_PORT + ". It combines direct messages, room chat and relayed PCM voice streaming for quick localhost demos.</html>");
-        highlight.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
-        highlightCard.add(highlight, BorderLayout.CENTER);
-        grid.add(highlightCard);
 
         page.add(grid, BorderLayout.CENTER);
         setContentPane(page);
