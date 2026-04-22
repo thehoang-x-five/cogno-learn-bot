@@ -28,6 +28,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -82,13 +83,13 @@ public class ReportScreenshotTool {
             "Starting UDP transfer: submission_sample.txt, 1024 bytes, 1 packets\nSent packet 1/1\nUDP transfer completed. Bytes sent: 1024",
             "UDP sender gui packet va xac nhan hoan tat.");
         capture(new QuizServerFrame(), "10_quiz_server.png",
-            "Quiz server started on port 2030\nQuestion bank: 4 questions\nStudent 01 connected from /127.0.0.1:54002\nStudent 01 answered question 1: A -> correct\nFinal score for Student 01: 4/4",
-            "Quiz server phan phoi cau hoi va cham diem.");
+            "Quiz server started on port 2030\nQuestion bank: 15 questions\nEach new attempt receives 4 questions.\nStudent 01 connected from /127.0.0.1:54002\nStudent 01 answered question 1: A -> correct\nFinal score for Student 01: 4/4",
+            "Quiz server phan phoi ngau nhien 4 cau hoi moi cho moi luot lam bai va cham diem.");
         capture(new QuizClientFrame(), "11_quiz_client.png",
             "Connected. Total questions: 4\nQuestion 1: selected A\nCorrect. Current score: 1/4\nPress Next Question to continue.\nQuestion 2: selected B\nCorrect. Current score: 2/4\nFinal score for Student 01: 4/4",
-            "Quiz client tra loi cau hoi va hien thi diem.");
+            "Quiz client tra loi cau hoi, kiem tra dap an va reset de lam luot moi.");
         capture(new RealtimeCommServerFrame(), "12_realtime_server.png", null, "Realtime server voi online users, rooms va call relay.");
-        capture(new RealtimeCommClientFrame(), "13_realtime_client.png", null, "Realtime client: live chat, group chat, call va group call.");
+        capture(new RealtimeCommClientFrame(), "13_realtime_client.png", null, "Realtime client: direct chat, room chat, voice call, video call va mo WebRTC tren trinh duyet.");
         writeOverviewReport();
     }
 
@@ -107,6 +108,8 @@ public class ReportScreenshotTool {
                 ((RealtimeCommServerFrame) frame).loadDemoStateForScreenshot();
             } else if (frame instanceof RealtimeCommClientFrame) {
                 ((RealtimeCommClientFrame) frame).loadDemoStateForScreenshot();
+                selectTab(frame.getContentPane(), "Call");
+                selectTab(frame.getContentPane(), "Activity");
             }
         });
 
@@ -137,7 +140,7 @@ public class ReportScreenshotTool {
                 writer.write("- `" + entry.getKey() + "`: " + entry.getValue() + "\n");
             }
             writer.write("\nNotes:\n");
-            writer.write("- Realtime screens include live chat, group chat, private call and group call demo state.\n");
+            writer.write("- Realtime screens include direct chat, room chat, video call state and browser WebRTC shortcut.\n");
             writer.write("- Use these images directly in your final project report.\n");
         }
     }
@@ -229,13 +232,32 @@ public class ReportScreenshotTool {
     private void enableSubmitButton(Component component) {
         if (component instanceof JButton) {
             JButton button = (JButton) component;
-            if ("Check Answer".equals(button.getText()) || "Next Question".equals(button.getText())) {
+            if ("Check Answer".equals(button.getText())
+                || "Next Question".equals(button.getText())
+                || "Reset Quiz".equals(button.getText())) {
                 button.setEnabled(true);
             }
         }
         if (component instanceof Container) {
             for (Component child : ((Container) component).getComponents()) {
                 enableSubmitButton(child);
+            }
+        }
+    }
+
+    private void selectTab(Component component, String tabTitle) {
+        if (component instanceof JTabbedPane) {
+            JTabbedPane tabbedPane = (JTabbedPane) component;
+            for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+                if (tabTitle.equals(tabbedPane.getTitleAt(i))) {
+                    tabbedPane.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        if (component instanceof Container) {
+            for (Component child : ((Container) component).getComponents()) {
+                selectTab(child, tabTitle);
             }
         }
     }

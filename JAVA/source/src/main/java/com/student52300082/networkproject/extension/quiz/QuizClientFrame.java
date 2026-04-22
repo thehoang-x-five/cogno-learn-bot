@@ -44,11 +44,13 @@ public class QuizClientFrame extends JFrame {
     private final JButton btnStart = UiTheme.primaryButton("Start Quiz");
     private final JButton btnSubmit = UiTheme.accentButton("Check Answer");
     private final JButton btnNext = UiTheme.secondaryButton("Next Question");
+    private final JButton btnReset = UiTheme.secondaryButton("Reset Quiz");
     private final JTextArea resultArea = new JTextArea();
     private final ArrayBlockingQueue<String> answerQueue = new ArrayBlockingQueue<String>(1);
     private final ArrayBlockingQueue<Boolean> nextQuestionQueue = new ArrayBlockingQueue<Boolean>(1);
 
     private volatile boolean quizRunning;
+    private volatile boolean quizCompleted;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new QuizClientFrame().setVisible(true));
@@ -94,10 +96,12 @@ public class QuizClientFrame extends JFrame {
 
         btnSubmit.setEnabled(false);
         btnNext.setEnabled(false);
+        btnReset.setEnabled(false);
         setAnswerOptionsEnabled(false);
         btnStart.addActionListener(e -> new Thread(this::runQuiz, "quiz-client").start());
         btnSubmit.addActionListener(e -> submitAnswer());
         btnNext.addActionListener(e -> nextQuestion());
+        btnReset.addActionListener(e -> resetQuizState(true));
     }
 
     private JPanel buildQuestionPanel() {
@@ -127,10 +131,11 @@ public class QuizClientFrame extends JFrame {
         lblFeedback.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
         actionPanel.add(lblFeedback, BorderLayout.NORTH);
 
-        JPanel buttons = new JPanel(new GridLayout(1, 2, 8, 0));
+        JPanel buttons = new JPanel(new GridLayout(1, 3, 8, 0));
         buttons.setBackground(UiTheme.SURFACE);
         buttons.add(btnSubmit);
         buttons.add(btnNext);
+        buttons.add(btnReset);
         actionPanel.add(buttons, BorderLayout.SOUTH);
         inner.add(actionPanel, BorderLayout.SOUTH);
 
@@ -194,9 +199,11 @@ public class QuizClientFrame extends JFrame {
         }
 
         quizRunning = true;
+        quizCompleted = false;
         answerQueue.clear();
         nextQuestionQueue.clear();
         setQuizControls(false, false);
+        setResetEnabled(false);
         setAnswerOptionsEnabled(false);
         setFeedback("Answer check", "Connecting to server...", UiTheme.MUTED);
         appendResult("Connecting to " + txtHost.getText().trim() + ":" + port);
@@ -235,6 +242,7 @@ public class QuizClientFrame extends JFrame {
 
             String finalResult = input.readUTF();
             appendResult(finalResult);
+            quizCompleted = true;
             showFinalMessage(finalResult);
         } catch (IOException ex) {
             appendResult("Quiz failed: " + ex.getMessage());
@@ -245,8 +253,14 @@ public class QuizClientFrame extends JFrame {
             setFeedback("Interrupted", "Quiz thread was interrupted.", FEEDBACK_INCORRECT);
         } finally {
             quizRunning = false;
-            setQuizControls(true, false);
             setAnswerOptionsEnabled(false);
+            if (quizCompleted) {
+                setQuizControls(false, false);
+                setResetEnabled(true);
+            } else {
+                setQuizControls(true, false);
+                setResetEnabled(true);
+            }
         }
     }
 
@@ -285,6 +299,7 @@ public class QuizClientFrame extends JFrame {
             answerGroup.clearSelection();
             btnSubmit.setEnabled(false);
             btnNext.setEnabled(false);
+            btnReset.setEnabled(true);
             setAnswerOptionsEnabled(false);
         });
     }
@@ -336,6 +351,39 @@ public class QuizClientFrame extends JFrame {
             btnStart.setEnabled(startEnabled);
             btnSubmit.setEnabled(submitEnabled);
             btnNext.setEnabled(false);
+        });
+    }
+
+    private void setResetEnabled(boolean enabled) {
+        SwingUtilities.invokeLater(() -> btnReset.setEnabled(enabled));
+    }
+
+    private void resetQuizState(boolean clearResultLog) {
+        if (quizRunning) {
+            return;
+        }
+
+        quizCompleted = false;
+        answerQueue.clear();
+        nextQuestionQueue.clear();
+        setAnswerOptionsEnabled(false);
+
+        SwingUtilities.invokeLater(() -> {
+            if (clearResultLog) {
+                resultArea.setText("");
+            }
+            lblQuestion.setText("<html>Press Start Quiz to receive questions from the server.</html>");
+            lblFeedback.setForeground(UiTheme.MUTED);
+            lblFeedback.setText("<html><b>Answer check</b><br>Select an answer and press Check Answer.</html>");
+            optionA.setText("A.");
+            optionB.setText("B.");
+            optionC.setText("C.");
+            optionD.setText("D.");
+            answerGroup.clearSelection();
+            btnStart.setEnabled(true);
+            btnSubmit.setEnabled(false);
+            btnNext.setEnabled(false);
+            btnReset.setEnabled(false);
         });
     }
 

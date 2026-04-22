@@ -70,6 +70,8 @@ public class RealtimeCommClientFrame extends JFrame {
     private final JLabel lblUserValue = UiTheme.subtitle("-");
     private final JLabel lblRoomValue = UiTheme.subtitle("No room");
     private final JLabel lblCallValue = UiTheme.subtitle("No active call");
+    private final JLabel lblCallTypeValue = UiTheme.subtitle("Idle");
+    private final JLabel lblCallModeHint = UiTheme.subtitle("Mode: Idle. Start a voice call or a video call.");
 
     private Socket socket;
     private DataInputStream inputStream;
@@ -104,6 +106,8 @@ public class RealtimeCommClientFrame extends JFrame {
     private JButton btnOpenWebRtc;
     private JLabel lblLocalVideo;
     private JLabel lblRemoteVideo;
+    private JTabbedPane monitorTabs;
+    private JTabbedPane actionTabs;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new RealtimeCommClientFrame().setVisible(true));
@@ -141,11 +145,12 @@ public class RealtimeCommClientFrame extends JFrame {
         connectionCard.add(connectionRow, BorderLayout.CENTER);
 
         JPanel statusCard = UiTheme.card();
-        JPanel statusGrid = new JPanel(new GridLayout(1, 3, 10, 10));
+        JPanel statusGrid = new JPanel(new GridLayout(1, 4, 10, 10));
         statusGrid.setBackground(UiTheme.SURFACE);
         statusGrid.add(statusItem("Connected as", lblUserValue));
         statusGrid.add(statusItem("Current room", lblRoomValue));
         statusGrid.add(statusItem("Call status", lblCallValue));
+        statusGrid.add(statusItem("Call type", lblCallTypeValue));
         statusCard.add(statusGrid, BorderLayout.CENTER);
 
         JPanel topPanel = new JPanel(new BorderLayout(12, 12));
@@ -177,11 +182,12 @@ public class RealtimeCommClientFrame extends JFrame {
 
         JPanel logCard = UiTheme.card();
         logCard.add(UiTheme.title("Message Monitor"), BorderLayout.NORTH);
-        JTabbedPane monitorTabs = new JTabbedPane();
+        monitorTabs = new JTabbedPane();
         monitorTabs.setFont(UiTheme.BODY_FONT);
         monitorTabs.addTab("Activity", UiTheme.scroll(logArea));
         monitorTabs.addTab("Direct Inbox", UiTheme.scroll(directInboxArea));
         monitorTabs.addTab("Room Inbox", UiTheme.scroll(roomInboxArea));
+        monitorTabs.setMinimumSize(new Dimension(0, 180));
         logCard.add(monitorTabs, BorderLayout.CENTER);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidePanel, logCard);
@@ -189,6 +195,7 @@ public class RealtimeCommClientFrame extends JFrame {
         splitPane.setBorder(null);
         splitPane.setOpaque(false);
         splitPane.setBackground(UiTheme.BACKGROUND);
+        splitPane.setMinimumSize(new Dimension(0, 220));
 
         JPanel directChatCard = UiTheme.card();
         directChatCard.add(UiTheme.title("Live Chat"), BorderLayout.NORTH);
@@ -200,7 +207,7 @@ public class RealtimeCommClientFrame extends JFrame {
         dmGc.insets = new java.awt.Insets(0, 0, 8, 8);
         dmGc.anchor = GridBagConstraints.WEST;
         btnSendDirect = UiTheme.primaryButton("Send DM");
-        btnPrivateCall = UiTheme.secondaryButton("Start Call");
+        btnPrivateCall = UiTheme.secondaryButton("Voice Call");
         btnVideoCall = UiTheme.secondaryButton("Video Call");
         directChatRow.add(new JLabel("Target"), dmGc);
         dmGc.gridx = 1;
@@ -265,8 +272,8 @@ public class RealtimeCommClientFrame extends JFrame {
         callRow.setBackground(UiTheme.SURFACE);
         btnMute = UiTheme.secondaryButton("Mute Mic");
         btnEndCall = UiTheme.accentButton("End Call");
-        btnOpenWebRtc = UiTheme.primaryButton("Open WebRTC");
-        callRow.add(UiTheme.subtitle("Audio call + video call demo (screen-frame relay via server)."));
+        btnOpenWebRtc = UiTheme.primaryButton("Open WebRTC Video");
+        callRow.add(lblCallModeHint);
         callRow.add(btnMute);
         callRow.add(btnEndCall);
         callRow.add(btnOpenWebRtc);
@@ -274,26 +281,37 @@ public class RealtimeCommClientFrame extends JFrame {
 
         JPanel videoPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         videoPanel.setBackground(UiTheme.SURFACE);
+        videoPanel.setPreferredSize(new Dimension(0, 180));
         lblLocalVideo = createVideoLabel("Local Preview");
         lblRemoteVideo = createVideoLabel("Remote Preview");
         videoPanel.add(wrapVideoCard("Local", lblLocalVideo));
         videoPanel.add(wrapVideoCard("Remote", lblRemoteVideo));
         callCard.add(videoPanel, BorderLayout.CENTER);
 
-        JTabbedPane actionTabs = new JTabbedPane();
+        actionTabs = new JTabbedPane();
         actionTabs.setFont(UiTheme.BODY_FONT);
         actionTabs.addTab("Direct Chat", directChatCard);
         actionTabs.addTab("Group Chat", groupChatCard);
         actionTabs.addTab("Call", callCard);
+        actionTabs.setMinimumSize(new Dimension(0, 250));
+
+        JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitPane, actionTabs);
+        mainSplit.setResizeWeight(0.5);
+        mainSplit.setBorder(null);
+        mainSplit.setOpaque(false);
+        mainSplit.setBackground(UiTheme.BACKGROUND);
 
         JPanel body = new JPanel(new BorderLayout(12, 12));
         body.setBackground(UiTheme.BACKGROUND);
         body.add(topPanel, BorderLayout.NORTH);
-        body.add(splitPane, BorderLayout.CENTER);
-        body.add(actionTabs, BorderLayout.SOUTH);
+        body.add(mainSplit, BorderLayout.CENTER);
 
         page.add(body, BorderLayout.CENTER);
         setContentPane(page);
+        SwingUtilities.invokeLater(() -> {
+            mainSplit.setDividerLocation(0.5);
+            splitPane.setDividerLocation(0.28);
+        });
 
         btnConnect.addActionListener(e -> connectToServer());
         btnDisconnect.addActionListener(e -> disconnectFromServer("Disconnected from realtime server."));
@@ -328,11 +346,11 @@ public class RealtimeCommClientFrame extends JFrame {
     public void loadDemoStateForScreenshot() {
         currentUserName = "Van";
         currentRoomName = "mobile-team";
-        callMode = RealtimeProtocol.CALL_MODE_GROUP;
+        callMode = RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO;
         microphoneMuted = false;
         lblUserValue.setText(currentUserName);
         lblRoomValue.setText(currentRoomName);
-        lblCallValue.setText("Group call in mobile-team (3 users)");
+        lblCallValue.setText("Video call with Linh");
         directTargetModel.removeAllElements();
         directTargetModel.addElement("Linh");
         directTargetModel.addElement("Minh");
@@ -345,7 +363,7 @@ public class RealtimeCommClientFrame extends JFrame {
         roomListModel.addElement("demo-room (2)");
         txtDirectMessage.setText("Please verify the audio relay.");
         txtRoomName.setText("mobile-team");
-        txtRoomMessage.setText("Group call is stable on localhost.");
+        txtRoomMessage.setText("Room chat is still available during the demo.");
         logArea.setText(
             "Connected as Van to localhost:" + AppConfig.DEFAULT_REALTIME_PORT + System.lineSeparator()
             + "[System] Connected to realtime server as Van." + System.lineSeparator()
@@ -353,23 +371,31 @@ public class RealtimeCommClientFrame extends JFrame {
             + "[DM from Linh] Audio packets are arriving correctly." + System.lineSeparator()
             + "[mobile-team][Van] Group chat is live." + System.lineSeparator()
             + "[mobile-team][Minh] Ready for the group demo." + System.lineSeparator()
-            + "[System] Group call in mobile-team (3 users)" + System.lineSeparator()
+            + "[System] Video call with Linh" + System.lineSeparator()
+            + "[System] Open WebRTC Video is available for browser-based signaling." + System.lineSeparator()
             + "[Audio] Streaming microphone frames..." + System.lineSeparator()
             + "[Audio] Receiving voice from Linh" + System.lineSeparator()
-            + "[Audio] Receiving voice from Minh"
+            + "[Video] Desktop preview relay is active."
         );
         directInboxArea.setText(
             "[DM from Linh] Audio packets are arriving correctly." + System.lineSeparator()
-            + "[DM from Minh] Da xac nhan call ben client em."
+            + "[DM from Linh] Remote preview is visible on my side."
         );
         roomInboxArea.setText(
             "[mobile-team][Minh] Ready for the group demo." + System.lineSeparator()
-            + "[mobile-team][Linh] Group call status: stable."
+            + "[mobile-team][Linh] Room chat remains active while demoing call features."
         );
-        lblLocalVideo.setText("Local Preview");
-        lblRemoteVideo.setText("Remote Preview");
+        lblLocalVideo.setText("Local video preview");
+        lblRemoteVideo.setText("Remote preview from Linh");
         lblLocalVideo.setIcon(null);
         lblRemoteVideo.setIcon(null);
+        updateCallPresentation();
+        if (monitorTabs != null) {
+            monitorTabs.setSelectedIndex(0);
+        }
+        if (actionTabs != null) {
+            actionTabs.setSelectedIndex(2);
+        }
         updateControlState();
     }
 
@@ -697,6 +723,7 @@ public class RealtimeCommClientFrame extends JFrame {
                 output.writeUTF(RealtimeProtocol.PRIVATE_CALL_START);
                 output.writeUTF(targetObject.toString());
             });
+            appendLog("[System] Voice call request sent to " + targetObject + ".");
         } catch (IOException ex) {
             disconnectFromServer("Start call failed: " + ex.getMessage());
         }
@@ -717,6 +744,7 @@ public class RealtimeCommClientFrame extends JFrame {
                 output.writeUTF(RealtimeProtocol.PRIVATE_VIDEO_CALL_START);
                 output.writeUTF(targetObject.toString());
             });
+            appendLog("[System] Video call request sent to " + targetObject + ".");
         } catch (IOException ex) {
             disconnectFromServer("Start video call failed: " + ex.getMessage());
         }
@@ -788,15 +816,22 @@ public class RealtimeCommClientFrame extends JFrame {
         btnMute.setText("Mute Mic");
         lblCallValue.setText(label);
         appendLog("[System] " + label);
-        updateControlState();
         tryOpenSpeaker();
         tryOpenMicrophone();
         startAudioCaptureThread();
         if (RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(newCallMode)) {
             startVideoCaptureThread();
         } else {
-            clearVideoPreviews();
+            if (RealtimeProtocol.CALL_MODE_PRIVATE.equals(newCallMode)) {
+                setVideoPreviewPlaceholders("Voice call active", "Video preview disabled");
+            } else if (RealtimeProtocol.CALL_MODE_GROUP.equals(newCallMode)) {
+                setVideoPreviewPlaceholders("Group voice call", "No video in group call");
+            } else {
+                clearVideoPreviews();
+            }
         }
+        updateCallPresentation();
+        updateControlState();
     }
 
     private void finishCallSession(String reason) {
@@ -808,6 +843,7 @@ public class RealtimeCommClientFrame extends JFrame {
         btnMute.setText("Mute Mic");
         appendLog("[System] " + reason);
         clearVideoPreviews();
+        updateCallPresentation();
         updateControlState();
     }
 
@@ -1029,7 +1065,7 @@ public class RealtimeCommClientFrame extends JFrame {
 
     private void updateLocalPreview(BufferedImage image) {
         SwingUtilities.invokeLater(() -> {
-            lblLocalVideo.setText("Local Preview");
+            lblLocalVideo.setText("Local video preview");
             lblLocalVideo.setIcon(new ImageIcon(scaleVideoPreview(image)));
         });
     }
@@ -1039,11 +1075,15 @@ public class RealtimeCommClientFrame extends JFrame {
     }
 
     private void clearVideoPreviews() {
+        setVideoPreviewPlaceholders("Local Preview", "Remote Preview");
+    }
+
+    private void setVideoPreviewPlaceholders(String localText, String remoteText) {
         SwingUtilities.invokeLater(() -> {
             lblLocalVideo.setIcon(null);
             lblRemoteVideo.setIcon(null);
-            lblLocalVideo.setText("Local Preview");
-            lblRemoteVideo.setText("Remote Preview");
+            lblLocalVideo.setText(localText);
+            lblRemoteVideo.setText(remoteText);
         });
     }
 
@@ -1091,12 +1131,14 @@ public class RealtimeCommClientFrame extends JFrame {
         lblUserValue.setText("-");
         lblRoomValue.setText("No room");
         lblCallValue.setText("No active call");
+        lblCallTypeValue.setText("Idle");
         onlineUsersModel.clear();
         roomListModel.clear();
         directTargetModel.removeAllElements();
         directInboxArea.setText("");
         roomInboxArea.setText("");
         clearVideoPreviews();
+        updateCallPresentation();
         updateControlState();
 
         if (wasConnected && message != null && !message.trim().isEmpty()) {
@@ -1110,6 +1152,30 @@ public class RealtimeCommClientFrame extends JFrame {
         if (RealtimeProtocol.CALL_MODE_NONE.equals(callMode)) {
             lblCallValue.setText("No active call");
         }
+    }
+
+    private void updateCallPresentation() {
+        SwingUtilities.invokeLater(() -> {
+            if (RealtimeProtocol.CALL_MODE_PRIVATE_VIDEO.equals(callMode)) {
+                lblCallTypeValue.setText("Video call");
+                lblCallModeHint.setText("Mode: Video call. Preview is active and you can open browser WebRTC.");
+                if (lblLocalVideo.getIcon() == null) {
+                    lblLocalVideo.setText("Local video preview");
+                }
+                if (lblRemoteVideo.getIcon() == null) {
+                    lblRemoteVideo.setText("Waiting for remote video");
+                }
+            } else if (RealtimeProtocol.CALL_MODE_PRIVATE.equals(callMode)) {
+                lblCallTypeValue.setText("Voice call");
+                lblCallModeHint.setText("Mode: Voice call only. Video preview is disabled in this mode.");
+            } else if (RealtimeProtocol.CALL_MODE_GROUP.equals(callMode)) {
+                lblCallTypeValue.setText("Group voice call");
+                lblCallModeHint.setText("Mode: Group voice call. Audio is active for the whole room.");
+            } else {
+                lblCallTypeValue.setText("Idle");
+                lblCallModeHint.setText("Mode: Idle. Start a voice call or a video call.");
+            }
+        });
     }
 
     private void updateControlState() {

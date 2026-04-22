@@ -15,7 +15,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,6 +31,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 public class QuizServerFrame extends JFrame {
+    private static final int QUESTIONS_PER_SESSION = 4;
     private static final QuizQuestion[] QUESTIONS = new QuizQuestion[] {
         new QuizQuestion(
             "Which Java class is commonly used to create a TCP server?",
@@ -42,11 +48,56 @@ public class QuizServerFrame extends JFrame {
         new QuizQuestion(
             "Which information should be sent before file bytes in a simple transfer protocol?",
             "Only local path", "Only current time", "Only port number", "File name and file size", "D"
+        ),
+        new QuizQuestion(
+            "Which port number helps the server identify a specific service?",
+            "MAC address", "Subnet mask", "Port", "Thread id", "C"
+        ),
+        new QuizQuestion(
+            "Which TCP class usually waits for client connections?",
+            "Socket", "ServerSocket", "DatagramPacket", "URL", "B"
+        ),
+        new QuizQuestion(
+            "Which UDP class represents one packet of data?",
+            "Socket", "ServerSocket", "DatagramPacket", "BufferedInputStream", "C"
+        ),
+        new QuizQuestion(
+            "Which statement best describes UDP?",
+            "Connection-oriented and ordered", "Connectionless and lightweight", "Only used for files", "Cannot send text", "B"
+        ),
+        new QuizQuestion(
+            "What is a common reason to use a worker thread in a Swing networking app?",
+            "To change Java syntax", "To avoid freezing the UI", "To rename ports automatically", "To replace sockets", "B"
+        ),
+        new QuizQuestion(
+            "Which class is useful for reading structured binary data from a socket?",
+            "PrintWriter", "DataInputStream", "StringBuilder", "Graphics2D", "B"
+        ),
+        new QuizQuestion(
+            "What usually happens if two servers try to bind the same port on one machine?",
+            "Both run normally", "The second bind fails", "The first server exits automatically", "The port changes randomly", "B"
+        ),
+        new QuizQuestion(
+            "In a client-server file transfer, what should the receiver know to stop reading the current file correctly?",
+            "Only the sender host name", "The file name and the expected size", "Only the Java version", "Only the UI title", "B"
+        ),
+        new QuizQuestion(
+            "Which method schedules Swing UI updates on the Event Dispatch Thread?",
+            "System.gc()", "SwingUtilities.invokeLater", "Thread.yield", "ServerSocket.accept", "B"
+        ),
+        new QuizQuestion(
+            "Why does UDP file transfer often need ACK and retry logic at the application layer?",
+            "Because UDP already guarantees retransmission", "Because UDP does not guarantee delivery", "Because TCP blocks all packets", "Because Swing requires it", "B"
+        ),
+        new QuizQuestion(
+            "Which data is most suitable for logging on the quiz server during a session?",
+            "Only button colors", "Student answers and current score", "Only window size", "Only font family", "B"
         )
     };
 
     private final JTextField txtPort = new JTextField(String.valueOf(AppConfig.DEFAULT_QUIZ_PORT), 6);
     private final JTextArea logArea = new JTextArea();
+    private final Map<String, QuestionDeck> questionDecks = new ConcurrentHashMap<String, QuestionDeck>();
 
     private ServerSocket serverSocket;
     private volatile boolean running;
@@ -151,6 +202,7 @@ public class QuizServerFrame extends JFrame {
             running = true;
             appendLog("Quiz server started on port " + port);
             appendLog("Question bank: " + QUESTIONS.length + " questions");
+            appendLog("Each new attempt receives " + QUESTIONS_PER_SESSION + " questions.");
             new Thread(this::acceptLoop, "quiz-server").start();
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "Cannot start quiz server: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -180,12 +232,14 @@ public class QuizServerFrame extends JFrame {
             }
 
             appendLog(studentName + " connected from " + client.getRemoteSocketAddress());
-            output.writeInt(QUESTIONS.length);
+            QuizQuestion[] sessionQuestions = nextQuestionsForStudent(studentName);
+            appendLog("Prepared " + sessionQuestions.length + " questions for " + studentName + ".");
+            output.writeInt(sessionQuestions.length);
             output.flush();
 
             int score = 0;
-            for (int i = 0; i < QUESTIONS.length; i++) {
-                QuizQuestion question = QUESTIONS[i];
+            for (int i = 0; i < sessionQuestions.length; i++) {
+                QuizQuestion question = sessionQuestions[i];
                 output.writeInt(i + 1);
                 output.writeUTF(question.text);
                 output.writeUTF(question.optionA);
@@ -201,19 +255,30 @@ public class QuizServerFrame extends JFrame {
                 }
 
                 String feedback = correct
-                    ? "Correct. Current score: " + score + "/" + QUESTIONS.length
-                    : "Incorrect. Correct answer: " + question.correctAnswer + ". Current score: " + score + "/" + QUESTIONS.length;
+                    ? "Correct. Current score: " + score + "/" + sessionQuestions.length
+                    : "Incorrect. Correct answer: " + question.correctAnswer + ". Current score: " + score + "/" + sessionQuestions.length;
                 output.writeUTF(feedback);
                 output.flush();
                 appendLog(studentName + " answered question " + (i + 1) + ": " + answer + " -> " + (correct ? "correct" : "incorrect"));
             }
 
-            String finalResult = "Final score for " + studentName + ": " + score + "/" + QUESTIONS.length;
+            String finalResult = "Final score for " + studentName + ": " + score + "/" + sessionQuestions.length;
             output.writeUTF(finalResult);
             output.flush();
             appendLog(finalResult);
         } catch (IOException ex) {
             appendLog("Client error: " + ex.getMessage());
+        }
+    }
+
+    private QuizQuestion[] nextQuestionsForStudent(String studentName) {
+        String key = studentName.toLowerCase(Locale.ROOT);
+        QuestionDeck deck = questionDecks.computeIfAbsent(key, ignored -> new QuestionDeck(QUESTIONS));
+        synchronized (deck) {
+            if (deck.remaining() < QUESTIONS_PER_SESSION) {
+                deck.reset(QUESTIONS);
+            }
+            return deck.nextBatch(QUESTIONS_PER_SESSION);
         }
     }
 
@@ -250,6 +315,34 @@ public class QuizServerFrame extends JFrame {
             this.optionC = optionC;
             this.optionD = optionD;
             this.correctAnswer = correctAnswer;
+        }
+    }
+
+    private static class QuestionDeck {
+        private final List<QuizQuestion> questions = new ArrayList<QuizQuestion>();
+        private int index;
+
+        private QuestionDeck(QuizQuestion[] source) {
+            reset(source);
+        }
+
+        private void reset(QuizQuestion[] source) {
+            questions.clear();
+            Collections.addAll(questions, source);
+            Collections.shuffle(questions);
+            index = 0;
+        }
+
+        private int remaining() {
+            return questions.size() - index;
+        }
+
+        private QuizQuestion[] nextBatch(int count) {
+            QuizQuestion[] batch = new QuizQuestion[count];
+            for (int i = 0; i < count; i++) {
+                batch[i] = questions.get(index++);
+            }
+            return batch;
         }
     }
 }

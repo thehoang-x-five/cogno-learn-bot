@@ -1,0 +1,22 @@
+# New File Types Support - Additional Dependencies
+# Add these to your main requirements.txt or Dockerfile
+
+# PPTX (PowerPoint) support
+python-pptx>=0.6.21
+
+# XLSX (Excel) support
+openpyxl>=3.1.2
+
+# HTML parsing
+beautifulsoup4>=4.12.0
+lxml>=4.9.0  # Better HTML parser for BeautifulSoup
+
+# RTF (Rich Text Format) support
+striprtf>=0.0.26
+
+# ODT (OpenDocument) support
+odfpy>=1.4.1
+
+# Note: CSV and JSON are built-in Python modules (no extra deps needed)
+# Note: Markdown parsing uses built-in file reading (no extra deps needed)
+# Note: Image OCR already uses pytesseract (already installed)

@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+.eggs/
+.python-version
+
+venv/
+.venv/
+env.bak/
+pip-wheel-metadata/
+
+# Pytest
+.cache/
+.pytest_cache/
+
+# MySQL local data (if any)
+*.sql
+
+# Virtualenv
+venv/
+ENV/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Env files - ignore .env files (sensitive data)
+
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker volumes / local data
+mysql_data/
+chroma_data/
+uploads/
+
+# Uploads folder content (keep folder, ignore files inside)
+BE/uploads/*
+!BE/uploads/.gitkeep

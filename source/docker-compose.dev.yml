@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  backend:
+    volumes:
+      - ./BE:/app            # mount toàn bộ BE code
+      - uploads_data:/app/uploads
+
+  celery_worker:
+    volumes:
+      - ./BE:/app            # mount toàn bộ BE code cho celery worker
+      - uploads_data:/app/uploads
+
+  frontend:
+    volumes:
+      - ./FE:/app            # mount toàn bộ FE code
+      - /app/node_modules    # prevent node_modules from being overwritten
